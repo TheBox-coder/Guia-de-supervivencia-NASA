@@ -39,13 +39,18 @@
           });
 
           const result = await layer.queryElevation(geometry, {
-            demResolution: 'auto'
+            demResolution: 200,
+            returnSampleInfo: true
           });
 
           const sampled = result && result.geometry ? result.geometry.points : [];
           return points.map(function (p, i) {
-            const z = Number(sampled && sampled[i] ? sampled[i][2] : NaN);
-            return Object.assign({}, p, { elevationM: Number.isFinite(z) ? z : null });
+            const raw = sampled && sampled[i] ? sampled[i][2] : null;
+            const resolution = result.sampleInfo?.[i]?.demResolution;
+            const numeric = window.JEZERO_VALIDATION?.numeric || (v => typeof v==='number' && Number.isFinite(v) ? v : null);
+            const z = numeric(raw);
+            const missing = resolution === -1 || (!Number.isFinite(resolution) && raw === result.noDataValue);
+            return Object.assign({}, p, { elevationM: !missing ? z : null, demResolutionM: Number.isFinite(resolution) && resolution>0 ? resolution : null });
           });
         };
 

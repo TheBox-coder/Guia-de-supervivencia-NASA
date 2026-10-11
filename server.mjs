@@ -4,12 +4,30 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { URL } from 'node:url';
 import { buildMissionPdf } from './pdf-report.mjs';
+import validation from './modules/validation.cjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 8000);
 
 const NOMENCLATURE_ENDPOINT = 'https://planetarynames.wr.usgs.gov/nomenclature/SearchResults';
 const nomenclatureCache = new Map();
+const PUBLIC_FILES = new Set([
+  '/index.html','/style.css','/script.js','/mars-elevation.js','/mars-data.json',
+  '/modules/route-engine.cjs','/modules/theme.js','/modules/i18n.js','/modules/module-shell.js','/modules/validation.cjs',
+  '/assets/favicon.ico','/assets/favicon-256.png','/assets/favicon-32.png',
+  '/assets/favicon-64.png','/assets/mars-2020-logo.png'
+]);
+const pdfRequests = new Map();
+function allowPdfRequest(req) {
+  const key = req.socket.remoteAddress || 'unknown', now = Date.now();
+  let item = pdfRequests.get(key);
+  if (!item || now - item.started >= 60_000) item = {started: now, count: 0};
+  item.count++;
+  pdfRequests.set(key,item);
+  for(const [ip,entry] of pdfRequests)if(now-entry.started>=60_000)pdfRequests.delete(ip);
+  if(pdfRequests.size>1024)pdfRequests.delete(pdfRequests.keys().next().value);
+  return item.count <= 12;
+}
 
 function decodeXml(text='') {
   return String(text)
@@ -44,9 +62,9 @@ function parseNomenclatureXml(xml) {
   for (const block of blocks) {
     const approval = block.match(/<approvalstatus\b[^>]*\bid=["']?(\d+)["']?[^>]*>/i);
     if (approval && approval[1] !== '5') continue;
-    const lat = Number(xmlTag(block, 'centerlatitude'));
-    const lon360 = Number(xmlTag(block, 'centerlongitude'));
-    if (!Number.isFinite(lat) || !Number.isFinite(lon360)) continue;
+    const lat = validation.numeric(xmlTag(block, 'centerlatitude'));
+    const lon360 = validation.numeric(xmlTag(block, 'centerlongitude'));
+    if (lat === null || lon360 === null || Math.abs(lat)>90 || lon360<0 || lon360>360) continue;
     const lon = lon360 > 180 ? lon360 - 360 : lon360;
     const id = xmlTag(block, 'id');
     const name = xmlTag(block, 'name') || xmlTag(block, 'cleanName');
@@ -93,7 +111,9 @@ async function fetchMarsNomenclature({west,east,south,north,zoom}) {
 }
 
 function cors(res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://js.arcgis.com 'unsafe-eval'; style-src 'self' https://cdn.jsdelivr.net https://js.arcgis.com https://fonts.googleapis.com 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https:; font-src 'self' data: https:; worker-src 'self' blob: https://js.arcgis.com; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
 }
 function send(res, status, body, type='application/json; charset=utf-8') {
   cors(res);
@@ -101,17 +121,24 @@ function send(res, status, body, type='application/json; charset=utf-8') {
   res.end(typeof body === 'string' ? body : JSON.stringify(body));
 }
 async function serveStatic(req, res, url) {
-  let pathname = decodeURIComponent(url.pathname);
+  if (!['GET','HEAD'].includes(req.method)) return send(res,405,{error:'Método no permitido.'});
+  let pathname;
+  try { pathname = decodeURIComponent(url.pathname); }
+  catch { return send(res,400,{error:'Ruta inválida.'}); }
   if (pathname === '/') pathname = '/index.html';
-  const file = path.normalize(path.join(ROOT, pathname));
-  if (!file.startsWith(ROOT)) return send(res, 403, { error: 'Acceso denegado' });
+  if (!PUBLIC_FILES.has(pathname)) return send(res,404,'Not found','text/plain; charset=utf-8');
+  const file = path.resolve(ROOT, '.' + pathname);
   try {
+    const realFile = await fs.realpath(file);
+    const relative = path.relative(ROOT,realFile);
+    if(relative.startsWith('..') || path.isAbsolute(relative)) return send(res,403,{error:'Acceso denegado'});
     const stat = await fs.stat(file);
     if (!stat.isFile()) throw new Error('not file');
     const ext = path.extname(file).toLowerCase();
     const types = {
       '.html':'text/html; charset=utf-8',
       '.js':'text/javascript; charset=utf-8',
+      '.cjs':'text/javascript; charset=utf-8',
       '.css':'text/css; charset=utf-8',
       '.json':'application/json; charset=utf-8',
       '.png':'image/png',
@@ -119,8 +146,8 @@ async function serveStatic(req, res, url) {
       '.md':'text/markdown; charset=utf-8'
     };
     const data = await fs.readFile(file);
-    res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream' });
-    res.end(data);
+    res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream', 'Content-Length':data.length, 'Cache-Control':'no-cache' });
+    res.end(req.method==='HEAD'?undefined:data);
   } catch {
     send(res, 404, 'Not found', 'text/plain; charset=utf-8');
   }
@@ -133,30 +160,31 @@ async function readJson(req, maxBytes = 2_000_000) {
     req.on('data', chunk => {
       size += chunk.length;
       if (size > maxBytes) {
-        reject(new Error('Solicitud demasiado grande.'));
-        req.destroy();
+        chunks.length=0;
+        reject(Object.assign(new Error('Solicitud demasiado grande.'),{statusCode:413}));
         return;
       }
       chunks.push(chunk);
     });
     req.on('end', () => {
       try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}')); }
-      catch { reject(new Error('JSON de mision invalido.')); }
+      catch { reject(Object.assign(new Error('JSON de misión inválido.'),{statusCode:400})); }
     });
     req.on('error', reject);
   });
 }
 
 const server = http.createServer(async (req, res) => {
+  cors(res);
   try {
-    const url = new URL(req.url, `http://${req.headers.host}`);
+    const url = new URL(req.url, 'http://localhost');
     if (url.pathname === '/api/mars-nomenclature' && req.method === 'GET') {
-      const west = Math.max(-180, Math.min(180, Number(url.searchParams.get('west'))));
-      const east = Math.max(-180, Math.min(180, Number(url.searchParams.get('east'))));
-      const south = Math.max(-90, Math.min(90, Number(url.searchParams.get('south'))));
-      const north = Math.max(-90, Math.min(90, Number(url.searchParams.get('north'))));
-      const zoom = Number(url.searchParams.get('zoom') || 3);
-      if (![west,east,south,north].every(Number.isFinite) || south > north) return send(res, 400, {error:'Rango cartográfico inválido.'});
+      const west = validation.numeric(url.searchParams.get('west'));
+      const east = validation.numeric(url.searchParams.get('east'));
+      const south = validation.numeric(url.searchParams.get('south'));
+      const north = validation.numeric(url.searchParams.get('north'));
+      const zoom = validation.numeric(url.searchParams.get('zoom') ?? 3);
+      if (![west,east,south,north,zoom].every(Number.isFinite) || Math.abs(west)>180 || Math.abs(east)>180 || Math.abs(south)>90 || Math.abs(north)>90 || south > north || zoom<0 || zoom>24) return send(res, 400, {error:'Rango cartográfico inválido.'});
       try {
         const data = await fetchMarsNomenclature({west,east,south,north,zoom});
         return send(res, 200, data);
@@ -167,12 +195,20 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/health') {
       return send(res, 200, {
         ok: true,
+        version:'V44',
+        check:'server-liveness',
         elevation: 'ArcGIS ElevationLayer · MDEM200M',
         note: 'La elevación se consulta en el navegador mediante queryElevation.'
       });
     }
     if (url.pathname === '/api/mission-pdf' && req.method === 'POST') {
+      if (!allowPdfRequest(req)) {
+        res.setHeader('Retry-After','60');
+        return send(res,429,{error:'Demasiados informes. Espera un minuto antes de volver a intentarlo.'});
+      }
+      if (!String(req.headers['content-type']||'').toLowerCase().startsWith('application/json')) return send(res,415,{error:'Envía el informe como application/json.'});
       const report = await readJson(req);
+      validation.report(report);
       const pdf = buildMissionPdf(report);
       cors(res);
       res.writeHead(200, {
@@ -185,8 +221,10 @@ const server = http.createServer(async (req, res) => {
     }
     return serveStatic(req, res, url);
   } catch (err) {
-    send(res, 500, { error: err.message });
+    if(!res.headersSent)send(res, err.statusCode || 500, { error: err.statusCode ? err.message : 'No se pudo procesar la solicitud.' });
   }
 });
+server.requestTimeout=30_000;
+server.headersTimeout=15_000;
 
 server.listen(PORT, '0.0.0.0', () => console.log(`Mars Explorer disponible en el puerto ${PORT}`));

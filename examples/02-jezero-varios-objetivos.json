@@ -1,0 +1,49 @@
+{
+  "format": "JEZERO-MISSION",
+  "version": 44,
+  "mode": "balanced",
+  "returnBase": true,
+  "optimizeOrder": true,
+  "points": [
+    {
+      "lat": 18.44463,
+      "lon": 77.45088,
+      "name": "Base de referencia Jezero",
+      "type": "base",
+      "dwellMin": 0
+    },
+    {
+      "lat": 18.45,
+      "lon": 77.46,
+      "name": "Objetivo norte",
+      "type": "target",
+      "dwellMin": 20
+    },
+    {
+      "lat": 18.44,
+      "lon": 77.465,
+      "name": "Objetivo este",
+      "type": "target",
+      "dwellMin": 20
+    },
+    {
+      "lat": 18.438,
+      "lon": 77.45,
+      "name": "Objetivo sur",
+      "type": "target",
+      "dwellMin": 10
+    }
+  ],
+  "params": {
+    "speed": 1.2,
+    "evaTime": 8,
+    "returnMargin": 25,
+    "maxSlopeLimit": 25,
+    "minTransitability": 25,
+    "minConfidence": 20
+  },
+  "missionMeta": {
+    "missionName": "Jezero: comparación de estrategias",
+    "notes": "Escenario de aprendizaje. No representa una misión aprobada."
+  }
+}

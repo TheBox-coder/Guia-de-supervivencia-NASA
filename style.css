@@ -394,7 +394,7 @@ body{background:var(--theme-bg)!important;overflow:hidden!important;}
   box-shadow:0 12px 32px rgba(0,0,0,.34)!important;
 }
 .topbar::before{height:3px!important;background:linear-gradient(90deg,var(--theme-accent) 0 8%,var(--theme-primary-2) 8% 72%,var(--theme-accent-2) 72% 100%)!important;}
-.topbar::after{content:"JEZERO / EVA MISSION SYSTEM / V39"!important;bottom:4px!important;font-size:6px!important;letter-spacing:1.8px!important;}
+.topbar::after{content:"JEZERO / EVA MISSION SYSTEM / V44"!important;bottom:4px!important;font-size:6px!important;letter-spacing:1.8px!important;}
 .brand{gap:10px!important}.brandLogo{width:42px!important;height:42px!important;object-fit:contain}.brandText b{font-size:19px!important;letter-spacing:3px!important}.brandText small{font:800 7.5px/1.2 "DM Mono",Consolas,monospace!important;letter-spacing:1.5px!important}.brandText em{font:600 6px/1.2 "DM Mono",Consolas,monospace!important;letter-spacing:1px!important}
 .missionHeaderStrip{display:grid;grid-template-columns:repeat(5,minmax(72px,1fr));height:44px;border:1px solid var(--theme-line);background:color-mix(in srgb,var(--theme-panel) 92%,transparent);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);overflow:hidden}
 .missionHeaderStrip>div{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:5px 10px;border-right:1px solid var(--theme-line)}.missionHeaderStrip>div:last-child{border-right:0}.missionHeaderStrip span{font:700 6.5px/1 "DM Mono",Consolas,monospace;letter-spacing:1.3px;color:var(--theme-soft)}.missionHeaderStrip b{margin-top:5px;font:800 10px/1.05 "DM Mono",Consolas,monospace;color:var(--theme-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.missionHeaderStrip>div:first-child b{color:var(--theme-accent-2)}
@@ -1241,3 +1241,11 @@ body[data-module="analysis"] .mapScaleChip{display:none!important}
 @media (prefers-reduced-motion: reduce){
   .motionSetting{opacity:.6}
 }
+
+/* V44: calculation feedback and keyboard focus. */
+.missionWarnings{white-space:pre-line;padding:12px;margin:10px 0;border:1px solid var(--theme-warning,#ffc857);border-radius:6px;font:500 12px/1.5 Segoe UI,sans-serif;color:var(--theme-text,#fff)}
+.missionWarnings[hidden]{display:none!important}
+.strategyCard:has(input:disabled){opacity:.6}
+.strategyCard:has(input:disabled) .strategyCopy em{color:var(--theme-warning,#ffc857)}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--theme-accent-2,#55c8ff);outline-offset:3px}
+.safetyNote{font-size:12px!important;line-height:1.5!important}

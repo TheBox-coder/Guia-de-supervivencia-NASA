@@ -1,12 +1,12 @@
 {
   "app": {
-    "name": "Mars Explorer",
+    "name": "JEZERO",
     "language": "es",
     "region": "Marte Global",
     "mode": "research-planning",
     "disclaimer": "Índice experimental de riesgo topográfico; no constituye certificación de seguridad para una misión tripulada.",
     "scope": "global",
-    "version": "V34"
+    "version": "V44"
   },
   "region": {
     "name": "Marte Global",
@@ -40,7 +40,7 @@
     {
       "name": "NASA MOLA / USGS Astrogeology",
       "url": "https://astrogeology.usgs.gov/search/map/mars_mgs_mola_dem_463m",
-      "use": "DEM global de elevación MOLA a 463 m/píxel, usado internamente para análisis topográfico y rutas."
+      "use": "Referencia MOLA global de 463 m/píxel. El motor activo consulta MDEM200M mediante ArcGIS."
     },
     {
       "name": "NASA Mars Express HRSC + MOLA",
@@ -743,5 +743,12 @@
       "sourceUrl": "https://planetarynames.wr.usgs.gov/Page/MARS/target",
       "description": "Referencia geográfica oficial de Marte. Centro aproximado usado para la etiqueta; la nomenclatura completa se carga desde el Gazetteer USGS/IAU al acercar el mapa."
     }
-  ]
+  ],
+  "model": {
+    "algorithmVersion": "44.0",
+    "marsRadiusKm": 3389.5,
+    "demNominalResolutionM": 200,
+    "sampleQualityMeaning": "Completitud y densidad del muestreo; no es una probabilidad de seguridad.",
+    "searchScope": "Corredor común de búsqueda para las tres estrategias."
+  }
 }

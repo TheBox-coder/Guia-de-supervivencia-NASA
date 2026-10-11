@@ -1,0 +1,35 @@
+{
+  "format": "JEZERO-MISSION",
+  "version": 44,
+  "mode": "balanced",
+  "returnBase": true,
+  "optimizeOrder": true,
+  "points": [
+    {
+      "lat": 18.44463,
+      "lon": 77.45088,
+      "name": "Base de referencia Jezero",
+      "type": "base",
+      "dwellMin": 0
+    },
+    {
+      "lat": 18.44463,
+      "lon": 77.45588,
+      "name": "Objetivo cercano",
+      "type": "target",
+      "dwellMin": 15
+    }
+  ],
+  "params": {
+    "speed": 1.2,
+    "evaTime": 8,
+    "returnMargin": 25,
+    "maxSlopeLimit": 25,
+    "minTransitability": 25,
+    "minConfidence": 20
+  },
+  "missionMeta": {
+    "missionName": "Jezero: primer recorrido",
+    "notes": "Escenario de aprendizaje. No representa una misión aprobada."
+  }
+}

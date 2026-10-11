@@ -1,3 +1,6 @@
+const validation = window.JEZERO_VALIDATION;
+const finiteValue = validation.finite;
+const numericValue = validation.numeric;
 const DATA_URL = 'mars-data.json';
 const MARTIAN_RADIUS = 3389.5;
 const DEM_RESOLUTION_KM = 0.2;
@@ -9,7 +12,8 @@ const DEFAULTS_KEY = 'jezero-operational-defaults-v29';
 const PANEL_STATE_KEY = 'jezero-panel-state-v34';
 const MAP_VIEW_KEY = 'jezero-map-view-v34';
 const BASE_MAP_KEY = 'jezero-base-map-v34';
-const JEZERO_UI_VERSION = 'V43';
+const JEZERO_UI_VERSION = 'V44';
+const ALGORITHM_VERSION = '44.0';
 
 let D;
 let map, markerLayer, routeLayer, analysisLayer, molaLayer, imageryLayer, slopeLayer, roughnessLayer, landingLayer, knownLayer;
@@ -440,6 +444,7 @@ function showReferencePopup(feature){
 function closeReferencePopup(){ $('mapInfo')?.classList.add('hide'); }
 function addReferenceToMission(feature){
   const point={lat:Number(feature.get('lat')),lon:Number(feature.get('lon')),name:feature.get('name'),type:'target',required:true,dwellMin:15};
+  try{validation.points([...missionPoints,point]);}catch(err){showToast(err.message);return;}
   missionPoints.push(point); currentMission=null; selecting=true; drawPointMarkers();renderMissionList();updatePlanningUI();showToast(`${feature.get('name')} se añadió como punto de misión.`);closeReferencePopup();
 }
 function setBaseFromLanding(feature){
@@ -479,6 +484,7 @@ function onMapClick(evt){
   const point = index===0
     ? {lat:safeLat,lon:safeLon,name:'Base de misión',type:'base',required:true,dwellMin:0}
     : {lat:safeLat,lon:safeLon,name:`Punto ${index}`,type:'target',required:true,dwellMin:15};
+  try{validation.points([...missionPoints,point]);}catch(err){showToast(err.message);return;}
   missionPoints.push(point);
   currentMission=null;
   drawPointMarkers(); renderMissionList(); updatePlanningUI();
@@ -572,8 +578,8 @@ async function refreshDerivedLayers(force=true){
     const slopeFeatures=[], roughFeatures=[];
     for(let r=0;r<samples.rows-1;r++) for(let c=0;c<samples.cols-1;c++){
       const p00=get(r,c),p10=get(r,c+1),p01=get(r+1,c),p11=get(r+1,c+1);
-      const vals=[p00?.elevationM,p10?.elevationM,p01?.elevationM,p11?.elevationM].map(Number).filter(Number.isFinite);
-      if(vals.length<3) continue;
+      const vals=[p00?.elevationM,p10?.elevationM,p01?.elevationM,p11?.elevationM].filter(finiteValue).map(Number);
+      if(vals.length<4) continue;
       const dxKm=Math.max(.001,haversine(p00,p10));
       const dyKm=Math.max(.001,haversine(p00,p01));
       const sx=Math.atan2(Math.abs((Number(p10.elevationM)-Number(p00.elevationM))/1000),dxKm)*180/Math.PI;
@@ -602,481 +608,70 @@ async function refreshDerivedLayers(force=true){
   }
 }
 
-function haversine(a,b){
-  const p1=a.lat*Math.PI/180,p2=b.lat*Math.PI/180,dp=(b.lat-a.lat)*Math.PI/180,dl=shortestLonDelta(a.lon,b.lon)*Math.PI/180;
-  const h=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
-  return 2*MARTIAN_RADIUS*Math.asin(Math.sqrt(h));
-}
-function pathMetrics(path,params){
-  let d=0,gain=0,descent=0,change=0,maxSlope=0,sumSlope=0,count=0;
-  let maxUphill=0,maxDownhill=0,uphillWeighted=0,downhillWeighted=0;
-  let transitWeighted=0,confidenceWeighted=0,roughWeighted=0,metricDistance=0;
-  let minTransitability=100,minConfidence=100,uncertainDistance=0,difficultDistance=0;
-  for(let i=1;i<path.length;i++){
-    const a=path[i-1],b=path[i];
-    const dist=haversine(a,b); const e1=a.elevationM,e2=b.elevationM;
-    d+=dist;
-    const analysis=analyzeEdge(a,b,params);
-    if(Number.isFinite(e1)&&Number.isFinite(e2)&&dist>0){
-      const rise=e2-e1;
-      if(rise>0) gain+=rise; else descent+=Math.abs(rise);
-      change+=Math.abs(rise);
-      const slope=Math.abs(analysis.signedSlopeDeg);
-      maxSlope=Math.max(maxSlope,slope); sumSlope+=slope; count++; path[i].slopeDeg=slope; path[i].signedSlopeDeg=analysis.signedSlopeDeg; path[i].transitability=analysis.transitability; path[i].edgeConfidence=analysis.confidence;
-      if(analysis.signedSlopeDeg>=0){ maxUphill=Math.max(maxUphill,analysis.signedSlopeDeg); uphillWeighted+=analysis.signedSlopeDeg*dist; }
-      else { const down=Math.abs(analysis.signedSlopeDeg); maxDownhill=Math.max(maxDownhill,down); downhillWeighted+=down*dist; }
-    }
-    if(Number.isFinite(analysis.transitability)){
-      transitWeighted+=analysis.transitability*dist;
-      minTransitability=Math.min(minTransitability,analysis.transitability);
-      if(analysis.transitability<50) difficultDistance+=dist;
-    }
-    if(Number.isFinite(analysis.confidence)){
-      confidenceWeighted+=analysis.confidence*dist;
-      minConfidence=Math.min(minConfidence,analysis.confidence);
-      if(analysis.confidence<50) uncertainDistance+=dist;
-    }
-    if(Number.isFinite(analysis.roughnessDeg)) roughWeighted+=analysis.roughnessDeg*dist;
-    metricDistance+=dist;
-  }
-  return {
-    distanceKm:d,
-    gainM:gain,
-    descentM:descent,
-    elevationChangeM:change,
-    maxSlopeDeg:count?maxSlope:null,
-    avgSlopeDeg:count?sumSlope/count:null,
-    maxUphillSlopeDeg:count?maxUphill:null,
-    maxDownhillSlopeDeg:count?maxDownhill:null,
-    avgUphillSlopeDeg:metricDistance?uphillWeighted/metricDistance:null,
-    avgDownhillSlopeDeg:metricDistance?downhillWeighted/metricDistance:null,
-    avgTransitability:metricDistance?transitWeighted/metricDistance:null,
-    minTransitability:metricDistance?minTransitability:null,
-    avgConfidence:metricDistance?confidenceWeighted/metricDistance:null,
-    minConfidence:metricDistance?minConfidence:null,
-    avgRoughnessDeg:metricDistance?roughWeighted/metricDistance:null,
-    uncertainDistanceKm:uncertainDistance,
-    difficultDistanceKm:difficultDistance,
-    segments:count
-  };
-}
-function nearestNode(grid,p){ return grid.nodes.reduce((best,n)=>!best||haversine(n,p)<haversine(best,p)?n:best,null); }
-function neighbors(node,grid){
-  const out=[]; for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) if(dr||dc){const r=node.r+dr,c=node.c+dc;if(r>=0&&r<grid.rows&&c>=0&&c<grid.cols) out.push(grid.nodes[r*grid.cols+c]);} return out;
-}
-function heuristic(n,goal,mode,params){
-  // La distancia geodésica es una cota inferior válida para las tres estrategias.
-  // Mantener la heurística neutra evita que el A* esconda diferencias introducidas
-  // por los costos de terreno de cada estrategia.
-  return haversine(n,goal);
-}
-function analyzeEdge(a,b,params){
-  const d=haversine(a,b);
-  const elevReady=Number.isFinite(a.elevationM)&&Number.isFinite(b.elevationM)&&d>0;
-  if(!elevReady) return {distanceKm:d,signedSlopeDeg:null,roughnessDeg:null,confidence:0,transitability:0,blocked:true,reasons:['elevación desconocida']};
-  const rise=b.elevationM-a.elevationM;
-  const signedSlopeDeg=Math.atan2(rise/1000,Math.max(d,.001))*180/Math.PI;
-  const absSlope=Math.abs(signedSlopeDeg);
-  const roughnessDeg=[a.localRoughnessDeg,b.localRoughnessDeg].filter(Number.isFinite).reduce((x,y,_,arr)=>x+y/arr.length,0);
-  const confVals=[a.dataConfidence,b.dataConfidence].filter(Number.isFinite);
-  const confidence=confVals.length?Math.min(...confVals):0;
-  const baseVals=[a.baseTransitability,b.baseTransitability].filter(Number.isFinite);
-  const baseTransitability=baseVals.length?baseVals.reduce((x,y)=>x+y,0)/baseVals.length:50;
-  const directionalPenalty=signedSlopeDeg>=0 ? absSlope*.75 : absSlope*.45;
-  const transitability=clamp(baseTransitability-directionalPenalty,0,100);
-  const reasons=[];
-  if(absSlope>params.maxSlopeLimit) reasons.push(`pendiente ${absSlope.toFixed(1)}° > ${params.maxSlopeLimit.toFixed(1)}°`);
-  if(transitability<params.minTransitability) reasons.push(`transitabilidad ${transitability.toFixed(0)} < ${params.minTransitability.toFixed(0)}`);
-  if(confidence<params.minConfidence) reasons.push(`confianza ${confidence.toFixed(0)}% < ${params.minConfidence.toFixed(0)}%`);
-  return {distanceKm:d,riseM:rise,signedSlopeDeg,absSlopeDeg:absSlope,roughnessDeg,confidence,transitability,blocked:reasons.length>0,reasons};
-}
-function edgeCost(a,b,mode,params){
-  const x=analyzeEdge(a,b,params);
-  if(x.blocked || !Number.isFinite(x.distanceKm)) return Infinity;
-  const d=x.distanceKm;
-  const speed=Math.max(.1,params.speed);
-  const travelHours=d/speed;
-  const uphill=Math.max(0,x.signedSlopeDeg||0),downhill=Math.max(0,-(x.signedSlopeDeg||0));
-  const directionalSlopeNorm=clamp((uphill*1.25+downhill*.85)/18,0,2);
-  const transitPenalty=clamp((100-x.transitability)/100,0,1);
-  const uncertaintyPenalty=clamp((100-x.confidence)/100,0,1);
-  const roughPenalty=clamp((x.roughnessDeg||0)/12,0,1.5);
-  // V42: las estrategias tienen objetivos deliberadamente distintos. Los límites
-  // duros se aplican arriba en analyzeEdge() para las tres por igual.
-  if(mode==='distance') return d;
-  if(mode==='risk') return d*(1+directionalSlopeNorm*3.15+transitPenalty*3.25+uncertaintyPenalty*2.45+roughPenalty*1.65)+travelHours*.45;
-  return d*(1+directionalSlopeNorm*1.15+transitPenalty*1.20+uncertaintyPenalty*.90+roughPenalty*.62)+travelHours*.11;
-}
-function aStar(grid,start,goal,mode,params){
-  const open=[start], came=new Map(), g=new Map([[key(start),0]]), f=new Map([[key(start),heuristic(start,goal,mode,params)]]);
-  while(open.length){
-    open.sort((a,b)=>(f.get(key(a))??Infinity)-(f.get(key(b))??Infinity));
-    const cur=open.shift();
-    if(key(cur)===key(goal)){
-      const path=[]; let n=cur; while(n){path.push(n);n=came.get(key(n));} return path.reverse();
-    }
-    for(const nb of neighbors(cur,grid)){
-      const edge=edgeCost(cur,nb,mode,params);
-      if(!Number.isFinite(edge)) continue;
-      const tentative=(g.get(key(cur))??Infinity)+edge;
-      if(tentative<(g.get(key(nb))??Infinity)){
-        came.set(key(nb),cur);g.set(key(nb),tentative);f.set(key(nb),tentative+heuristic(nb,goal,mode,params));
-        if(!open.some(n=>key(n)===key(nb)))open.push(nb);
-      }
-    }
-  }
-  return null;
-}
-const key=n=>`${n.r}:${n.c}`;
-function forceEndpoints(path,a,b){ if(!path||path.length<2)return path; return [{...a,elevationM:a.elevationM},...path.slice(1,-1),{...b,elevationM:b.elevationM}]; }
-function shortestLonDelta(a,b){ return ((b-a+540)%360)-180; }
-function interpolateLon(a,b,t){ return normalizeLon(a + shortestLonDelta(a,b)*t); }
-function buildGrid(a,b,rows=17,cols=17,mode='balanced'){
-  // V26: corredor 2D orientado al tramo. La versión anterior variaba la latitud
-  // por fila, pero reutilizaba la misma longitud por columna; en tramos casi N/S
-  // las columnas podían colapsar y A* no tenía espacio real para rodear terreno.
-  const directKm=Math.max(.001,haversine(a,b));
-  const kmPerDegLat=Math.PI*MARTIAN_RADIUS/180;
-  const midLat=(a.lat+b.lat)/2;
-  const kmPerDegLon=Math.max(kmPerDegLat*.08,kmPerDegLat*Math.cos(midLat*Math.PI/180));
-  const eastKm=shortestLonDelta(a.lon,b.lon)*kmPerDegLon;
-  const northKm=(b.lat-a.lat)*kmPerDegLat;
-  const norm=Math.max(.001,Math.hypot(eastKm,northKm));
-  const perpEast=-northKm/norm;
-  const perpNorth=eastKm/norm;
-  const corridorFactor=mode==='distance'?.18:mode==='risk'?.72:.42;
-  const minWidth=mode==='distance'?2.5:mode==='risk'?8:4;
-  const maxWidth=mode==='distance'?70:mode==='risk'?240:145;
-  const corridorHalfWidthKm=clamp(directKm*corridorFactor,minWidth,maxWidth);
-  const nodes=[];
-
-  for(let r=0;r<rows;r++){
-    const lateral=((r/(rows-1))-.5)*2*corridorHalfWidthKm;
-    for(let c=0;c<cols;c++){
-      const t=c/(cols-1);
-      const centerLat=a.lat+(b.lat-a.lat)*t;
-      const centerLon=interpolateLon(a.lon,b.lon,t);
-      const offsetNorth=perpNorth*lateral;
-      const offsetEast=perpEast*lateral;
-      const lat=clamp(centerLat+offsetNorth/kmPerDegLat,-89.5,89.5);
-      const localKmPerDegLon=Math.max(kmPerDegLat*.08,kmPerDegLat*Math.cos(lat*Math.PI/180));
-      const lon=normalizeLon(centerLon+offsetEast/localKmPerDegLon);
-      nodes.push({r,c,lat,lon});
-    }
-  }
-  return {nodes,rows,cols,corridorHalfWidthKm};
-}
-function stddev(values){
-  if(!values.length) return 0;
-  const mean=values.reduce((a,b)=>a+b,0)/values.length;
-  return Math.sqrt(values.reduce((a,b)=>a+(b-mean)**2,0)/values.length);
-}
-function annotateGridTerrain(grid){
-  const spacings=[];
-  for(const n of grid.nodes){
-    if(n.c+1<grid.cols) spacings.push(haversine(n,grid.nodes[n.r*grid.cols+n.c+1]));
-    if(n.r+1<grid.rows) spacings.push(haversine(n,grid.nodes[(n.r+1)*grid.cols+n.c]));
-  }
-  const sorted=spacings.filter(Number.isFinite).sort((a,b)=>a-b);
-  const medianSpacingKm=sorted.length?sorted[Math.floor(sorted.length/2)]:DEM_RESOLUTION_KM;
-  const densityFactor=clamp((DEM_RESOLUTION_KM*3)/Math.max(DEM_RESOLUTION_KM,medianSpacingKm),0,1);
-  for(const node of grid.nodes){
-    const allNeighbors=neighbors(node,grid);
-    const validNeighbors=allNeighbors.filter(x=>Number.isFinite(x.elevationM));
-    const ownValid=Number.isFinite(node.elevationM);
-    const slopes=[];
-    const elevations=ownValid?[node.elevationM]:[];
-    if(ownValid){
-      for(const nb of validNeighbors){
-        const dist=haversine(node,nb);
-        if(dist>0){
-          slopes.push(Math.atan2(Math.abs(nb.elevationM-node.elevationM)/1000,dist)*180/Math.PI);
-          elevations.push(nb.elevationM);
-        }
-      }
-    }
-    const completeness=ownValid?(1+validNeighbors.length)/(1+allNeighbors.length):0;
-    const confidence=ownValid?clamp(100*completeness*(.35+.65*densityFactor),0,100):0;
-    const maxLocalSlopeDeg=slopes.length?Math.max(...slopes):null;
-    const localRoughnessDeg=slopes.length?stddev(slopes):null;
-    const localRoughnessM=elevations.length>1?stddev(elevations):null;
-    const baseTransitability=ownValid?clamp(100-(maxLocalSlopeDeg||0)*2.35-(localRoughnessDeg||0)*2.0-(100-confidence)*.22,0,100):0;
-    Object.assign(node,{dataConfidence:confidence,maxLocalSlopeDeg,localRoughnessDeg,localRoughnessM,baseTransitability});
-  }
-  grid.medianSpacingKm=medianSpacingKm;
-  grid.densityFactor=densityFactor;
-  return grid;
-}
+const routing=window.JEZERO_ROUTING.createEngine({
+  getElevations:points=>getElevations(points),
+  optimizeOrderEnabled:()=>$('optimizeOrder')?.checked!==false
+});
+const {haversine,pathMetrics,nearestNode,neighbors,heuristic,analyzeEdge,edgeCost,aStar,forceEndpoints,shortestLonDelta,interpolateLon,buildGrid,stddev,annotateGridTerrain,gridSizeForDistanceKm,calculateLeg,riskScore,riskLabel,availableMissionHours,estimateDuration,formatHours,formatSignedMargin,sequenceWithReturn,createLegCache,getCachedLeg,evaluateSequence,routeOrderGeodesicCost,heldKarpWaypointOrder,heuristicWaypointOrder,waypointOrderSeed,missionOrderObjective,refineWaypointOrder,chooseSequence,aggregateMission,validateFinalPath}=routing;
 async function getElevations(points){
-  if(!window.marsElevationReady || !window.queryMarsElevations){
+  if(!window.marsElevationReady){
     throw new Error('La fuente global de elevación todavía está cargando. Espera unos segundos y vuelve a calcular.');
   }
   await window.marsElevationReady;
+  if(typeof window.queryMarsElevations!=='function') throw new Error('La fuente de elevación no está disponible.');
   const out=await window.queryMarsElevations(points);
   if(!Array.isArray(out)) throw new Error('La fuente global de elevación no devolvió puntos.');
-  const valid=out.filter(p=>Number.isFinite(Number(p.elevationM))).length;
+  if(out.length!==points.length) throw new Error('La fuente de elevación devolvió una cantidad de muestras inesperada.');
+  const valid=out.filter(p=>finiteValue(p.elevationM)).length;
   if(valid===0) throw new Error('El DEM global no devolvió elevaciones válidas para la misión.');
-  return out;
+  return out.map(p=>({...p,elevationM:numericValue(p.elevationM)}));
 }
 
-function gridSizeForDistanceKm(distanceKm){
-  if(distanceKm>5000) return 11;
-  if(distanceKm>2500) return 13;
-  if(distanceKm>800) return 15;
-  return 17;
-}
-async function calculateLeg(a,b,mode,params){
-  const gridSize=gridSizeForDistanceKm(haversine(a,b));
-  const grid=buildGrid(a,b,gridSize,gridSize,mode);
-  const samples=grid.nodes.map(n=>({lat:n.lat,lon:n.lon}));
-  samples.push({lat:a.lat,lon:a.lon},{lat:b.lat,lon:b.lon});
-  const elevated=await getElevations(samples);
-  const mapByCoord=new Map(elevated.map(p=>[`${Number(p.lat).toFixed(5)},${Number(p.lon).toFixed(5)}`,p.elevationM]));
-  for(const n of grid.nodes) n.elevationM=mapByCoord.get(`${n.lat.toFixed(5)},${n.lon.toFixed(5)}`);
-  annotateGridTerrain(grid);
-  const aElev=elevated[elevated.length-2]?.elevationM,bElev=elevated[elevated.length-1]?.elevationM;
-  const aa={...a,elevationM:aElev},bb={...b,elevationM:bElev};
-  if(!Number.isFinite(aa.elevationM)||!Number.isFinite(bb.elevationM)) throw new Error('No se recibió elevación para uno de los puntos de la misión.');
-  const s=nearestNode(grid,aa),g=nearestNode(grid,bb);
-  const path0=aStar(grid,s,g,mode,params);
-  if(!path0) throw new Error(`No existe una trayectoria que cumpla los límites duros entre ${a.name} y ${b.name}. Revisa pendiente máxima, transitabilidad mínima o confianza cartográfica.`);
-  const startPoint={...aa,dataConfidence:s.dataConfidence,baseTransitability:s.baseTransitability,localRoughnessDeg:s.localRoughnessDeg,localRoughnessM:s.localRoughnessM};
-  const endPoint={...bb,dataConfidence:g.dataConfidence,baseTransitability:g.baseTransitability,localRoughnessDeg:g.localRoughnessDeg,localRoughnessM:g.localRoughnessM};
-  const path=forceEndpoints(path0,startPoint,endPoint);
-  const metrics=pathMetrics(path,params);
-  return {from:a,to:b,path,metrics,durationHours:estimateDuration(metrics,params),gridSpacingKm:grid.medianSpacingKm};
-}
-function riskScore(m){
-  if(!m || !Number.isFinite(m.maxSlopeDeg)) return null;
-  const slopePenalty=clamp(m.maxSlopeDeg/25,0,1)*35;
-  const transitPenalty=clamp((100-(m.minTransitability??100))/100,0,1)*30;
-  const uncertaintyPenalty=clamp((100-(m.avgConfidence??100))/100,0,1)*20;
-  const roughnessPenalty=clamp((m.avgRoughnessDeg||0)/10,0,1)*15;
-  return Math.round(clamp(slopePenalty+transitPenalty+uncertaintyPenalty+roughnessPenalty,0,100));
-}
-function riskLabel(score){ if(score<30)return 'Bajo'; if(score<55)return 'Moderado'; if(score<75)return 'Alto'; return 'Muy alto'; }
 function normalizeParams(){
-  const speed=Math.max(.1,Number($('speed').value)||1.2);
-  const evaTime=Math.max(.5,Number($('evaTime').value)||8);
-  const returnMargin=clamp(Number($('returnMargin').value)||25,0,80);
-  const maxSlopeLimit=clamp(Number($('maxSlopeLimit')?.value)||25,1,45);
-  const minTransitability=clamp(Number($('minTransitability')?.value)||25,0,100);
-  const minConfidence=clamp(Number($('minConfidence')?.value)||20,0,100);
-  return {speed,evaTime,returnMargin,maxSlopeLimit,minTransitability,minConfidence};
+  return validation.parameters(Object.fromEntries(Object.keys(validation.PARAM_RULES).map(id=>[id,$(id)?.value])));
 }
-function availableMissionHours(params){ return params.evaTime*(1-params.returnMargin/100); }
-function estimateDuration(metrics,params){
-  const speed=Math.max(.1,params.speed);
-  const uphillFactor=1+clamp((metrics.avgUphillSlopeDeg||0)/20,0,.7)*.55;
-  const downhillFactor=1+clamp((metrics.avgDownhillSlopeDeg||0)/20,0,.7)*.28;
-  const terrainFactor=1+clamp((100-(metrics.avgTransitability??100))/100,0,1)*.35;
-  const uncertaintyFactor=1+clamp((100-(metrics.avgConfidence??100))/100,0,1)*.12;
-  return metrics.distanceKm/speed*uphillFactor*downhillFactor*terrainFactor*uncertaintyFactor;
+function planningFingerprint(){
+  return JSON.stringify({points:missionPoints,params:Object.fromEntries(Object.keys(validation.PARAM_RULES).map(id=>[id,$(id)?.value])),returnBase:$('returnBase')?.checked,optimizeOrder:$('optimizeOrder')?.checked});
 }
-function formatHours(h){ if(!Number.isFinite(h))return '—'; const sign=h<0?'−':''; const value=Math.abs(h); const hrs=Math.floor(value),mins=Math.round((value-hrs)*60); return `${sign}${hrs} h ${String(mins).padStart(2,'0')} min`; }
-function formatSignedMargin(h){ return h>=0 ? formatHours(h) : `EXCEDE ${formatHours(-h)}`; }
-
-function sequenceWithReturn(points, returnBase){
-  if(!returnBase || points.length<2) return points.map(p=>({...p}));
-  const base=points.find((p,i)=>i===0 || p.type==='base') || points[0];
-  const last=points[points.length-1];
-  const out=points.map(p=>({...p}));
-  if(last.lat!==base.lat || last.lon!==base.lon) out.push({...base,name:'Regreso a base',type:'base',required:true,dwellMin:0});
-  return out;
+function invalidateMission(){
+  currentMission=null;lastCalculatedAt=null;
+  routeLayer?.getSource()?.clear();analysisLayer?.getSource()?.clear();
+  resetMetrics();updatePlanningUI();
+  if($('missionWarnings')){$('missionWarnings').textContent='';$('missionWarnings').hidden=true;}
 }
-
-function createLegCache(){ const cache=new Map(); return { cache, key:(a,b,mode,params)=>`${mode}|${a.lat.toFixed(5)},${a.lon.toFixed(5)}>${b.lat.toFixed(5)},${b.lon.toFixed(5)}|${params.speed.toFixed(2)}|${params.maxSlopeLimit.toFixed(1)}|${params.minTransitability.toFixed(0)}|${params.minConfidence.toFixed(0)}` }; }
-async function getCachedLeg(a,b,mode,params,legCache){
-  const k=legCache.key(a,b,mode,params); if(legCache.cache.has(k)) return legCache.cache.get(k);
-  const promise=calculateLeg(a,b,mode,params); legCache.cache.set(k,promise); return promise;
-}
-
-async function evaluateSequence(seq,mode,params,legCache){
-  const legs=[];
-  for(let i=1;i<seq.length;i++) legs.push(await getCachedLeg(seq[i-1],seq[i],mode,params,legCache));
-  return aggregateMission(legs,mode,params,seq);
-}
-function routeOrderGeodesicCost(base,order,returnBase){
-  if(!order.length) return 0;
-  let total=haversine(base,order[0]);
-  for(let i=1;i<order.length;i++) total+=haversine(order[i-1],order[i]);
-  if(returnBase) total+=haversine(order.at(-1),base);
-  return total;
-}
-function heldKarpWaypointOrder(base,targets,returnBase){
-  const n=targets.length;
-  if(n<=1) return targets.slice();
-  if(n>10) return null;
-  const size=1<<n;
-  const dp=Array.from({length:size},()=>Array(n).fill(null));
-  for(let j=0;j<n;j++) dp[1<<j][j]={cost:haversine(base,targets[j]),prev:-1};
-  for(let mask=1;mask<size;mask++){
-    for(let j=0;j<n;j++){
-      const cur=dp[mask][j]; if(!cur) continue;
-      for(let k=0;k<n;k++){
-        if(mask&(1<<k)) continue;
-        const next=mask|(1<<k), cost=cur.cost+haversine(targets[j],targets[k]);
-        if(!dp[next][k]||cost<dp[next][k].cost) dp[next][k]={cost,prev:j};
-      }
-    }
-  }
-  const full=size-1; let bestEnd=0,bestCost=Infinity;
-  for(let j=0;j<n;j++){
-    const cur=dp[full][j]; if(!cur) continue;
-    const cost=cur.cost+(returnBase?haversine(targets[j],base):0);
-    if(cost<bestCost){bestCost=cost;bestEnd=j;}
-  }
-  const idx=[]; let mask=full,j=bestEnd;
-  while(j>=0){idx.push(j);const prev=dp[mask][j]?.prev??-1;mask&=~(1<<j);j=prev;}
-  idx.reverse();
-  return idx.map(i=>targets[i]);
-}
-function heuristicWaypointOrder(base,targets,returnBase){
-  const remaining=targets.slice(), order=[]; let cur=base;
-  while(remaining.length){
-    let bi=0,bd=Infinity;
-    remaining.forEach((p,i)=>{const d=haversine(cur,p);if(d<bd){bd=d;bi=i;}});
-    cur=remaining.splice(bi,1)[0]; order.push(cur);
-  }
-  let improved=true,guard=0;
-  while(improved&&guard++<3){
-    improved=false; let best=routeOrderGeodesicCost(base,order,returnBase),bestOrder=order;
-    for(let i=0;i<order.length-1;i++) for(let j=i+1;j<order.length;j++){
-      const candidate=order.slice(); [candidate[i],candidate[j]]=[candidate[j],candidate[i]];
-      const c=routeOrderGeodesicCost(base,candidate,returnBase);
-      if(c+1e-6<best){best=c;bestOrder=candidate;improved=true;}
-    }
-    order.splice(0,order.length,...bestOrder);
-  }
-  return order;
-}
-function waypointOrderSeed(basePoints,returnBase,optimize){
-  const base=basePoints[0]; const targets=basePoints.slice(1);
-  if(!optimize) return targets.slice();
-  return heldKarpWaypointOrder(base,targets,returnBase) || heuristicWaypointOrder(base,targets,returnBase);
-}
-function missionOrderObjective(mission,mode){
-  const m=mission?.metrics||{}, risk=Number(mission?.score)||0;
-  const distance=Number(m.distanceKm)||0, duration=Number(mission?.duration)||0;
-  const difficult=Number(m.difficultDistanceKm)||0, uncertain=Number(m.uncertainDistanceKm)||0;
-  const transit=Number.isFinite(Number(m.avgTransitability))?Number(m.avgTransitability):60;
-  const slope=Number(m.maxSlopeDeg)||0, rough=Number(m.avgRoughnessDeg)||0;
-  if(mode==='distance') return distance;
-  if(mode==='risk') return distance*.18 + duration*.72 + risk*.115 + difficult*4.2 + uncertain*2.4 + Math.max(0,88-transit)*.12 + slope*.16 + rough*.20;
-  return distance*.48 + duration*.72 + risk*.042 + difficult*1.45 + uncertain*.82 + Math.max(0,76-transit)*.052 + slope*.055 + rough*.07;
-}
-async function refineWaypointOrder(base,seedOrder,returnBase,mode,params,legCache){
-  let order=seedOrder.slice();
-  let mission=await evaluateSequence(sequenceWithReturn([base,...order],returnBase),mode,params,legCache);
-  if(order.length<2) return {order,mission,trials:0};
-  const passes=order.length<=6?2:1;
-  let trials=0;
-  for(let pass=0;pass<passes;pass++){
-    const currentScore=missionOrderObjective(mission,mode); let bestScore=currentScore,bestOrder=null,bestMission=null;
-    const candidates=[];
-    for(let i=0;i<order.length-1;i++) for(let j=i+1;j<order.length;j++) candidates.push([i,j]);
-    const maxTrials=order.length<=8?candidates.length:Math.min(18,candidates.length);
-    for(const [i,j] of candidates.slice(0,maxTrials)){
-      const trialOrder=order.slice(); [trialOrder[i],trialOrder[j]]=[trialOrder[j],trialOrder[i]];
-      try{
-        const trial=await evaluateSequence(sequenceWithReturn([base,...trialOrder],returnBase),mode,params,legCache); trials++;
-        const score=missionOrderObjective(trial,mode);
-        if(score+1e-6<bestScore){bestScore=score;bestOrder=trialOrder;bestMission=trial;}
-      }catch{/* una transición no viable se descarta */}
-    }
-    if(!bestOrder) break;
-    order=bestOrder; mission=bestMission;
-  }
-  return {order,mission,trials};
-}
-async function chooseSequence(mode,basePoints,returnBase,params,legCache){
-  const available=availableMissionHours(params);
-  const cleaned=basePoints.map((p,i)=>({...p,type:i===0||p.type==='base'?'base':'target',required:true,scienceValue:undefined,scienceCategory:undefined,scienceNotes:undefined}));
-  const base=cleaned[0]; const optimize=$('optimizeOrder')?.checked!==false;
-  const seed=waypointOrderSeed(cleaned,returnBase,optimize);
-  let result;
-  if(optimize) result=await refineWaypointOrder(base,seed,returnBase,mode,params,legCache);
-  else{
-    const seq=sequenceWithReturn([base,...seed],returnBase);
-    result={order:seed,mission:await evaluateSequence(seq,mode,params,legCache),trials:0};
-  }
-  const finalMission=result.mission;
-  finalMission.includedPoints=finalMission.sequence;
-  finalMission.omittedOptional=[];
-  finalMission.availableHours=available;
-  finalMission.overBudget=finalMission.duration>available;
-  finalMission.params={...params};
-  finalMission.orderOptimization={
-    enabled:optimize,
-    method:optimize?(cleaned.length-1<=10?'Held-Karp geodésico + refinamiento A* por terreno':'heurística geodésica + refinamiento A* por terreno'):'orden manual',
-    trials:result.trials,
-    inputOrder:cleaned.slice(1).map(p=>p.name),
-    optimizedOrder:result.order.map(p=>p.name)
-  };
-  finalMission.strategyDescription=mode==='distance'
-    ?'Optimiza el orden de visita y minimiza la distancia de los tramos viables.'
-    :mode==='risk'
-      ?'Optimiza el orden de visita priorizando menor exposición, transitabilidad y confianza cartográfica.'
-      :'Optimiza el orden de visita equilibrando distancia, tiempo, pendiente, transitabilidad e incertidumbre.';
-  return finalMission;
-}
-
-function aggregateMission(legs,mode,params,sequence){
-  const metrics={distanceKm:0,gainM:0,descentM:0,elevationChangeM:0,maxSlopeDeg:null,avgSlopeDeg:null,maxUphillSlopeDeg:null,maxDownhillSlopeDeg:null,avgUphillSlopeDeg:null,avgDownhillSlopeDeg:null,avgTransitability:null,minTransitability:null,avgConfidence:null,minConfidence:null,avgRoughnessDeg:null,uncertainDistanceKm:0,difficultDistanceKm:0,segments:0};
-  let weightedSlope=0,weightedDistance=0,weightedUp=0,weightedDown=0,weightedTransit=0,weightedConfidence=0,weightedRough=0;
-  legs.forEach(leg=>{
-    const lm=leg.metrics,dist=lm.distanceKm||0;
-    metrics.distanceKm+=dist; metrics.gainM+=lm.gainM; metrics.descentM+=lm.descentM; metrics.elevationChangeM+=lm.elevationChangeM; metrics.segments+=lm.segments;
-    metrics.uncertainDistanceKm+=lm.uncertainDistanceKm||0; metrics.difficultDistanceKm+=lm.difficultDistanceKm||0;
-    if(Number.isFinite(lm.maxSlopeDeg)) metrics.maxSlopeDeg=metrics.maxSlopeDeg===null?lm.maxSlopeDeg:Math.max(metrics.maxSlopeDeg,lm.maxSlopeDeg);
-    if(Number.isFinite(lm.maxUphillSlopeDeg)) metrics.maxUphillSlopeDeg=metrics.maxUphillSlopeDeg===null?lm.maxUphillSlopeDeg:Math.max(metrics.maxUphillSlopeDeg,lm.maxUphillSlopeDeg);
-    if(Number.isFinite(lm.maxDownhillSlopeDeg)) metrics.maxDownhillSlopeDeg=metrics.maxDownhillSlopeDeg===null?lm.maxDownhillSlopeDeg:Math.max(metrics.maxDownhillSlopeDeg,lm.maxDownhillSlopeDeg);
-    if(Number.isFinite(lm.minTransitability)) metrics.minTransitability=metrics.minTransitability===null?lm.minTransitability:Math.min(metrics.minTransitability,lm.minTransitability);
-    if(Number.isFinite(lm.minConfidence)) metrics.minConfidence=metrics.minConfidence===null?lm.minConfidence:Math.min(metrics.minConfidence,lm.minConfidence);
-    if(dist>0){
-      if(Number.isFinite(lm.avgSlopeDeg)) weightedSlope+=lm.avgSlopeDeg*dist;
-      if(Number.isFinite(lm.avgUphillSlopeDeg)) weightedUp+=lm.avgUphillSlopeDeg*dist;
-      if(Number.isFinite(lm.avgDownhillSlopeDeg)) weightedDown+=lm.avgDownhillSlopeDeg*dist;
-      if(Number.isFinite(lm.avgTransitability)) weightedTransit+=lm.avgTransitability*dist;
-      if(Number.isFinite(lm.avgConfidence)) weightedConfidence+=lm.avgConfidence*dist;
-      if(Number.isFinite(lm.avgRoughnessDeg)) weightedRough+=lm.avgRoughnessDeg*dist;
-      weightedDistance+=dist;
-    }
-  });
-  metrics.avgSlopeDeg=weightedDistance?weightedSlope/weightedDistance:null;
-  metrics.avgUphillSlopeDeg=weightedDistance?weightedUp/weightedDistance:null;
-  metrics.avgDownhillSlopeDeg=weightedDistance?weightedDown/weightedDistance:null;
-  metrics.avgTransitability=weightedDistance?weightedTransit/weightedDistance:null;
-  metrics.avgConfidence=weightedDistance?weightedConfidence/weightedDistance:null;
-  metrics.avgRoughnessDeg=weightedDistance?weightedRough/weightedDistance:null;
-  const dwellMinutes=sequence.reduce((s,p)=>s+(Number(p.dwellMin)||0),0);
-  const duration=estimateDuration(metrics,params)+dwellMinutes/60;
-  const scores=legs.map(x=>riskScore(x.metrics)).filter(Number.isFinite);
-  const score=scores.length?Math.max(...scores):null;
-  const targetKeys=new Set(sequence.filter(p=>p.type!=='base').map(pointCoordKey));
-  return {mode,legs,metrics,dwellMinutes,duration,score,sequence,targetCount:targetKeys.size};
-}
-
 async function calculateMission({saveHistory=true}={}){
   if(missionPoints.length<2||busy)return;
-  const params=normalizeParams();
-  setBusy(true,'Calculando misión: estrategia + terreno + restricciones operacionales…');
+  const fingerprint=planningFingerprint();
+  const params=normalizeParams(),returnBase=$('returnBase').checked;
+  invalidateMission();
+  setBusy(true,ui('Calculando estrategias sobre el mismo terreno…','Calculating strategies on the same terrain…'));
   try{
-    const basePoints=missionPoints.map(p=>({...p}));
-    const modes=['distance','balanced','risk'];
-    const legCache=createLegCache();
-    const mission={};
-    for(const mode of modes){
-      setBusy(true,`Evaluando estrategia: ${mode==='distance'?'más directa':mode==='risk'?'menor exposición':'equilibrada'}…`);
-      mission[mode]=await chooseSequence(mode,basePoints,$('returnBase').checked,params,legCache);
+    const basePoints=validation.points(missionPoints,{minimum:2,calculation:true});
+    const legCache=createLegCache(),mission={errors:{}};
+    for(const mode of ['distance','balanced','risk']){
+      setBusy(true,`${ui('Evaluando estrategia','Evaluating strategy')}: ${strategyLabel(mode)}…`);
+      try{mission[mode]=await chooseSequence(mode,basePoints,returnBase,params,legCache);}
+      catch(err){mission.errors[mode]=err.message||ui('No se pudo calcular.','Calculation failed.');}
+      if(planningFingerprint()!==fingerprint)throw new Error(ui('La misión cambió durante el cálculo. Vuelve a calcular con los datos actuales.','The mission changed during calculation. Recalculate using the current inputs.'));
     }
     currentMission=mission;
+    const requested=document.querySelector('input[name="mode"]:checked')?.value||'balanced';
+    const selectedMode=[requested,'balanced','distance','risk'].find(mode=>mission[mode]);
+    const errors=Object.entries(mission.errors).map(([mode,message])=>`${strategyLabel(mode)}: ${message}`);
+    if($('missionWarnings')){$('missionWarnings').textContent=errors.join('\n');$('missionWarnings').hidden=!errors.length;}
+    updateStrategyCards(mission);
+    if(!selectedMode){currentMission=null;throw new Error(ui('No se pudo calcular ninguna estrategia. Revisa los mensajes y los límites.','No strategy could be calculated. Review the messages and limits.'));}
     lastCalculatedAt=new Date();
-    const selectedMode=document.querySelector('input[name="mode"]:checked').value;
-    renderMission(mission[selectedMode]); drawMissionRoutes(mission,selectedMode); updatePlanningUI();
-    if(saveHistory) saveHistoryEntry(selectedMode);
-    setBusy(false,`MISIÓN CALCULADA · ${lastCalculatedAt.toLocaleTimeString('es-NI',{hour:'2-digit',minute:'2-digit'})} · NASA / USGS`);
-  }catch(err){ setBusy(false); showToast(err.message); }
+    const radio=document.querySelector(`input[name="mode"][value="${selectedMode}"]`);if(radio)radio.checked=true;
+    renderMission(mission[selectedMode]);drawMissionRoutes(mission,selectedMode);updatePlanningUI();
+    if(saveHistory)saveHistoryEntry(selectedMode);
+    setBusy(false,`${ui('MISIÓN CALCULADA','MISSION CALCULATED')} · ${Object.keys(mission).filter(k=>validation.MODES.includes(k)).length}/3 ${ui('estrategias disponibles','strategies available')}`);
+  }catch(err){
+    currentMission=null;lastCalculatedAt=null;routeLayer?.getSource()?.clear();
+    resetMetrics();updatePlanningUI();
+    if($('missionWarnings')){$('missionWarnings').textContent=[$('missionWarnings').textContent,err.message].filter(Boolean).join('\n');$('missionWarnings').hidden=false;}
+    setBusy(false,ui('CÁLCULO NO DISPONIBLE · revisa los mensajes','CALCULATION UNAVAILABLE · review the messages'));showToast(err.message);
+  }finally{setBusy(false,$('statusText')?.textContent);updateStrategyCards(currentMission);}
 }
 function drawMissionRoutes(mission,selectedMode){
   const source=routeLayer.getSource(); source.clear();
@@ -1107,7 +702,7 @@ function profileSeries(mission){
   let km=0,prev=null;
   for(const node of nodes){
     if(prev) km+=haversine(prev,node);
-    if(Number.isFinite(Number(node.elevationM))) series.push({km,elevationM:Number(node.elevationM)});
+    if(finiteValue(node.elevationM)) series.push({km,elevationM:Number(node.elevationM)});
     prev=node;
   }
   return series;
@@ -1143,22 +738,22 @@ function analyticsSeries(mission){
     const path=leg.path||[]; if(!path.length) return;
     let legDist=0; for(let i=1;i<path.length;i++) legDist+=haversine(path[i-1],path[i]);
     for(let i=0;i<path.length;i++){
-      const node=path[i];
+    const node=path[i];
       if(li>0&&i===0) continue;
       let edge=0;
       if(prevGlobal){
         edge=haversine(prevGlobal,node); km+=edge;
-        if(Number.isFinite(Number(prevGlobal.elevationM))&&Number.isFinite(Number(node.elevationM))){
+        if(finiteValue(prevGlobal.elevationM)&&finiteValue(node.elevationM)){
           const de=Number(node.elevationM)-Number(prevGlobal.elevationM); if(de>0) gain+=de; else descent+=Math.abs(de);
         }
         if(legDist>0) elapsed+=(Number(leg.durationHours)||0)*(edge/legDist);
       }
-      const slope=Number.isFinite(Number(node.signedSlopeDeg))?Number(node.signedSlopeDeg):Number.isFinite(Number(node.slopeDeg))?Number(node.slopeDeg):null;
-      const transit=Number.isFinite(Number(node.transitability))?Number(node.transitability):Number.isFinite(Number(node.baseTransitability))?Number(node.baseTransitability):null;
-      const confidence=Number.isFinite(Number(node.edgeConfidence))?Number(node.edgeConfidence):Number.isFinite(Number(node.dataConfidence))?Number(node.dataConfidence):null;
-      const roughness=Number.isFinite(Number(node.localRoughnessDeg))?Number(node.localRoughnessDeg):null;
+      const slope=finiteValue(node.signedSlopeDeg)?Number(node.signedSlopeDeg):finiteValue(node.slopeDeg)?Number(node.slopeDeg):null;
+      const transit=finiteValue(node.transitability)?Number(node.transitability):finiteValue(node.baseTransitability)?Number(node.baseTransitability):null;
+      const confidence=finiteValue(node.edgeConfidence)?Number(node.edgeConfidence):finiteValue(node.dataConfidence)?Number(node.dataConfidence):null;
+      const roughness=finiteValue(node.localRoughnessDeg)?Number(node.localRoughnessDeg):null;
       const difficulty=clamp((Math.abs(slope||0)/25)*35 + ((100-(transit??100))/100)*30 + ((100-(confidence??100))/100)*20 + ((roughness||0)/10)*15,0,100);
-      out.push({km,lat:Number(node.lat),lon:Number(node.lon),elevationM:Number.isFinite(Number(node.elevationM))?Number(node.elevationM):null,slope,transit,confidence,roughness,difficulty,cumGain:gain,cumDescent:descent,elapsedHours:elapsed,evaRemaining:availableMissionHours(params)-elapsed});
+      out.push({km,lat:Number(node.lat),lon:Number(node.lon),elevationM:finiteValue(node.elevationM)?Number(node.elevationM):null,slope,transit,confidence,roughness,difficulty,cumGain:gain,cumDescent:descent,elapsedHours:elapsed,evaRemaining:availableMissionHours(params)-elapsed});
       prevGlobal=node;
     }
     const dwell=(Number(leg.to?.dwellMin)||0)/60;
@@ -1192,7 +787,7 @@ function syncAnalyticsCursor(point,{pin=false,highlightMap=true}={}){
     const x=L+clamp(point.km/maxKm,0,1)*(W-L-R); const line=svg.querySelector('.analyticsSyncCursor');
     if(line){line.setAttribute('x1',x);line.setAttribute('x2',x);line.setAttribute('visibility','visible');}
   });
-  if($('analyticsSelectionReadout')) $('analyticsSelectionReadout').textContent=`KM ${point.km.toFixed(2)} · ${formatLat(point.lat)} · ${formatLon(point.lon)} · pendiente ${Number.isFinite(point.slope)?point.slope.toFixed(1)+'°':'—'} · transit. ${Number.isFinite(point.transit)?Math.round(point.transit)+'/100':'—'} · confianza ${Number.isFinite(point.confidence)?Math.round(point.confidence)+'%':'—'}`;
+  if($('analyticsSelectionReadout')) $('analyticsSelectionReadout').textContent=`KM ${point.km.toFixed(2)} · ${formatLat(point.lat)} · ${formatLon(point.lon)} · pendiente ${Number.isFinite(point.slope)?point.slope.toFixed(1)+'°':'—'} · transit. ${Number.isFinite(point.transit)?Math.round(point.transit)+'/100':'—'} · calidad de muestreo ${Number.isFinite(point.confidence)?Math.round(point.confidence)+'%':'—'}`;
   updateAnalyticsMiniCursor(point);
   if(highlightMap&&analysisLayer){
     const src=analysisLayer.getSource();src.clear();src.addFeature(new ol.Feature({geometry:new ol.geom.Point([point.lon,point.lat]),analysisKind:'point',label:`${point.km.toFixed(2)} km`}));
@@ -1211,7 +806,7 @@ function bindSyncedChart(host,svg,series,{tooltip=null}={}){
     const rect=svg.getBoundingClientRect(),left=rect.left+rect.width*(L/W),right=rect.right-rect.width*(R/W),frac=clamp((e.clientX-left)/Math.max(1,right-left),0,1),target=frac*maxKm;
     let best=series[0];for(const p of series)if(Math.abs(p.km-target)<Math.abs(best.km-target))best=p;
     syncAnalyticsCursor(best,{pin:false});
-    if(tooltip){tooltip.hidden=false;tooltip.style.left=`${Math.min(host.clientWidth-230,Math.max(8,e.clientX-host.getBoundingClientRect().left+12))}px`;tooltip.style.top='44px';tooltip.innerHTML=`<b>${best.km.toFixed(2)} km</b><br>${ui('Elevación','Elevation')}: ${Number.isFinite(best.elevationM)?Math.round(best.elevationM)+' m':'—'}<br>${ui('Pendiente','Slope')}: ${Number.isFinite(best.slope)?best.slope.toFixed(1)+'°':'—'}<br>${ui('Rugosidad','Roughness')}: ${Number.isFinite(best.roughness)?best.roughness.toFixed(1)+'°':'—'}<br>${ui('Transitabilidad','Traversability')}: ${Number.isFinite(best.transit)?Math.round(best.transit)+'/100':'—'}<br>${ui('Confianza','Confidence')}: ${Number.isFinite(best.confidence)?Math.round(best.confidence)+'%':'—'}`;}
+    if(tooltip){tooltip.hidden=false;tooltip.style.left=`${Math.min(host.clientWidth-230,Math.max(8,e.clientX-host.getBoundingClientRect().left+12))}px`;tooltip.style.top='44px';tooltip.innerHTML=`<b>${best.km.toFixed(2)} km</b><br>${ui('Elevación','Elevation')}: ${Number.isFinite(best.elevationM)?Math.round(best.elevationM)+' m':'—'}<br>${ui('Pendiente','Slope')}: ${Number.isFinite(best.slope)?best.slope.toFixed(1)+'°':'—'}<br>${ui('Rugosidad','Roughness')}: ${Number.isFinite(best.roughness)?best.roughness.toFixed(1)+'°':'—'}<br>${ui('Transitabilidad','Traversability')}: ${Number.isFinite(best.transit)?Math.round(best.transit)+'/100':'—'}<br>${ui('Calidad de muestreo','Sampling quality')}: ${Number.isFinite(best.confidence)?Math.round(best.confidence)+'%':'—'}`;}
     return best;
   };
   svg.addEventListener('pointermove',pick);
@@ -1238,7 +833,7 @@ function renderAnalyticsProfile(mission){
     {key:'slope',label:ui('PENDIENTE','SLOPE'),top:112,h:48,min:-maxSlope,max:maxSlope,color:c.warning},
     {key:'roughness',label:ui('RUGOSIDAD','ROUGHNESS'),top:176,h:42,min:0,max:maxRough,color:c.primary2},
     {key:'transit',label:ui('TRANSIT.','TRAV.'),top:234,h:42,min:0,max:100,color:c.success},
-    {key:'confidence',label:ui('CONFIANZA','CONFIDENCE'),top:292,h:42,min:0,max:100,color:c.accent2}
+    {key:'confidence',label:ui('CALIDAD','CONFIDENCE'),top:292,h:42,min:0,max:100,color:c.accent2}
   ];
   const x=p=>L+p.km/maxKm*(W-L-R),y=(v,t)=>t.top+t.h-(v-t.min)/Math.max(.001,t.max-t.min)*t.h;
   let svg=`<svg viewBox="0 0 ${W} ${H}" data-sync-chart data-w="${W}" data-l="${L}" data-r="${R}" data-max-km="${maxKm}">`;
@@ -1283,14 +878,14 @@ function activateStrategyFromAnalytics(mode){
 function renderAnalyticsRoutes(selected){
   const host=$('analyticsRoutesChart');if(!host)return;const rows=['distance','balanced','risk'].map(k=>currentMission?.[k]).filter(Boolean);if(!rows.length){host.innerHTML='<div class="chartEmpty">Calcula la misión para comparar estrategias.</div>';return;}
   const label=m=>m.mode==='distance'?ui('MÁS DIRECTA','MOST DIRECT'):m.mode==='risk'?ui('MENOR EXPOSICIÓN','LOWER EXPOSURE'):ui('EQUILIBRADA','BALANCED');
-  const metrics=[[ui('Distancia','Distance'),m=>`${m.metrics.distanceKm.toFixed(2)} km`],[ui('Duración','Duration'),m=>formatHours(m.duration)],[ui('Pendiente máx.','Max slope'),m=>`${m.metrics.maxSlopeDeg?.toFixed(1)??'—'}°`],[ui('Transitabilidad','Traversability'),m=>`${Math.round(m.metrics.avgTransitability??0)}/100`],[ui('Confianza','Confidence'),m=>`${Math.round(m.metrics.avgConfidence??0)}%`],[ui('Dificultad','Difficulty'),m=>`${m.score??'—'}/100`],[ui('Orden','Order'),m=>(m.orderOptimization?.optimizedOrder||[]).map((name,i)=>`${i+1}:${name}`).join(' → ')||'—']];
+  const metrics=[[ui('Distancia','Distance'),m=>`${m.metrics.distanceKm.toFixed(2)} km`],[ui('Duración','Duration'),m=>formatHours(m.duration)],[ui('Pendiente máx.','Max slope'),m=>`${m.metrics.maxSlopeDeg?.toFixed(1)??'—'}°`],[ui('Transitabilidad','Traversability'),m=>`${Math.round(m.metrics.avgTransitability??0)}/100`],[ui('Calidad de muestreo','Sampling quality'),m=>`${Math.round(m.metrics.avgConfidence??0)}%`],[ui('Dificultad','Difficulty'),m=>`${m.score??'—'}/100`],[ui('Orden','Order'),m=>(m.orderOptimization?.optimizedOrder||[]).map((name,i)=>`${i+1}:${name}`).join(' → ')||'—']];
   host.innerHTML=`<div class="v36RouteCompare"><div class="head">${ui('MÉTRICA','METRIC')}</div>${rows.map(m=>`<button class="head strategyPick ${m.mode===selected?.mode?'selected':''}" data-strategy="${m.mode}">${label(m)}</button>`).join('')}${metrics.map(([name,fn])=>`<div class="metric">${name}</div>${rows.map(m=>`<button class="value strategyPick ${m.mode===selected?.mode?'selected':''}" data-strategy="${m.mode}">${escapeHtml(fn(m))}</button>`).join('')}`).join('')}</div>`;
   host.querySelectorAll('[data-strategy]').forEach(btn=>btn.addEventListener('click',()=>activateStrategyFromAnalytics(btn.dataset.strategy)));
 }
 function renderAnalyticsHealth(mission){
   const host=$('analyticsHealthChart');if(!host)return;if(!mission){host.innerHTML='<div class="chartEmpty">Sin datos.</div>';return;}
   const available=mission.availableHours??availableMissionHours(mission.params||normalizeParams()),margin=available-Number(mission.duration||0),m=mission.metrics||{};
-  const vals=[[ui('Transitabilidad media','Average traversability'),clamp(Number(m.avgTransitability)||0,0,100)],[ui('Confianza cartográfica','Cartographic confidence'),clamp(Number(m.avgConfidence)||0,0,100)],[ui('Condición del terreno','Terrain condition'),clamp(100-(Number(mission.score)||0),0,100)],[ui('Margen EVA','EVA margin'),margin<=0?0:clamp(margin/Math.max(.001,available)*100,0,100)],[ui('Cobertura de datos','Data coverage'),clamp(100-(Number(m.uncertainDistanceKm)||0)/Math.max(.001,Number(m.distanceKm)||1)*100,0,100)],[ui('Viabilidad temporal','Time feasibility'),mission.overBudget?0:100]];
+  const vals=[[ui('Transitabilidad media','Average traversability'),clamp(Number(m.avgTransitability)||0,0,100)],[ui('Calidad de muestreo','Sampling quality'),clamp(Number(m.avgConfidence)||0,0,100)],[ui('Condición del terreno','Terrain condition'),clamp(100-(Number(mission.score)||0),0,100)],[ui('Margen EVA','EVA margin'),margin<=0?0:clamp(margin/Math.max(.001,available)*100,0,100)],[ui('Cobertura de datos','Data coverage'),clamp(100-(Number(m.uncertainDistanceKm)||0)/Math.max(.001,Number(m.distanceKm)||1)*100,0,100)],[ui('Viabilidad temporal','Time feasibility'),mission.overBudget?0:100]];
   host.innerHTML=`<div class="v35Health">${vals.map(([name,v])=>`<div class="v35HealthItem" tabindex="0"><span>${name}</span><div class="v35HealthTrack"><div class="v35HealthFill" style="width:${v.toFixed(1)}%"></div></div><b>${Math.round(v)}</b></div>`).join('')}</div>`;
   host.querySelectorAll('.v35HealthItem').forEach(el=>el.addEventListener('pointerenter',()=>{$('analyticsSelectionReadout').textContent=`${el.querySelector('span').textContent} · ${el.querySelector('b').textContent}/100`;}));
 }
@@ -1305,13 +900,16 @@ function renderAnalyticsMiniMap(mission){
 }
 function renderAnalyticsSegments(mission){
   const host=$('analyticsSegmentsTable');if(!host)return;if(!mission?.legs?.length){host.innerHTML='<div class="chartEmpty">Sin datos.</div>';return;}
-  host.innerHTML=`<table class="v36SegmentTable"><thead><tr><th>#</th><th>TRAMO</th><th>KM</th><th>TIEMPO</th><th>PEND. MÁX.</th><th>TRANSIT.</th><th>CONFIANZA</th><th>DIFICULTAD</th></tr></thead><tbody>${mission.legs.map((leg,i)=>`<tr tabindex="0" data-leg="${i}"><td>${i+1}</td><td>${escapeHtml(leg.from?.name||'—')} → ${escapeHtml(leg.to?.name||'—')}</td><td>${Number(leg.metrics?.distanceKm||0).toFixed(2)}</td><td>${formatHours(leg.durationHours)}</td><td>${Number(leg.metrics?.maxSlopeDeg||0).toFixed(1)}°</td><td>${Math.round(leg.metrics?.avgTransitability??0)}</td><td>${Math.round(leg.metrics?.avgConfidence??0)}%</td><td>${riskScore(leg.metrics)??'—'}</td></tr>`).join('')}</tbody></table>`;
+  host.innerHTML=`<table class="v36SegmentTable"><thead><tr><th>#</th><th>TRAMO</th><th>KM</th><th>TIEMPO</th><th>PEND. MÁX.</th><th>TRANSIT.</th><th>CALIDAD</th><th>DIFICULTAD</th></tr></thead><tbody>${mission.legs.map((leg,i)=>`<tr tabindex="0" data-leg="${i}"><td>${i+1}</td><td>${escapeHtml(leg.from?.name||'—')} → ${escapeHtml(leg.to?.name||'—')}</td><td>${Number(leg.metrics?.distanceKm||0).toFixed(2)}</td><td>${formatHours(leg.durationHours)}</td><td>${Number(leg.metrics?.maxSlopeDeg||0).toFixed(1)}°</td><td>${Math.round(leg.metrics?.avgTransitability??0)}</td><td>${Math.round(leg.metrics?.avgConfidence??0)}%</td><td>${riskScore(leg.metrics)??'—'}</td></tr>`).join('')}</tbody></table>`;
   host.querySelectorAll('[data-leg]').forEach(row=>{const activate=()=>{const leg=mission.legs[Number(row.dataset.leg)];if(!leg)return;const src=analysisLayer?.getSource();src?.clear();src?.addFeature(new ol.Feature({geometry:new ol.geom.LineString((leg.path||[]).map(p=>[p.lon,p.lat])),analysisKind:'segment'}));$('analyticsSelectionReadout').textContent=`TRAMO ${Number(row.dataset.leg)+1} · ${leg.from?.name||'—'} → ${leg.to?.name||'—'} · ${Number(leg.metrics?.distanceKm||0).toFixed(2)} km`;};row.addEventListener('pointerenter',activate);row.addEventListener('focus',activate);row.addEventListener('click',activate);});
 }
 function renderMissionAnalytics(mission){
   if($('analyticsRouteName'))$('analyticsRouteName').textContent=mission?($('routeName')?.textContent||ui('RUTA ACTIVA','ACTIVE ROUTE')):ui('SIN MISIÓN','NO MISSION');
   if($('analyticsGeneratedAt'))$('analyticsGeneratedAt').textContent=mission&&lastCalculatedAt?lastCalculatedAt.toLocaleString(uiLang()==='en'?'en-US':'es-NI',{dateStyle:'short',timeStyle:'short'}):ui('CALCULA UNA RUTA','CALCULATE A ROUTE');
-  if($('analyticsStrategySelect')&&mission)$('analyticsStrategySelect').value=mission.mode;
+  if($('analyticsStrategySelect')){
+    if(mission)$('analyticsStrategySelect').value=mission.mode;
+    [...$('analyticsStrategySelect').options].forEach(option=>option.disabled=Boolean(currentMission?.errors?.[option.value]));
+  }
   renderAnalyticsProfile(mission);renderAnalyticsDistributions(mission);renderAnalyticsEva(mission);renderAnalyticsReturn(mission);renderAnalyticsGain(mission);renderAnalyticsExposure(mission);renderAnalyticsRoutes(mission);renderAnalyticsHealth(mission);renderAnalyticsMiniMap(mission);renderAnalyticsSegments(mission);
   if(analyticsPinnedPoint)syncAnalyticsCursor(analyticsPinnedPoint);
 }
@@ -1374,7 +972,9 @@ function updateStrategyCards(all=currentMission){
   ['balanced','risk','distance'].forEach(mode=>{
     const card=document.querySelector(`[data-strategy-card="${mode}"]`);
     const summary=document.querySelector(`[data-strategy-summary="${mode}"]`);
-    if(summary) summary.textContent=strategySummary(all?.[mode]);
+    const error=all?.errors?.[mode];
+    if(summary){summary.textContent=error?ui('No disponible · revisa el mensaje','Unavailable · review the message'):strategySummary(all?.[mode]);summary.title=error||'';}
+    const radio=document.querySelector(`input[name="mode"][value="${mode}"]`);if(radio)radio.disabled=busy||Boolean(error);
     if(card){
       const m=all?.[mode];
       card.classList.toggle('has-result',Boolean(m));
@@ -1408,7 +1008,13 @@ function renderMission(mission){
   $('riskNumber').textContent=Number.isFinite(score)?score:'—';$('riskLabel').textContent=Number.isFinite(score)?riskLabel(score):'Sin evaluación';$('riskBar').style.width=`${Number.isFinite(score)?score:0}%`;
   $('avgSlope').textContent=Number.isFinite(m.avgSlopeDeg)?`${m.avgSlopeDeg.toFixed(1)}°`:'—';$('segments').textContent=m.segments;$('legsCount').textContent=mission.legs.length;$('dwellTotal').textContent=`${Number.isFinite(mission.dwellMinutes)?mission.dwellMinutes:0} min`;$('missionMargin').textContent=formatSignedMargin(margin);
   if($('avgTransitability'))$('avgTransitability').textContent=Number.isFinite(m.avgTransitability)?`${m.avgTransitability.toFixed(0)}/100`:'—';if($('minTransitabilityMetric'))$('minTransitabilityMetric').textContent=Number.isFinite(m.minTransitability)?`${m.minTransitability.toFixed(0)}/100`:'—';if($('avgConfidence'))$('avgConfidence').textContent=Number.isFinite(m.avgConfidence)?`${m.avgConfidence.toFixed(0)}%`:'—';if($('minConfidenceMetric'))$('minConfidenceMetric').textContent=Number.isFinite(m.minConfidence)?`${m.minConfidence.toFixed(0)}%`:'—';if($('avgRoughnessDisplay'))$('avgRoughnessDisplay').textContent=Number.isFinite(m.avgRoughnessDeg)?`${m.avgRoughnessDeg.toFixed(1)}°`:'—';
-  $('calcParams').textContent=`${mission.params.speed.toFixed(1)} km/h · EVA ${mission.params.evaTime.toFixed(1)} h · margen ${mission.params.returnMargin}% · pendiente ≤${mission.params.maxSlopeLimit.toFixed(0)}° · transit. ≥${mission.params.minTransitability.toFixed(0)} · confianza ≥${mission.params.minConfidence.toFixed(0)}%`;
+  $('calcParams').textContent=`${mission.params.speed.toFixed(1)} km/h · EVA ${mission.params.evaTime.toFixed(1)} h · margen ${mission.params.returnMargin}% · pendiente ≤${mission.params.maxSlopeLimit.toFixed(0)}° · transit. ≥${mission.params.minTransitability.toFixed(0)} · calidad de muestreo ≥${mission.params.minConfidence.toFixed(0)}%`;
+  if($('dataQualitySummary')){
+    const samples=mission.legs.reduce((n,l)=>n+(l.sampling?.sampleCount||0),0),valid=mission.legs.reduce((n,l)=>n+(l.sampling?.validCount||0),0);
+    const resolutions=mission.legs.map(l=>l.sampling?.maxResolutionM).filter(finiteValue);
+    const spacing=Math.max(...mission.legs.map(l=>l.gridSpacingKm||0))*1000;
+    $('dataQualitySummary').textContent=ui(`DEM solicitado: 200 m · resolución recibida: ${resolutions.length?Math.max(...resolutions).toFixed(0)+' m':'no informada'} · espaciamiento máximo de malla por tramo: ${spacing.toFixed(0)} m · cobertura: ${valid}/${samples} muestras. Calidad = completitud y densidad; no probabilidad de seguridad.`,`Requested DEM: 200 m · reported resolution: ${resolutions.length?Math.max(...resolutions).toFixed(0)+' m':'not reported'} · maximum median grid spacing across legs: ${spacing.toFixed(0)} m · coverage: ${valid}/${samples} samples. Quality = completeness and density; not a safety probability.`);
+  }
   renderMissionTimeline(mission);updateRouteSequenceStrip(mission);renderTerrainProfile(mission);renderMissionAnalytics(mission);updateMissionHud(mission);updateHeaderStatus();updateStrategyCards(currentMission);drawPointMarkers();
   $('recalculate').disabled=false;$('saveMission').disabled=false;if($('lastCalculated'))$('lastCalculated').textContent=lastCalculatedAt?`Último cálculo: ${lastCalculatedAt.toLocaleString('es-NI',{dateStyle:'short',timeStyle:'short'})}`:'Último cálculo: —';
 }
@@ -1434,6 +1040,7 @@ function handleWaypointAction(action,i){
   currentMission=null;routeLayer?.getSource()?.clear();drawPointMarkers();renderMissionList();resetMetrics();updatePlanningUI();
 }
 function updatePlanningUI(){
+  if(!currentMission){lastCalculatedAt=null;routeLayer?.getSource()?.clear();resetMetrics();}
   $('pointCount').textContent=missionPoints.length;$('calculate').disabled=busy||missionPoints.length<2;$('saveMission').disabled=busy||!currentMission;
   const hint=$('selectionHint'),hintBox=$('mapMissionHint');
   if(hint) hint.textContent=selecting?`Toca Marte para agregar el punto ${missionPoints.length+1}`:'';
@@ -1462,6 +1069,8 @@ function setLanding(){
 function resetMetrics(){
   ['distance','duration','maxSlope','gain','avgSlope','segments','riskNumber','legsCount','dwellTotal','missionMargin','avgTransitability','minTransitabilityMetric','avgConfidence','minConfidenceMetric','__legacyScienceRemoved'].forEach(id=>{if($(id))$(id).textContent='—';});
   if($('routeName'))$('routeName').textContent=ui('Esperando misión','Waiting for mission');
+  if($('routeDescription'))$('routeDescription').textContent=ui('Define una base y al menos un objetivo. Calcula para obtener resultados actuales.','Define a base and at least one target. Calculate to obtain current results.');
+  if($('dataQualitySummary'))$('dataQualitySummary').textContent=ui('Calcula para consultar la cobertura y resolución del muestreo.','Calculate to inspect sampling coverage and resolution.');
   if($('routeStatus')){$('routeStatus').textContent=ui('SIN RUTA','NO ROUTE');$('routeStatus').className='pill';}
   if($('riskLabel'))$('riskLabel').textContent=ui('Sin evaluación','Not evaluated');
   if($('riskBar'))$('riskBar').style.width='0%';
@@ -1479,7 +1088,7 @@ function setHistory(items){localStorage.setItem(HISTORY_KEY,JSON.stringify(items
 
 function pdfPointPayload(p){
   if(!p)return null;
-  return {lat:Number(p.lat),lon:Number(p.lon),name:p.name,type:p.type==='base'?'base':'target',dwellMin:Number(p.dwellMin)||0,elevationM:Number.isFinite(Number(p.elevationM))?Number(p.elevationM):null};
+  return {lat:Number(p.lat),lon:Number(p.lon),name:p.name,type:p.type==='base'?'base':'target',dwellMin:Number(p.dwellMin)||0,elevationM:finiteValue(p.elevationM)?Number(p.elevationM):null};
 }
 
 function pdfLegPayload(leg){
@@ -1488,26 +1097,27 @@ function pdfLegPayload(leg){
     from:pdfPointPayload(leg.from),
     to:pdfPointPayload(leg.to),
     durationHours:Number(leg.durationHours),
-    gridSpacingKm:Number.isFinite(Number(leg.gridSpacingKm))?Number(leg.gridSpacingKm):null,
+    gridSpacingKm:finiteValue(leg.gridSpacingKm)?Number(leg.gridSpacingKm):null,
+    sampling:{...(leg.sampling||{})},
     metrics:{...(leg.metrics||{})},
     path:(leg.path||[]).map((p,index)=>({
       index:index+1,
       lat:Number(p.lat),
       lon:Number(p.lon),
-      elevationM:Number.isFinite(Number(p.elevationM))?Number(p.elevationM):null,
-      signedSlopeDeg:Number.isFinite(Number(p.signedSlopeDeg))?Number(p.signedSlopeDeg):null,
-      dataConfidence:Number.isFinite(Number(p.dataConfidence))?Number(p.dataConfidence):null,
-      baseTransitability:Number.isFinite(Number(p.baseTransitability))?Number(p.baseTransitability):null,
-      localRoughnessDeg:Number.isFinite(Number(p.localRoughnessDeg))?Number(p.localRoughnessDeg):null,
-      transitability:Number.isFinite(Number(p.transitability))?Number(p.transitability):null,
-      edgeConfidence:Number.isFinite(Number(p.edgeConfidence))?Number(p.edgeConfidence):null
+      elevationM:finiteValue(p.elevationM)?Number(p.elevationM):null,
+      signedSlopeDeg:finiteValue(p.signedSlopeDeg)?Number(p.signedSlopeDeg):null,
+      dataConfidence:finiteValue(p.dataConfidence)?Number(p.dataConfidence):null,
+      baseTransitability:finiteValue(p.baseTransitability)?Number(p.baseTransitability):null,
+      localRoughnessDeg:finiteValue(p.localRoughnessDeg)?Number(p.localRoughnessDeg):null,
+      transitability:finiteValue(p.transitability)?Number(p.transitability):null,
+      edgeConfidence:finiteValue(p.edgeConfidence)?Number(p.edgeConfidence):null
     }))
   };
 }
 
 function pdfStrategyPayload(m){
   if(!m)return null;
-  return {mode:m.mode,strategyDescription:m.strategyDescription||'',duration:Number(m.duration),score:Number.isFinite(Number(m.score))?Number(m.score):null,overBudget:Boolean(m.overBudget),availableHours:Number(m.availableHours),dwellMinutes:Number(m.dwellMinutes)||0,params:{...(m.params||{})},metrics:{...(m.metrics||{})},sequence:(m.sequence||[]).map(pdfPointPayload).filter(Boolean),includedPoints:(m.includedPoints||m.sequence||[]).map(pdfPointPayload).filter(Boolean),orderOptimization:m.orderOptimization?{...m.orderOptimization}:null,legs:(m.legs||[]).map(pdfLegPayload).filter(Boolean)};
+  return {mode:m.mode,strategyDescription:m.strategyDescription||'',duration:Number(m.duration),score:finiteValue(m.score)?Number(m.score):null,overBudget:Boolean(m.overBudget),availableHours:Number(m.availableHours),dwellMinutes:Number(m.dwellMinutes)||0,params:{...(m.params||{})},metrics:{...(m.metrics||{})},sequence:(m.sequence||[]).map(pdfPointPayload).filter(Boolean),includedPoints:(m.includedPoints||m.sequence||[]).map(pdfPointPayload).filter(Boolean),orderOptimization:m.orderOptimization?{...m.orderOptimization}:null,legs:(m.legs||[]).map(pdfLegPayload).filter(Boolean)};
 }
 
 async function exportMissionPdf(mode){
@@ -1515,13 +1125,13 @@ async function exportMissionPdf(mode){
   if(!selected) return false;
   const now=new Date();
   const points=missionPoints.map(pdfPointPayload).filter(Boolean);
-  const params=normalizeParams();
+  const params={...selected.params};
   const report={
     fileName:`jezero-mision-${now.toISOString().slice(0,19).replace(/[T:]/g,'-')}`,
     reportId:`JEZERO-${now.toISOString().replace(/[-:TZ.]/g,'').slice(0,14)}`,
     generatedAt:now.toISOString(),
     selectedMode:mode,
-    returnBase:$('returnBase').checked,
+    returnBase:selected.sequence?.at(-1)?.type==='base',
     params,
     mission:{
       name:getMissionSettings().missionName || ui(`Misión EVA · ${points.length} punto(s)`,`EVA Mission · ${points.length} point(s)`),
@@ -1538,11 +1148,14 @@ async function exportMissionPdf(mode){
       elevation:'MDEM200M mediante ArcGIS ElevationLayer',
       cartography:'NASA / USGS / ESA / HRSC',
       map:'NASA Mars Trek / capas configuradas en JEZERO',
-      marsRadiusKm:MARTIAN_RADIUS
+      marsRadiusKm:MARTIAN_RADIUS,
+      demResolutionRequestedM:200,
+      sampleQuality:'Índice de completitud y densidad del muestreo; no es una probabilidad de seguridad.'
     },
     software:{
       name:'JEZERO',
-      version:'V38',
+      version:JEZERO_UI_VERSION,
+      algorithmVersion:ALGORITHM_VERSION,
       interfaceTheme:themeInfo().label,
       themeKey:themeInfo().key,
       reportLanguage:uiLang()
@@ -1565,7 +1178,7 @@ function saveHistoryEntry(mode){
   const items=getHistory(),now=new Date(),selected=currentMission?.[mode];
   const fingerprint=JSON.stringify({mode,returnBase:$('returnBase').checked,optimizeOrder:$('optimizeOrder')?.checked!==false,speed:Number($('speed').value),eva:Number($('evaTime').value),margin:Number($('returnMargin').value),maxSlope:Number($('maxSlopeLimit')?.value),minTransit:Number($('minTransitability')?.value),minConfidence:Number($('minConfidence')?.value),points:missionPoints.map(p=>[p.lat,p.lon,p.name,p.dwellMin])});
   const existing=items.find(x=>x.fingerprint===fingerprint);
-  const meta=getMissionSettings(); const entry={id:existing?.id||`m-${Date.now()}`,date:now.toISOString(),name:meta.missionName||ui(`Misión ${now.toLocaleDateString('es-NI')} · ${missionPoints.length} puntos`,`Mission ${now.toLocaleDateString('en-US')} · ${missionPoints.length} points`),missionMeta:meta,mode,points:missionPoints.map(p=>({...p})),returnBase:$('returnBase').checked,optimizeOrder:$('optimizeOrder')?.checked!==false,speed:Number($('speed').value),evaTime:Number($('evaTime').value),returnMargin:Number($('returnMargin').value),maxSlopeLimit:Number($('maxSlopeLimit')?.value)||25,minTransitability:Number($('minTransitability')?.value)||25,minConfidence:Number($('minConfidence')?.value)||20,metrics:selected?.metrics||null,duration:selected?.duration||null,score:selected?.score??null,includedPoints:selected?.includedPoints||[],orderOptimization:selected?.orderOptimization||null,fingerprint};
+  const meta=getMissionSettings(); const entry={id:existing?.id||`m-${Date.now()}`,date:now.toISOString(),name:meta.missionName||ui(`Misión ${now.toLocaleDateString('es-NI')} · ${missionPoints.length} puntos`,`Mission ${now.toLocaleDateString('en-US')} · ${missionPoints.length} points`),missionMeta:meta,mode,points:missionPoints.map(p=>({...p})),returnBase:$('returnBase').checked,optimizeOrder:$('optimizeOrder')?.checked!==false,speed:Number($('speed').value),evaTime:Number($('evaTime').value),returnMargin:Number($('returnMargin').value),...normalizeParams(),metrics:selected?.metrics||null,duration:selected?.duration||null,score:selected?.score??null,includedPoints:selected?.includedPoints||[],orderOptimization:selected?.orderOptimization||null,fingerprint};
   const filtered=items.filter(x=>x.id!==entry.id); filtered.unshift(entry); setHistory(filtered);renderHistory();
 }
 function renderHistory(){
@@ -1577,10 +1190,10 @@ function renderHistory(){
 }
 function loadHistory(id){
   const item=getHistory().find(x=>x.id===id); if(!item)return;
-  missionPoints=item.points.map((p,i)=>({...p,type:i===0||p.type==='base'?'base':'target',required:true,scienceValue:undefined,scienceCategory:undefined,scienceNotes:undefined})); $('returnBase').checked=item.returnBase!==false; if($('optimizeOrder'))$('optimizeOrder').checked=item.optimizeOrder!==false; $('speed').value=item.speed ?? 1.2; $('evaTime').value=item.evaTime ?? 8; $('returnMargin').value=item.returnMargin ?? 25; if($('maxSlopeLimit'))$('maxSlopeLimit').value=item.maxSlopeLimit ?? 25; if($('minTransitability'))$('minTransitability').value=item.minTransitability ?? 25; if($('minConfidence'))$('minConfidence').value=item.minConfidence ?? 20;
+  try{missionPoints=validation.points(item.points);}catch(e){showToast(e.message);return;} $('returnBase').checked=item.returnBase!==false; if($('optimizeOrder'))$('optimizeOrder').checked=item.optimizeOrder!==false; $('speed').value=item.speed ?? 1.2; $('evaTime').value=item.evaTime ?? 8; $('returnMargin').value=item.returnMargin ?? 25; if($('maxSlopeLimit'))$('maxSlopeLimit').value=item.maxSlopeLimit ?? 25; if($('minTransitability'))$('minTransitability').value=item.minTransitability ?? 25; if($('minConfidence'))$('minConfidence').value=item.minConfidence ?? 20;
   if(item.missionMeta) setMissionSettings(item.missionMeta);
   const radio=document.querySelector(`input[name="mode"][value="${item.mode}"]`);if(radio)radio.checked=true;
-  currentMission=null;selecting=false;drawPointMarkers();renderMissionList();updatePlanningUI();centerGlobal();showToast('Misión cargada con sus parámetros originales. Pulsa “Calcular misión” o “Recalcular” para obtener el nuevo resultado.');
+  invalidateMission();selecting=false;drawPointMarkers();renderMissionList();updatePlanningUI();centerGlobal();showToast('Misión cargada con sus parámetros originales. Pulsa “Calcular misión” o “Recalcular” para obtener el nuevo resultado.');
 }
 function deleteHistory(id){setHistory(getHistory().filter(x=>x.id!==id));renderHistory();}
 
@@ -1607,21 +1220,12 @@ function setMissionSettings(values={}){
   if($('missionNotesSetting')) $('missionNotesSetting').value=next.notes||'';
   updateSettingsSummary();
 }
-function readOperationalDefaults(){
-  return {
-    speed:Number($('speed')?.value)||1.2,
-    evaTime:Number($('evaTime')?.value)||8,
-    returnMargin:Number($('returnMargin')?.value)||25,
-    maxSlopeLimit:Number($('maxSlopeLimit')?.value)||25,
-    minTransitability:Number($('minTransitability')?.value)||25,
-    minConfidence:Number($('minConfidence')?.value)||20
-  };
-}
+function readOperationalDefaults(){return normalizeParams();}
 function getSavedDefaults(){ try{return JSON.parse(localStorage.getItem(DEFAULTS_KEY)||'null');}catch{return null;} }
 function applyDefaults(values,{notify=true}={}){
   if(!values) return false;
   const mapIds={speed:'speed',evaTime:'evaTime',returnMargin:'returnMargin',maxSlopeLimit:'maxSlopeLimit',minTransitability:'minTransitability',minConfidence:'minConfidence'};
-  Object.entries(mapIds).forEach(([k,id])=>{ if($(id) && Number.isFinite(Number(values[k]))) $(id).value=Number(values[k]); });
+  Object.entries(mapIds).forEach(([k,id])=>{ if($(id) && finiteValue(values[k])) $(id).value=validation.parameters(values)[k]; });
   currentMission=null; routeLayer?.getSource()?.clear(); resetMetrics(); updatePlanningUI();
   if(notify) showToast(ui('Parámetros predeterminados aplicados al Planificador.','Default parameters applied to Mission Planner.'));
   return true;
@@ -1634,7 +1238,7 @@ function updateSettingsSummary(){
   if($('settingsLanguageSummary')) $('settingsLanguageSummary').textContent=uiLang()==='en'?'English':'Español';
   if($('settingsThemeSummary')) $('settingsThemeSummary').textContent=themeInfo().label;
   updateHeaderStatus();
-  if($('defaultsStatus')) $('defaultsStatus').textContent=defs ? `${ui('Guardados','Saved')}: ${defs.speed} km/h · EVA ${defs.evaTime} h · ${ui('pendiente','slope')} ≤ ${defs.maxSlopeLimit}° · ${ui('transitabilidad','traversability')} ≥ ${defs.minTransitability} · ${ui('confianza','confidence')} ≥ ${defs.minConfidence}%` : ui('Usando valores de fábrica hasta que guardes un perfil.','Using factory values until you save a profile.');
+  if($('defaultsStatus')) $('defaultsStatus').textContent=defs ? `${ui('Guardados','Saved')}: ${defs.speed} km/h · EVA ${defs.evaTime} h · ${ui('pendiente','slope')} ≤ ${defs.maxSlopeLimit}° · ${ui('transitabilidad','traversability')} ≥ ${defs.minTransitability} · ${ui('calidad de muestreo','confidence')} ≥ ${defs.minConfidence}%` : ui('Usando valores de fábrica hasta que guardes un perfil.','Using factory values until you save a profile.');
 }
 function initializeSettings(){
   const meta=getMissionSettings();
@@ -1695,7 +1299,7 @@ function initializeSettings(){
 }
 function exportMissionJson(){
   const mode=document.querySelector('input[name="mode"]:checked')?.value||'balanced';
-  const payload={format:'JEZERO-MISSION',version:43,exportedAt:new Date().toISOString(),missionMeta:getMissionSettings(),interface:{language:uiLang(),theme:themeInfo().key,routeAnimation:routeAnimationEnabled},points:missionPoints.map(p=>({lat:p.lat,lon:p.lon,name:p.name,type:p.type==='base'?'base':'target',dwellMin:Number(p.dwellMin)||0})),returnBase:$('returnBase')?.checked!==false,optimizeOrder:$('optimizeOrder')?.checked!==false,mode,params:readOperationalDefaults()};
+  const payload={format:'JEZERO-MISSION',version:44,algorithmVersion:ALGORITHM_VERSION,exportedAt:new Date().toISOString(),missionMeta:getMissionSettings(),interface:{language:uiLang(),theme:themeInfo().key,routeAnimation:routeAnimationEnabled},points:missionPoints.map(p=>({lat:p.lat,lon:p.lon,name:p.name,type:p.type==='base'?'base':'target',dwellMin:Number(p.dwellMin)||0})),returnBase:$('returnBase')?.checked!==false,optimizeOrder:$('optimizeOrder')?.checked!==false,mode,params:readOperationalDefaults(),snapshot:currentMission?{calculatedAt:lastCalculatedAt?.toISOString(),algorithmVersion:ALGORITHM_VERSION,terrain:window.marsElevationInfo||null,strategies:validation.MODES.map(k=>pdfStrategyPayload(currentMission[k])).filter(Boolean),errors:{...currentMission.errors}}:null};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a');
   const code=(payload.missionMeta.missionCode||'mision').replace(/[^a-z0-9_-]+/gi,'-'); a.href=url; a.download=`jezero-${code}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1200);
   showToast(ui('Misión exportada a JSON.','Mission exported to JSON.'));
@@ -1703,11 +1307,9 @@ function exportMissionJson(){
 async function importMissionJsonFile(ev){
   const file=ev.target.files?.[0]; if(!file) return;
   try{
-    const data=JSON.parse(await file.text());
-    if(data.format!=='JEZERO-MISSION'||!Array.isArray(data.points)) throw new Error(ui('El archivo no es una misión JEZERO válida.','The file is not a valid JEZERO mission.'));
-    missionPoints=data.points.map((p,i)=>({
-      lat:Number(p.lat),lon:Number(p.lon),name:String(p.name||`Punto ${i}`),type:i===0||p.type==='base'?'base':'target',required:true,dwellMin:i===0||p.type==='base'?0:Math.max(0,Number(p.dwellMin)||0)
-    })).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon));
+    if(file.size>5_000_000)throw new Error(ui('El archivo supera el límite de 5 MB.','The file exceeds the 5 MB limit.'));
+    const data=validation.missionFile(JSON.parse(await file.text()));
+    missionPoints=data.points;
     if(data.missionMeta) setMissionSettings(data.missionMeta);
     if(data.interface?.theme) window.JEZERO_THEMES?.setTheme?.(data.interface.theme);
     if(typeof data.interface?.routeAnimation==='boolean') setRouteAnimationEnabled(data.interface.routeAnimation,{notify:false});
@@ -1727,10 +1329,7 @@ function resetCoordinateForm(){
   if($('coordDwellInput')) $('coordDwellInput').value='15';
   if($('coordinateError')){ $('coordinateError').textContent=''; $('coordinateError').classList.add('hide'); }
 }
-function parseCoordinateValue(value){
-  const n=Number(String(value ?? '').trim().replace(',', '.'));
-  return Number.isFinite(n) ? n : NaN;
-}
+function parseCoordinateValue(value){return numericValue(value,NaN);}
 function addPointFromCoordinates(){
   const lat=parseCoordinateValue($('coordLatInput')?.value);
   const lon=parseCoordinateValue($('coordLonInput')?.value);
@@ -1752,6 +1351,7 @@ function addPointFromCoordinates(){
     dwellMin:type==='base' ? 0 : dwellMin
   };
 
+  try{validation.points(type==='base'?[point,...missionPoints.filter(p=>p.type!=='base')]:[...missionPoints,point]);}catch(e){return fail(e.message);}
   if(type==='base'){
     const others=missionPoints.filter(p=>p.type!=='base');
     missionPoints=[point,...others];
@@ -1873,10 +1473,10 @@ function applyLayerVisibility(layer,visible){
 }
 document.querySelectorAll('[data-layer],[data-quick-layer]').forEach(el=>el.addEventListener('change',()=>applyLayerVisibility(el.dataset.layer||el.dataset.quickLayer,el.checked)));
 
-document.querySelectorAll('input[name="mode"]').forEach(el=>el.onchange=()=>{updateStrategyCards(currentMission);if(currentMission){const mode=el.value;renderMission(currentMission[mode]);drawMissionRoutes(currentMission,mode);if(strategiesEquivalent(currentMission))showToast(ui('Las tres estrategias son prácticamente equivalentes en este terreno y con estos límites.','The three strategies are practically equivalent on this terrain with these limits.'));}});
+document.querySelectorAll('input[name="mode"]').forEach(el=>el.onchange=()=>{updateStrategyCards(currentMission);if(currentMission?.[el.value]){const mode=el.value;renderMission(currentMission[mode]);drawMissionRoutes(currentMission,mode);if(strategiesEquivalent(currentMission))showToast(ui('Las tres estrategias son prácticamente equivalentes en este terreno y con estos límites.','The three strategies are practically equivalent on this terrain with these limits.'));}});
 $('returnBase').onchange=()=>{currentMission=null;routeLayer?.getSource()?.clear();resetMetrics();updatePlanningUI();};
 $('optimizeOrder')?.addEventListener('change',()=>{currentMission=null;routeLayer?.getSource()?.clear();resetMetrics();updatePlanningUI();showToast($('optimizeOrder').checked?ui('Orden automático activado. JEZERO elegirá la mejor secuencia al calcular.','Automatic ordering enabled. JEZERO will choose the best sequence when calculating.'):ui('Orden manual activado. JEZERO respetará la lista de puntos.','Manual ordering enabled. JEZERO will respect the point list.'));});
-['speed','evaTime','returnMargin','maxSlopeLimit','minTransitability','minConfidence'].forEach(id=>$(id).addEventListener('input',()=>{if(currentMission){$('recalculate').disabled=false;$('statusText').textContent='CAMBIOS PENDIENTES · pulsa recalcular';}}));
+['speed','evaTime','returnMargin','maxSlopeLimit','minTransitability','minConfidence'].forEach(id=>$(id).addEventListener('input',()=>{invalidateMission();$('statusText').textContent=ui('PARÁMETROS CAMBIADOS · vuelve a calcular','PARAMETERS CHANGED · recalculate');}));
 function showToast(msg){$('toast').textContent=msg;$('toast').classList.remove('hide');clearTimeout(showToast.t);showToast.t=setTimeout(()=>$('toast').classList.add('hide'),5000);}
 
 const BASE_MAP_MODES = new Set(['viking','mola','hybrid']);
