@@ -1,3 +1,5 @@
+> Actualización V47: la interfaz principal exige observaciones importadas y equipo confirmado para evaluar autonomía. Sin observaciones, no muestra el ciclo histórico ilustrativo. La plantilla CSV descargable está vacía. Los ejemplos y el motor histórico descritos más abajo permanecen solo como material técnico de desarrollo.
+
 # Datos que cambian decisiones en JEZERO
 
 La app está preparada para incorporar datos cuando el hackatón los entregue. No descarga ni presenta telemetría actual de NASA. La referencia MEDA integrada es histórica; el DEM real se consulta mediante el servicio existente y la demo utiliza un DEM sintético explícito.

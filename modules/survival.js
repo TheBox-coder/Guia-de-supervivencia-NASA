@@ -6,6 +6,7 @@
   const fields={crew:'survivalCrew',oxygenKg:'survivalOxygenCapacity',oxygenRateKgH:'survivalOxygenRate',batteryKWh:'survivalBatteryCapacity',powerKW:'survivalPower',reservePct:'survivalReserve',startHour:'survivalStartHour'};
   let settings={...engine.DEFAULTS},dataset=null,snapshot=null,comparison=null;
   try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved)settings=engine.config(saved);}catch{}
+  try{const stored=JSON.parse(localStorage.getItem(KEY+'-weather')||'null');if(stored){engine.weatherModel(stored);dataset=stored;}}catch{}
   for(const [key,id] of Object.entries(fields))$(id).value=settings[key];$('survivalDust').value=settings.dustIndex*100;$('survivalSurface').value=settings.surface;
   function save(){try{localStorage.setItem(KEY,JSON.stringify(settings));}catch{}}
   function chart(series,key,{band=false,percent=false,start=null,duration=0,overlays=[]}={}){
@@ -25,30 +26,50 @@
   }
   function mission(){return window.JEZERO_UI_ACTIONS?.selectedMission?.()||null;}
   function error(message=''){const host=$('survivalError');host.textContent=message;host.hidden=!message;}
+  let ready=false,settingsInvalid=false;
+  function focusCard(id){const card=$(id);if(card){card.scrollIntoView({behavior:'smooth',block:'start'});card.setAttribute('tabindex','-1');card.focus({preventScroll:true});}}
+  function readiness(m){
+    const missing=[];
+    if(settingsInvalid)missing.push("Corrige los valores de equipo o salida antes de continuar.");
+    if(!m)missing.push('Calcula una ruta con base, destino y regreso.');
+    if(!dataset)missing.push('Carga observaciones de temperatura para estimar el clima.');
+    if(!$('guideEquipmentConfirmed').checked)missing.push('Revisa y confirma el oxígeno, la batería y los consumos de tu equipo.');
+    ready=missing.length===0;
+    set('guideRouteState',m?'Recorrido calculado':'Pendiente: base y destino');
+    set('guideDataState',dataset?'Archivo cargado':'Pendiente: observaciones');
+    set('guideEquipmentState',$('guideEquipmentConfirmed').checked?'Valores confirmados':'Pendiente: revisar valores');
+    $('survivalQuickExport').disabled=$('survivalExport').disabled=!ready;
+    $('survivalProgress').disabled=!ready;
+    return missing;
+  }
   function render(){
     try{
-      snapshot=engine.evaluate(mission(),settings,dataset);comparison=engine.compare(window.JEZERO_UI_ACTIONS?.allMissions?.(),settings,dataset);
+      const selected=mission(),missing=readiness(selected);
+      snapshot=engine.evaluate(ready?selected:null,settings,dataset);
+      if(!ready){snapshot.status='incomplete';snapshot.label='Completa tu preparación';snapshot.alerts=missing.map(text=>({level:'info',code:'preparation',text}));snapshot.terrain=engine.terrain(selected);snapshot.missingInputs=missing;}
+      snapshot.inputReadiness={route:Boolean(selected),weather:Boolean(dataset),equipmentConfirmed:$('guideEquipmentConfirmed').checked};
+      if(!dataset){snapshot.environment={...snapshot.environment,series:[],model:{kind:'missing',name:'Sin observaciones',pressurePa:null,windMps:null,note:'Carga observaciones para obtener una proyección. No se generan condiciones meteorológicas de ejemplo.'}};}
+      comparison=ready?engine.compare(window.JEZERO_UI_ACTIONS?.allMissions?.(),settings,dataset):{rows:[]};
       const env=snapshot.environment,model=env.model,m=mission(),has=Boolean(snapshot.oxygen);
       $('survivalDecision').dataset.status=snapshot.status;
-      set('survivalStatus',snapshot.label);set('survivalReason',has?(snapshot.alerts.find(a=>a.level==='critical')?.text||'Reservas conservadas bajo tus supuestos. Radiación, equipo real y comunicaciones siguen sin verificarse.'):'Carga la demo para descubrir cómo cambia tu ventana de EVA cuando cambian las condiciones.');
+      set('survivalStatus',snapshot.label);set('survivalReason',has?(snapshot.alerts.find(a=>a.level==='critical')?.text||'Reservas conservadas bajo tus supuestos. Radiación, equipo real y comunicaciones siguen sin verificarse.'):missing[0]);
       set('survivalTime',has?hours(m.availableHours):'—');set('survivalMargin',has?(snapshot.timeMarginHours<0?'−':'')+hours(snapshot.timeMarginHours):'—');
-      $('survivalLive').hidden=!window.JEZERO_DEMO?.enabled;
-      set('survivalDataBadge',window.JEZERO_DEMO?.enabled?'DEMO SINTÉTICA':'ESCENARIO');
+      set('survivalDataBadge',ready?'ESTIMACIÓN':'PREPARACIÓN');
       set('terrainSourceBadge',!m?'TERRENO: SIN RUTA':window.JEZERO_DEMO?.enabled?'TERRENO: DEM SINTÉTICO':'TERRENO: DEM MDEM200M');
-      set('weatherSourceBadge',dataset?'CLIMA: ARCHIVO IMPORTADO':'CLIMA: REFERENCIA HISTÓRICA');
-      set('weatherModelBadge',dataset?'PATRÓN AJUSTADO':'MODELO ILUSTRATIVO');
+      set('weatherSourceBadge',dataset?'CLIMA: ARCHIVO IMPORTADO':'CLIMA: PENDIENTE');
+      set('weatherModelBadge',dataset?'PROYECCIÓN DESDE OBSERVACIONES':'SIN OBSERVACIONES');
       const temps=has?[snapshot.temperature.minC,snapshot.temperature.maxC]:env.series.map(p=>p.temperatureC);
-      set('weatherTemperature',`${Math.min(...temps).toFixed(0)} / ${Math.max(...temps).toFixed(0)} °C`);
+      set('weatherTemperature',dataset?`${Math.min(...temps).toFixed(0)} / ${Math.max(...temps).toFixed(0)} °C`:'Sin datos');
       set('weatherPressure',model.pressurePa===null?'Sin datos':`${Math.round(model.pressurePa)} Pa`);set('weatherWind',model.windMps===null?'Sin datos':`${model.windMps.toFixed(1)} m/s`);
       set('weatherModelNote',model.note);set('survivalDustValue',`${Math.round(env.dustIndex*100)}/100 · supuesto`);
-      $('weatherChart').innerHTML=chart(env.series,'temperatureC',{band:true,start:has?settings.startHour:null,duration:has?snapshot.durationHours*24/engine.SOL_HOURS:0});
-      set('survivalDatasetStatus',dataset?`${model.name} · ${model.recordCount} observaciones · próximo sol ${model.baseSol}. Temperatura: ${model.fieldCoverage.temperature}; presión: ${model.fieldCoverage.pressure}; viento: ${model.fieldCoverage.wind} muestras. ${model.unusedFields.length?'Campos no utilizados: '+model.unusedFields.join(', ')+'. ':''}Procedencia declarada; no verificada automáticamente.`:'Sin observaciones importadas. Referencia térmica: 3–4 abril 2021; presión de referencia: febrero 2021. No son condiciones actuales.');
+      $('weatherChart').innerHTML=dataset?chart(env.series,'temperatureC',{band:true,start:has?settings.startHour:null,duration:has?snapshot.durationHours*24/engine.SOL_HOURS:0}):'<div class="chartEmpty">Añade observaciones en el paso 2.</div>';
+      set('survivalDatasetStatus',dataset?`${model.name} · ${model.recordCount} observaciones · próximo sol ${model.baseSol}. Temperatura: ${model.fieldCoverage.temperature}; presión: ${model.fieldCoverage.pressure}; viento: ${model.fieldCoverage.wind} muestras. ${model.unusedFields.length?'Campos no utilizados: '+model.unusedFields.join(', ')+'. ':''}Procedencia declarada; no verificada automáticamente.`:'Sin observaciones. No se muestra clima generado. Carga un archivo para continuar.');
       for(const [name,unit,id] of [['oxygen','kg','Oxygen'],['battery','kWh','Battery']]){
         const resource=snapshot[name],capacity=resource?.[name==='oxygen'?'capacityKg':'capacityKWh'],remaining=resource?.[name==='oxygen'?'remainingKg':'remainingKWh'],reserve=resource?.[name==='oxygen'?'reserveKg':'reserveKWh'];
         set('survival'+id,has?`${remaining<0?'Déficit ':''}${Math.abs(remaining).toFixed(2)} ${unit}`:'—');
         const bar=$('survival'+id+'Bar');bar.style.width=has?`${Math.max(0,Math.min(100,remaining/capacity*100))}%`:'0%';bar.classList.toggle('is-low',has&&remaining<reserve);
         $('survival'+id+'Reserve').style.left=settings.reservePct+'%';
-        set('survival'+id+'Note',has?`Reserva exigida: ${reserve.toFixed(2)} ${unit} · capacidad efectiva: ${capacity.toFixed(2)} ${unit}.`:'Presupuesto hipotético; no especificación de un traje real.');
+        set('survival'+id+'Note',has?`Reserva exigida: ${reserve.toFixed(2)} ${unit} · capacidad efectiva: ${capacity.toFixed(2)} ${unit}.`:'Pendiente: calcula la ruta, carga el clima y confirma tu equipo.');
       }
       const t=snapshot.terrain;set('soilSlope',t.slopeDeg===null?'—':`${t.slopeDeg.toFixed(1)}°`);set('soilRoughness',t.roughnessDeg===null?'—':`${t.roughnessDeg.toFixed(1)}°`);set('soilQuality',t.sampleQuality===null?'—':`${Math.round(t.sampleQuality)}/100`);set('soilSpacing',t.spacingM===null?'—':`${Math.round(t.spacingM)} m`);set('soilClassification',t.classification);
       $('survivalAlerts').innerHTML=snapshot.alerts.map(a=>`<div class="survivalAlert" data-level="${a.level}"><span>${({critical:'REPLANTEAR',warning:'REVISAR',unknown:'DATO AUSENTE',info:'EMPEZAR'})[a.level]}</span>${esc(a.text)}</div>`).join('');
@@ -65,22 +86,23 @@
     set('survivalTimelineTime',p?hours(p.elapsedHours):'—');set('progressOxygen',p?`O₂ ${p.oxygenKg.toFixed(2)} kg`:'O₂ —');set('progressBattery',p?`Batería ${p.batteryKWh.toFixed(2)} kWh`:'Batería —');set('progressWindow',p?`${p.remainingWindowHours<0?'Exceso':'Ventana'} ${hours(p.remainingWindowHours)}`:'Ventana —');
     window.JEZERO_UI_ACTIONS?.previewProgress?.(p?.fraction??0);
   }
-  function change(){
-    try{const raw={...settings};for(const [key,id] of Object.entries(fields))raw[key]=$(id).value;raw.dustIndex=Number($('survivalDust').value)/100;raw.surface=$('survivalSurface').value;settings=engine.config(raw);error();save();render();}
-    catch(e){error(e.message);}
+  function change(event){
+    const eventEquipmentChange=Object.entries(fields).some(([key,id])=>key!=='startHour'&&id===event?.target?.id);
+    try{const raw={...settings};for(const [key,id] of Object.entries(fields))raw[key]=$(id).value;raw.dustIndex=Number($('survivalDust').value)/100;raw.surface=$('survivalSurface').value;settings=engine.config(raw);settingsInvalid=false;if(eventEquipmentChange)$('guideEquipmentConfirmed').checked=false;error();save();render();}
+    catch(e){settingsInvalid=true;render();error(e.message);}
   }
   [...Object.values(fields),'survivalDust','survivalSurface'].forEach(id=>$(id)?.addEventListener('input',change));
   $('survivalProgress').addEventListener('input',updateProgress);
   document.querySelectorAll('[data-survival-scenario]').forEach(b=>b.addEventListener('click',()=>{settings.scenario=b.dataset.survivalScenario;save();render();}));
-  $('survivalLive').addEventListener('click',()=>{window.JEZERO_DEMO.disable();render();});
   $('survivalPlan').addEventListener('click',()=>window.JEZERO_MODULES.activate('planner'));
-  $('survivalDemo').addEventListener('click',async event=>{
-    const button=event.currentTarget;button.disabled=true;const old=button.textContent;button.textContent='Preparando escenario…';
-    try{settings={...settings,scenario:'nominal',dustIndex:.1};$('survivalDust').value=10;await window.JEZERO_UI_ACTIONS?.startSurvivalDemo?.();save();error();render();}
-    catch(e){error(e.message);}finally{button.disabled=false;button.textContent=old;}
-  });
+  $('guideRouteStep').addEventListener('click',()=>window.JEZERO_MODULES.activate('planner'));
+  ['survivalGoData','guideDataStep'].forEach(id=>$(id).addEventListener('click',()=>focusCard('guideDataCard')));
+  $('guideEquipmentStep').addEventListener('click',()=>{focusCard('guideEquipmentCard');$('guideEquipmentCard').querySelector('details').open=true;});
+  $('guideEquipmentConfirmed').addEventListener('change',render);
+  $('guideDetails').addEventListener('click',()=>{const open=$('survivalWorkspace').classList.toggle('guideDetailed');$('guideDetails').setAttribute('aria-expanded',String(open));$('guideDetails').textContent=open?'Ocultar detalles técnicos':'Ver detalles técnicos y escenarios';});
+  $('survivalQuickExport').addEventListener('click',()=>$('survivalExport').click());
   function download(name,data){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-  $('survivalExport').addEventListener('click',()=>download('jezero-evaluacion-supervivencia.json',{format:'JEZERO-SURVIVAL',version:1,exportedAt:new Date().toISOString(),modelVersion:engine.MODEL_VERSION,terrainMode:window.JEZERO_DEMO?.enabled?'synthetic':'dem',config:settings,dataset,checklist:[...document.querySelectorAll('[data-survival-check]')].filter(el=>el.checked).map(el=>el.dataset.survivalCheck),mission:window.JEZERO_UI_ACTIONS?.missionSnapshot?.(),evaluation:snapshot}));
+  $('survivalExport').addEventListener('click',()=>{if(!ready){error('Completa los tres pasos antes de guardar una evaluación.');return;}download('jezero-evaluacion-supervivencia.json',{format:'JEZERO-SURVIVAL',version:1,exportedAt:new Date().toISOString(),modelVersion:engine.MODEL_VERSION,terrainMode:window.JEZERO_DEMO?.enabled?'synthetic':'dem',config:settings,dataset,checklist:[...document.querySelectorAll('[data-survival-check]')].filter(el=>el.checked).map(el=>el.dataset.survivalCheck),mission:window.JEZERO_UI_ACTIONS?.missionSnapshot?.(),evaluation:snapshot});});
   function csvRecords(text){
     const rows=[];let row=[],cell='',quote=false;
     for(let i=0;i<text.length;i++){const c=text[i];if(c==='"'){if(quote&&text[i+1]==='"'){cell+='"';i++;}else quote=!quote;}else if(c===','&&!quote){row.push(cell);cell='';}else if((c==='\n'||c==='\r')&&!quote){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cell);if(row.some(v=>v.trim()))rows.push(row);row=[];cell='';}else cell+=c;}
@@ -94,12 +116,12 @@
     const file=event.target.files?.[0];if(!file)return;
     try{
       if(file.size>5_000_000)throw new Error('El archivo supera 5 MB.');
-      const raw=await file.text(),parsed=file.name.toLowerCase().endsWith('.csv')?{format:'JEZERO-WEATHER',version:1,source:{name:`CSV ${file.name} · procedencia declarada`},location:{lat:$('weatherLatitude').value,lon:$('weatherLongitude').value},units:{temperature:'C',pressure:'Pa',wind:'m/s'},records:csvRecords(raw)}:JSON.parse(raw);
-      engine.weatherModel(parsed);dataset=parsed;error();render();
+      const raw=await file.text(),parsed=file.name.toLowerCase().endsWith('.csv')?{format:'JEZERO-WEATHER',version:1,source:{name:$('weatherSourceName').value.trim()||''},location:{lat:$('weatherLatitude').value,lon:$('weatherLongitude').value},units:{temperature:'C',pressure:'Pa',wind:'m/s'},records:csvRecords(raw)}:JSON.parse(raw);
+      engine.weatherModel(parsed);dataset=parsed;try{localStorage.setItem(KEY+'-weather',JSON.stringify(dataset));}catch{error('Datos cargados, pero el navegador no pudo guardarlos. Exporta la evaluación antes de cerrar.');render();return;}error();render();
     }catch(e){error(e.message);}finally{event.target.value='';}
   });
-  $('survivalSampleWeather').addEventListener('click',()=>download('jezero-observaciones-ejemplo.json',{format:'JEZERO-WEATHER',version:1,source:{name:'Muestras sintéticas de prueba · NO SON DATOS NASA'},location:{lat:18.44463,lon:77.45088},units:{temperature:'C',pressure:'Pa',wind:'m/s'},records:Array.from({length:48},(_,i)=>({sol:Math.floor(i/24)+100,localHour:i%24,temperatureC:Number((-52.5-30.5*Math.cos(2*Math.PI*((i%24)-3)/24)).toFixed(2)),pressurePa:718,windMps:null}))}));
-  $('survivalClearWeather').addEventListener('click',()=>{dataset=null;error();render();});
+  $('survivalSampleWeather').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob(['sol,localHour,temperatureC,pressurePa,windMps\n'],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='jezero-plantilla-observaciones.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+  $('survivalClearWeather').addEventListener('click',()=>{dataset=null;try{localStorage.removeItem(KEY+'-weather');}catch{}error();render();});
   function checklist(){const checked=[...document.querySelectorAll('[data-survival-check]')].filter(el=>el.checked);set('survivalChecklistCount',`${checked.length}/6`);try{localStorage.setItem(KEY+'-checklist',JSON.stringify(checked.map(el=>el.dataset.survivalCheck)));}catch{}}
   try{const checked=JSON.parse(localStorage.getItem(KEY+'-checklist')||'[]');document.querySelectorAll('[data-survival-check]').forEach(el=>el.checked=checked.includes(el.dataset.survivalCheck));}catch{}
   document.querySelectorAll('[data-survival-check]').forEach(el=>el.addEventListener('change',checklist));checklist();

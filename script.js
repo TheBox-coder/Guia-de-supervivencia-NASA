@@ -1582,17 +1582,6 @@ window.JEZERO_UI_ACTIONS=Object.freeze({
   missionSnapshot:()=>currentMission?{selectedMode:selectedMission()?.mode,strategies:validation.MODES.map(k=>pdfStrategyPayload(currentMission[k])).filter(Boolean)}:null,
   selectMode:mode=>activateStrategyFromAnalytics(mode),
   previewProgress:fraction=>{const points=analyticsSeries(selectedMission());const point=points[Math.round((points.length-1)*fraction)];if(point)syncAnalyticsCursor(point,{pin:false});},
-  async startSurvivalDemo(){
-    window.JEZERO_DEMO.enable();
-    const response=await fetch('/examples/survival-demo.json');if(!response.ok)throw new Error('No se pudo cargar el escenario de demo.');
-    const text=await response.text();validation.missionFile(JSON.parse(text));
-    await importMissionJsonFile({target:{files:[new File([text],'survival-demo.json',{type:'application/json'})],value:''}});
-    await calculateMission();if(!currentMission)throw new Error('La demo no pudo calcular su recorrido.');
-    map.getView().cancelAnimations();map.getView().fit(ol.extent.boundingExtent(missionPoints.map(p=>[p.lon,p.lat])),{padding:[170,370,90,450],maxZoom:12,duration:0});
-    map.renderSync();
-    $('toast')?.classList.add('hide');
-    window.JEZERO_MODULES.activate('survival');
-  },
   beginMapSelection(){selecting=true;updatePlanningUI();showToast(ui('Toca el mapa para añadir un punto. Los puntos actuales se conservan.','Tap the map to add a point. Existing points are preserved.'));},
   async loadExample(){
     const response=await fetch('/examples/01-jezero-corto.json');

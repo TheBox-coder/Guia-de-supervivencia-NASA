@@ -1,7 +1,7 @@
-const CACHE='jezero-survival-v46';
+const CACHE='jezero-survival-v47';
 const FILES=['/assets/jezero-mark.svg','/','/index.html','/style.css','/interface.css','/survival.css','/mars-data.json','/mars-elevation.js','/script.js',
  '/assets/vendor/ol.js','/assets/vendor/ol.css','/assets/favicon.ico','/assets/mars-2020-logo.png',
- '/modules/theme.js','/modules/i18n.js','/modules/validation.cjs','/modules/route-engine.cjs','/modules/module-shell.js','/modules/interface.js','/modules/survival-engine.cjs','/modules/survival.js','/modules/demo.js','/modules/offline.js',
+ '/modules/theme.js','/modules/i18n.js','/modules/validation.cjs','/modules/route-engine.cjs','/modules/module-shell.js','/modules/interface.js','/modules/survival-engine.cjs','/modules/survival.js','/modules/offline.js',
  '/examples/01-jezero-corto.json','/examples/02-jezero-varios-objetivos.json','/examples/03-presupuesto-ajustado.json','/examples/survival-demo.json'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('jezero-survival-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
