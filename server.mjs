@@ -12,7 +12,10 @@ const PORT = Number(process.env.PORT || 8000);
 const NOMENCLATURE_ENDPOINT = 'https://planetarynames.wr.usgs.gov/nomenclature/SearchResults';
 const nomenclatureCache = new Map();
 const PUBLIC_FILES = new Set([
-  '/index.html','/style.css','/script.js','/mars-elevation.js','/mars-data.json',
+  '/assets/jezero-mark.svg',
+  '/service-worker.js','/modules/offline.js',
+  '/survival.css','/modules/survival-engine.cjs','/modules/survival.js','/modules/demo.js','/examples/survival-demo.json','/assets/vendor/ol.js','/assets/vendor/ol.css',
+  '/interface.css','/modules/interface.js','/examples/01-jezero-corto.json','/examples/02-jezero-varios-objetivos.json','/examples/03-presupuesto-ajustado.json','/index.html','/style.css','/script.js','/mars-elevation.js','/mars-data.json',
   '/modules/route-engine.cjs','/modules/theme.js','/modules/i18n.js','/modules/module-shell.js','/modules/validation.cjs',
   '/assets/favicon.ico','/assets/favicon-256.png','/assets/favicon-32.png',
   '/assets/favicon-64.png','/assets/mars-2020-logo.png'
@@ -142,6 +145,7 @@ async function serveStatic(req, res, url) {
       '.css':'text/css; charset=utf-8',
       '.json':'application/json; charset=utf-8',
       '.png':'image/png',
+      '.svg':'image/svg+xml; charset=utf-8',
       '.ico':'image/x-icon',
       '.md':'text/markdown; charset=utf-8'
     };
@@ -195,7 +199,7 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/health') {
       return send(res, 200, {
         ok: true,
-        version:'V44',
+        version:'V46',
         check:'server-liveness',
         elevation: 'ArcGIS ElevationLayer · MDEM200M',
         note: 'La elevación se consulta en el navegador mediante queryElevation.'

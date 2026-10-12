@@ -1,0 +1,51 @@
+{
+  "format": "JEZERO-MISSION",
+  "version": 44,
+  "mode": "balanced",
+  "returnBase": true,
+  "optimizeOrder": true,
+  "params": {
+    "speed": 1.2,
+    "evaTime": 6,
+    "returnMargin": 25,
+    "maxSlopeLimit": 25,
+    "minTransitability": 25,
+    "minConfidence": 20
+  },
+  "points": [
+    {
+      "lat": 18.44463,
+      "lon": 77.45088,
+      "type": "base",
+      "name": "Hábitat Ares · escenario",
+      "dwellMin": 0
+    },
+    {
+      "lat": 18.456,
+      "lon": 77.461,
+      "type": "target",
+      "name": "Estación norte",
+      "dwellMin": 15
+    },
+    {
+      "lat": 18.443,
+      "lon": 77.477,
+      "type": "target",
+      "name": "Muestra de terreno",
+      "dwellMin": 15
+    },
+    {
+      "lat": 18.434,
+      "lon": 77.461,
+      "type": "target",
+      "name": "Baliza de retorno",
+      "dwellMin": 10
+    }
+  ],
+  "missionMeta": {
+    "missionName": "ARES-01 · supervivencia",
+    "missionCode": "ARES-01",
+    "crew": "Equipo de escenario",
+    "notes": "DEMO: terreno y equipo sintéticos. No representa una misión real."
+  }
+}

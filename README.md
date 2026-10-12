@@ -1,6 +1,19 @@
-# JEZERO V44
+# JEZERO Survival Lab · V46
 
-Planificador experimental de travesías EVA en Marte: base, objetivos, tres estrategias, análisis del terreno, historial y exportación JSON/PDF.
+Guía experimental de supervivencia y planificación de travesías en Marte: rutas, clima, suelo, recursos de escenario, alertas y exportación de decisiones.
+
+## Demostración rápida
+
+1. Abrir **Guía** y pulsar **Iniciar demo de supervivencia**.
+2. Revisar el escenario nominal y cambiar a **Polvo denso** o **Fallo de batería**.
+3. Explorar la cronología, los presupuestos editables y las alertas.
+4. Descargar/importar el archivo meteorológico sintético de ejemplo.
+5. Exportar la evaluación o el PDF de misión.
+
+La demo usa terreno y equipos sintéticos explícitos. Después de la primera carga, el service worker conserva la app y permite recargar y calcular la demo sin conexión. El PDF necesita el servidor disponible. Las consultas de elevación real y nomenclatura requieren sus proveedores.
+
+Leer `HACKATON.md` para el guion de presentación y `DATOS-NASA.md` para preparar las observaciones futuras.
+
 
 ## Ejecutar
 
@@ -10,7 +23,7 @@ Requiere Node.js 20 o posterior. Desde esta carpeta:
 npm start
 ```
 
-Abrir `http://localhost:8000`. También puede ejecutarse con `node server.mjs`. No hay dependencias npm que instalar. Se requiere conexión para las bibliotecas OpenLayers/ArcGIS y los servicios públicos de mapa y elevación. No abrir `index.html` como archivo local: el PDF y la nomenclatura necesitan el servidor.
+Abrir `http://localhost:8000`. También puede ejecutarse con `node server.mjs`. No hay dependencias npm que instalar. OpenLayers se incluye con su licencia BSD. La elevación real usa ArcGIS y las capas/nomenclatura utilizan servicios públicos externos. No abrir `index.html` como archivo local: el PDF y la nomenclatura necesitan el servidor.
 
 Si el puerto está ocupado, configurar `PORT`. Ejemplo PowerShell:
 
@@ -50,6 +63,10 @@ La suite usa el ejecutor incluido en Node. Cubre vacíos/ceros/nulos, importaci�
 - `pdf-report.mjs`: representación del informe.
 - `mars-data.json`: configuración canónica y manifiesto. La copia en `data/` se mantiene sincronizada por compatibilidad y no se publica por HTTP.
 - `tests/`: regresión.
+- `modules/survival-engine.cjs`: modelos puros de clima, terreno y recursos.
+- `modules/survival.js`: panel e importación/exportación de evaluación.
+- `modules/demo.js`: DEM y mapa sintéticos explícitos.
+- `service-worker.js`: caché de app; no simula respuestas de API ni guarda telemetría externa.
 
 Los módulos `.cjs` funcionan en Node y navegador sin bundler. El servidor publica solo los recursos enumerados en `PUBLIC_FILES`. Un recurso nuevo necesita incorporarse a esa lista.
 
@@ -77,8 +94,8 @@ Historial y preferencias se guardan en este navegador. Exportar JSON antes de bo
 
 La API PDF admite JSON hasta 2 MB y 12 solicitudes por minuto por dirección remota. Detrás de un proxy, revisar esta política: varios usuarios pueden compartir dirección. No se habilita CORS para otros orígenes. ArcGIS requiere evaluación dinámica en CSP y los estilos utilizan estilos en línea.
 
-Las notas `ACTUALIZAR-GITHUB-*`, `CHANGELOG-V*` y funciones anteriores Netlify se conservan como historial. La versión vigente se documenta en `CHANGELOG-V44.md`. Esta entrega no actualiza una instalación publicada automáticamente.
+Las notas `ACTUALIZAR-GITHUB-*`, `CHANGELOG-V*` y funciones anteriores Netlify se conservan como historial. La versión vigente se documenta en `CHANGELOG-V46.md`. Esta entrega no actualiza una instalación publicada automáticamente.
 
 ## Alcance
 
-Planificación y simulación. Oxígeno, batería, temperatura, comunicaciones, radiación y localización en tiempo real no forman parte del modelo operativo. V44 corrige consistencia del software; los coeficientes siguen necesitando calibración científica.
+Planificación y simulación. O₂, batería y carga térmica se evalúan como escenarios hipotéticos; no son modelos calibrados de un equipo real. Las proyecciones de clima no predicen tormentas. Radiación, comunicaciones, mineralogía, geotecnia y localización en tiempo real siguen sin mediciones operativas. Los coeficientes requieren validación científica.

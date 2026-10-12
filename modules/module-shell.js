@@ -1,13 +1,14 @@
 (() => {
-  const MODULE_KEY = 'jezero-active-module-v36';
+  const MODULE_KEY = 'jezero-active-module-v46';
   const labels = {
+    survival:'GUÍA',
     explorer: 'MAPA',
     planner: 'MISIÓN',
     eva: 'EVA',
     analysis: 'RESULTADOS',
     settings: 'CONFIGURACIÓN'
   };
-  const labelFor = name => window.JEZERO_I18N?.moduleLabel?.(name) || labels[name];
+  const labelFor = name => name==='survival'?'GUÍA':window.JEZERO_I18N?.moduleLabel?.(name) || labels[name];
 
   const qsa = (sel, root=document) => [...root.querySelectorAll(sel)];
   const byId = id => document.getElementById(id);
@@ -61,7 +62,9 @@
     if (save) localStorage.setItem(MODULE_KEY, name);
 
     const sidebar = document.querySelector('.sidebar');
-    if (sidebar && window.matchMedia('(max-width:760px)').matches && openMobile) sidebar.classList.add('mobile-open');
+    if (sidebar && window.matchMedia('(max-width:760px)').matches && openMobile){
+      if(['analysis','survival'].includes(name))sidebar.classList.remove('mobile-open');else sidebar.classList.add('mobile-open');
+    }
 
     // OpenLayers recalcula correctamente el viewport al recibir un resize.
     requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
@@ -74,23 +77,13 @@
     const sameModule = document.body.dataset.module === name;
 
     if (sidebar && window.matchMedia('(max-width:760px)').matches) {
-      if (sameModule) { sidebar.classList.toggle('mobile-open'); return; }
+      if (sameModule) { if(['analysis','survival'].includes(name))sidebar.classList.remove('mobile-open');else sidebar.classList.toggle('mobile-open'); return; }
       activateModule(name);
       return;
     }
 
-    // V36: los botones inferiores son también interruptores de sus opciones.
-    // Primera pulsación: activa el módulo y abre ambos paneles.
-    // Segunda pulsación sobre el mismo módulo: cierra ambos paneles.
-    // Una pulsación posterior vuelve a abrirlos sin perder el módulo activo.
-    const panels = window.JEZERO_PANELS;
-    if (sameModule && panels) {
-      const state = panels.get();
-      if (state.left || state.right) panels.close(); else panels.open();
-      return;
-    }
+    // Module navigation keeps its purpose; panel visibility has dedicated controls.
     activateModule(name);
-    panels?.open?.();
   }));
 
   qsa('[data-jump-module]').forEach(btn => btn.addEventListener('click', () => activateModule(btn.dataset.jumpModule)));
@@ -132,8 +125,8 @@
   setupMirrors();
   const initialRaw = localStorage.getItem(MODULE_KEY) || localStorage.getItem('jezero-active-module-v35') || localStorage.getItem('jezero-active-module-v34') || localStorage.getItem('jezero-active-module-v33') || localStorage.getItem('jezero-active-module-v32') || localStorage.getItem('jezero-active-module-v31') || localStorage.getItem('jezero-active-module-v30') || localStorage.getItem('jezero-active-module-v29') || localStorage.getItem('jezero-active-module-v28');
   const migrated = initialRaw === 'science' ? 'planner' : initialRaw === 'reports' ? 'analysis' : initialRaw === 'terrain' ? 'explorer' : initialRaw === 'control' ? 'eva' : initialRaw;
-  const initial = migrated;
-  activateModule(validModule(initial) ? initial : 'planner', {save:false, openMobile:false});
+  const initial = localStorage.getItem(MODULE_KEY) || 'survival';
+  activateModule(validModule(initial) ? initial : 'survival', {save:false, openMobile:false});
 
   window.addEventListener('jezero:languagechange',()=>activateModule(document.body.dataset.module||'planner',{save:false,openMobile:false}));
 

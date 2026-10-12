@@ -6,13 +6,19 @@
   const MARS_SR = { wkid: 104971 };
   let layer = null;
 
-  const ready = new Promise((resolve, reject) => {
-    if (typeof require !== 'function') {
-      reject(new Error('No se pudo cargar ArcGIS Maps SDK for JavaScript.'));
-      return;
-    }
+  function loadSdk() {
+    if (typeof require === 'function') return Promise.resolve();
+    return new Promise((resolve,reject)=>{
+      const script=document.createElement('script');script.src='https://js.arcgis.com/4.34/';script.async=true;
+      const timer=setTimeout(()=>reject(new Error('El servicio de elevación tardó demasiado. Puedes usar la demo sintética.')),12000);
+      script.onload=()=>{clearTimeout(timer);resolve();};
+      script.onerror=()=>{clearTimeout(timer);reject(new Error('No se pudo cargar ArcGIS. La demo sintética sigue disponible.'));};
+      document.head.appendChild(script);
+    });
+  }
 
-    require([
+  const ready = new Promise((resolve, reject) => {
+    loadSdk().then(()=>require([
       'esri/layers/ElevationLayer',
       'esri/geometry/Multipoint'
     ], function (ElevationLayer, Multipoint) {
@@ -56,12 +62,12 @@
 
         resolve(layer);
       }).catch(reject);
-    }, reject);
+    }, reject)).catch(reject);
   });
 
-  window.marsElevationReady = ready.catch(function (error) {
+  window.marsElevationReady = ready;
+  ready.catch(function (error) {
     window.marsElevationStatus = 'error';
     window.marsElevationError = error;
-    throw error;
   });
 })();

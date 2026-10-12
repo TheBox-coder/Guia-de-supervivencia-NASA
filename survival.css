@@ -1,0 +1,107 @@
+/* Survival dashboard; no dependency on a UI framework. */
+body.jezero-ui .survivalWorkspace{display:none;position:absolute;left:calc(var(--ui-rail) + 24px);right:20px;top:20px;bottom:20px;z-index:20;border:1px solid var(--theme-line);border-radius:16px;background:var(--theme-bg);overflow:hidden}
+body.jezero-ui[data-module=survival] .survivalWorkspace{display:block}
+body.jezero-ui[data-module=survival] .mapToolbar,body.jezero-ui[data-module=survival] .missionHud,body.jezero-ui[data-module=survival] .mapMissionHint,body.jezero-ui[data-module=survival] .mapCoordChip,body.jezero-ui[data-module=survival] .mapScaleChip,body.jezero-ui[data-module=survival] .routeSequenceStrip,body.jezero-ui[data-module=survival] .panelEdgeToggle{display:none!important}
+.survivalScroll{height:100%;overflow:auto;padding:32px;scrollbar-width:thin;scrollbar-color:var(--theme-line-strong) transparent;overscroll-behavior:contain}
+.survivalHero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.85fr);gap:32px;align-items:center;padding:12px 0 28px}
+.survivalEyebrow{font:600 10px/1.5 Consolas,monospace;letter-spacing:1.8px;color:var(--theme-accent-2)}
+.survivalEyebrow span{display:inline-block;letter-spacing:.5px;padding:3px 7px;border:1px solid var(--theme-line);border-radius:4px;margin-left:8px;color:var(--theme-muted)}
+.survivalHero h1{font:650 clamp(32px,3.5vw,52px)/1.06 'Segoe UI',sans-serif;letter-spacing:-1.8px;margin:16px 0}
+.survivalHero h1 em{font-style:normal;color:var(--theme-accent-2)}
+.survivalHero p{max-width:550px;color:var(--theme-muted);font-size:14px;line-height:1.6}
+.survivalHeroActions,.survivalDataActions{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px}
+.survivalWorkspace button{font:600 12px/1.4 'Segoe UI',sans-serif;border:1px solid var(--theme-line);border-radius:8px;padding:10px 13px;color:var(--theme-text);background:var(--theme-panel-2);min-height:40px;cursor:pointer}
+.survivalWorkspace button:hover{border-color:var(--theme-accent-2)}
+.survivalWorkspace .survivalPrimary{background:var(--theme-primary-2);border-color:var(--theme-primary-2);color:white}
+.survivalDecision{padding:24px;border:1px solid var(--theme-line);border-radius:14px;background:linear-gradient(145deg,color-mix(in srgb,var(--theme-primary-2) 14%,var(--theme-panel)),var(--theme-panel));position:relative;overflow:hidden}
+.survivalDecision::before{content:'';position:absolute;left:0;top:24px;bottom:24px;width:3px;background:var(--theme-accent-2)}
+.survivalDecision>span{font:600 10px/1.5 Consolas,monospace;letter-spacing:1.2px;color:var(--theme-muted)}
+.survivalDecision>strong{display:block;font:600 24px/1.25 'Segoe UI',sans-serif;letter-spacing:-.5px;margin:12px 0}
+.survivalDecision p{font-size:12px;line-height:1.6;margin-bottom:20px}
+.survivalDecisionFacts{display:grid;grid-template-columns:1fr 1fr;gap:14px;border-top:1px solid var(--theme-line);padding-top:16px}
+.survivalDecisionFacts small{display:block;font-size:9px;letter-spacing:.5px;color:var(--theme-muted)}
+.survivalDecisionFacts b{display:block;font:600 20px/1.5 Consolas,monospace;margin-top:6px}
+.survivalDecision[data-status=critical]{border-color:var(--theme-danger)}
+.survivalDecision[data-status=critical]::before{background:var(--theme-danger)}
+.survivalDecision[data-status=critical]>strong{color:var(--theme-danger)}
+.survivalDecision[data-status=review]::before{background:var(--theme-warning)}
+.survivalDecision[data-status=scenario-ok]::before{background:var(--theme-success)}
+.survivalProvenance{display:flex;gap:8px;flex-wrap:wrap;padding:14px 0 24px;border-top:1px solid var(--theme-line)}
+.survivalProvenance span{font:500 9px/1.5 Consolas,monospace;letter-spacing:.4px;padding:5px 8px;border-radius:5px;background:var(--theme-panel-2);color:var(--theme-muted);border:1px solid var(--theme-line)}
+.survivalTabs{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:24px}
+.survivalTabs>span{font-size:13px;font-weight:600;margin-right:8px}
+.survivalTabs button.is-active{background:color-mix(in srgb,var(--theme-accent-2) 12%,var(--theme-panel));border-color:var(--theme-accent-2);color:var(--theme-accent-2)}
+.survivalTabs #survivalExport{margin-left:auto}
+.survivalGrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:18px}
+.survivalCard{padding:22px;border:1px solid var(--theme-line);border-radius:13px;background:var(--theme-panel);min-width:0}
+.survivalWide{grid-column:1/-1}
+.survivalCardHeading{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:20px}
+.survivalCardHeading>div>span{font:600 9px/1.5 Consolas,monospace;letter-spacing:1.3px;color:var(--theme-accent-2)}
+.survivalCardHeading h2{font:600 19px/1.25 'Segoe UI',sans-serif;letter-spacing:-.4px;margin:5px 0 0}
+.survivalTag{font:500 8px/1.5 Consolas,monospace;letter-spacing:.3px;max-width:150px;text-align:right;border:1px solid var(--theme-line);border-radius:5px;padding:4px 7px;color:var(--theme-muted)}
+.weatherMetrics{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:12px;margin:4px 0 18px}
+.weatherMetrics small{display:block;font-size:9px;line-height:1.5;letter-spacing:.4px;color:var(--theme-muted)}
+.weatherMetrics strong{display:block;font:600 20px/1.3 'Segoe UI',sans-serif;letter-spacing:-.4px;margin-top:6px}
+.weatherMetrics em{font:400 11px/1.5 'Segoe UI',sans-serif;color:var(--theme-muted)}
+.weatherChart svg,.resourceChart svg{display:block;width:100%;height:auto}
+.weatherChart{border-bottom:1px solid var(--theme-line);padding-bottom:5px}
+.weatherLegend{display:flex;gap:12px;flex-wrap:wrap;font-size:9px;color:var(--theme-muted);margin:10px 0}
+.weatherLegend i{display:inline-block;width:12px;height:2px;background:var(--theme-accent-2);vertical-align:middle;margin-right:4px}
+.weatherLegend>span:nth-child(2) i{height:8px;background:color-mix(in srgb,var(--theme-accent-2) 20%,transparent)}
+.survivalWorkspace .survivalNote{font:400 11px/1.6 'Segoe UI',sans-serif;color:var(--theme-muted);margin:12px 0}
+.survivalInlineControls{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-top:18px}
+.survivalInlineControls label,.survivalInputs label,.survivalSurfaceLabel{font-size:11px;line-height:1.5;color:var(--theme-muted);display:flex;flex-direction:column;gap:6px;min-width:0}
+.survivalInlineControls label:first-child{max-width:150px}
+.survivalInlineControls label:last-child{flex:1;min-width:130px}
+.survivalWorkspace input[type=range]{width:100%;accent-color:var(--theme-accent-2);height:20px;min-height:20px!important;padding:0!important;border:0!important;background:transparent!important}
+.survivalInputs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.survivalInputs input{width:100%}
+.resourceReadout{padding:0 0 20px;margin-bottom:20px;border-bottom:1px solid var(--theme-line)}
+.resourceReadout>div:first-child{display:flex;align-items:center;gap:10px}
+.resourceIcon{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:var(--theme-panel-2);border:1px solid var(--theme-line);font-weight:600;color:var(--theme-accent-2);font-size:18px}
+.resourceReadout b{font-size:13px;font-weight:600}
+.resourceReadout small{display:block;font-size:10px;line-height:1.5;color:var(--theme-muted)}
+.resourceReadout>strong{display:block;font:600 30px/1.3 'Segoe UI',sans-serif;letter-spacing:-.6px;margin:16px 0 10px}
+.resourceTrack{position:relative;height:8px;border-radius:5px;background:var(--theme-panel-3);overflow:visible;margin-bottom:10px}
+.resourceTrack i{display:block;height:100%;width:0;background:var(--theme-success);border-radius:5px;transition:width .2s ease}
+.resourceTrack span{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--theme-warning);left:20%}
+.resourceTrack i.is-low{background:var(--theme-danger)}
+.survivalAssumptions>summary{font:600 12px/1.5 'Segoe UI',sans-serif;color:var(--theme-accent-2);cursor:pointer;list-style:none;padding:3px 0}
+.survivalAssumptions>summary::before{content:'+';margin-right:7px}
+.survivalAssumptions[open]>summary::before{content:'−'}
+.survivalAssumptions p,.survivalAssumptions li{font-size:11px;color:var(--theme-muted);line-height:1.6}
+.survivalAssumptions code{font-size:10px;overflow-wrap:anywhere}
+.survivalTimelineLabel{font-size:11px;color:var(--theme-muted);display:block;margin-top:12px}
+.timelineReadout{display:flex;gap:12px;flex-wrap:wrap;margin-top:9px;font:600 11px/1.5 Consolas,monospace}
+.soilMetrics{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px}
+.soilMetrics small{font-size:9px;letter-spacing:.4px;color:var(--theme-muted);display:block}
+.soilMetrics b{font:600 21px/1.5 'Segoe UI',sans-serif;display:block;margin-top:4px}
+.soilUnknowns{display:flex;gap:5px;flex-wrap:wrap;margin-top:14px}
+.soilUnknowns span{font-size:10px;padding:5px 7px;background:var(--theme-panel-2);border-radius:5px;color:var(--theme-muted)}
+.survivalWorkspace a{color:var(--theme-accent-2);font-size:11px;text-decoration:none}
+.survivalWorkspace a:hover{text-decoration:underline}
+.survivalAlerts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.survivalAlert{padding:13px 14px;border-radius:8px;border:1px solid var(--theme-line);background:var(--theme-panel-2);font-size:12px;line-height:1.6}
+.survivalAlert>span{display:block;font:600 9px/1.5 Consolas,monospace;letter-spacing:.5px;margin-bottom:5px;color:var(--theme-muted)}
+.survivalAlert[data-level=critical]{border-color:var(--theme-danger)}
+.survivalAlert[data-level=critical]>span{color:var(--theme-danger)}
+.survivalAlert[data-level=warning]>span{color:var(--theme-warning)}
+.survivalAlert[data-level=unknown]{border-style:dashed}
+.survivalComparison{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.survivalCompareItem{border:1px solid var(--theme-line);border-radius:9px;padding:14px;background:var(--theme-panel-2)}
+.survivalCompareItem b{font-size:12px}.survivalCompareItem strong{display:block;font:600 22px/1.5 Consolas,monospace;margin-top:8px}.survivalCompareItem small{display:block;font-size:10px;color:var(--theme-muted);margin:4px 0 10px}
+.survivalCompareItem.is-recommended{border-color:var(--theme-accent-2)}
+.survivalChecklist{display:grid;gap:14px}
+.survivalChecklist label{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.6;cursor:pointer}
+.survivalChecklist input{flex-shrink:0;margin-top:2px}
+.survivalDatasetStatus{padding:12px;border:1px dashed var(--theme-line);border-radius:8px;font-size:11px;line-height:1.6;color:var(--theme-muted);margin:16px 0}
+.survivalCard>p{font-size:12px;line-height:1.6;color:var(--theme-muted)}
+.survivalError{padding:14px;border:1px solid var(--theme-danger);border-radius:9px;font-size:13px;line-height:1.5;margin:0 0 20px;background:var(--theme-panel);color:var(--theme-text)}
+.survivalError[hidden]{display:none}
+.survivalFooter{padding:30px 0 8px;color:var(--theme-muted)}
+.survivalFooter>span{font:500 9px/1.5 Consolas,monospace;letter-spacing:1px}.survivalFooter p{font-size:11px;line-height:1.6}
+.demoModeBadge{position:absolute;z-index:19;left:var(--v39-safe-left);top:20px;font:600 10px/1.5 Consolas,monospace;border:1px solid var(--theme-warning);border-radius:7px;padding:8px 12px;background:var(--theme-panel);color:var(--theme-warning);max-width:230px}
+body[data-module=survival] .demoModeBadge,body[data-module=analysis] .demoModeBadge,.demoModeBadge[hidden]{display:none!important}
+@media(max-width:760px){body.jezero-ui .mapPanel[data-demo=true] .missionHud{top:104px!important}body.jezero-ui .mapPanel[data-demo=true] .routeSequenceStrip{top:188px!important}body.jezero-ui .toast{pointer-events:none!important}}
+@media(max-width:1100px){.survivalScroll{padding:24px}.survivalHero{grid-template-columns:1fr;gap:20px}.survivalDecision{max-width:none}.survivalDecisionFacts{grid-template-columns:1fr 1fr}.survivalGrid{grid-template-columns:1fr}.survivalWide{grid-column:auto}.survivalHero h1{font-size:40px}}
+@media(max-width:760px){body.jezero-ui .survivalWorkspace{left:12px;right:12px;top:12px;bottom:86px;border-radius:14px}.survivalScroll{padding:18px}.survivalHero{padding-top:4px}.survivalHero h1{font-size:34px;letter-spacing:-1px}.survivalHero p{font-size:13px}.survivalHeroActions button{flex:1;font-size:11px}.survivalCard{padding:17px}.survivalCardHeading{display:block}.survivalCardHeading .survivalTag{display:inline-block;margin-top:9px;text-align:left}.survivalTabs>span{width:100%;margin-bottom:4px}.survivalTabs button{padding:9px;font-size:10px}.survivalTabs #survivalExport{margin-left:0}.weatherMetrics{grid-template-columns:1fr 1fr}.weatherMetrics>div:last-child{grid-column:1/-1}.weatherMetrics strong{font-size:19px}.survivalAlerts,.survivalComparison{grid-template-columns:1fr}.survivalProvenance{gap:5px}.survivalProvenance span{font-size:8px}.survivalEyebrow{font-size:9px;letter-spacing:1px}.survivalEyebrow span{margin-left:0;margin-top:6px}.demoModeBadge{top:62px;left:12px;font-size:9px}.survivalDecision>strong{font-size:22px}body.jezero-ui .moduleNav small{font-size:9px!important}}

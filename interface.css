@@ -1,0 +1,239 @@
+/* JEZERO V45: presentation layer. Theme tokens and routing remain independent. */
+body.jezero-ui{
+  --ui-rail:72px;--ui-panel:336px;--ui-detail:304px;--ui-top:76px;
+  --v32-top:var(--ui-top);--v32-panel-w:var(--ui-panel);--v32-detail-w:var(--ui-detail);
+  --v33-map-left:calc(var(--ui-rail) + var(--ui-panel) + 44px);--v33-map-right:calc(var(--ui-detail) + 40px);
+  --v39-safe-left:var(--v33-map-left);--v39-safe-right:var(--v33-map-right);
+  font:14px/1.5 'Segoe UI',Inter,Arial,sans-serif!important;background:var(--theme-bg)!important;
+}
+body.jezero-ui.left-panel-hidden{--v33-map-left:calc(var(--ui-rail) + 32px);--v39-safe-left:var(--v33-map-left)}
+body.jezero-ui.right-panel-hidden{--v33-map-right:20px;--v39-safe-right:20px}
+body.jezero-ui .topbar{height:var(--ui-top)!important;padding:0 24px!important;grid-template-columns:260px minmax(0,1fr) 220px!important;background:var(--theme-panel)!important;box-shadow:none!important;border-bottom:1px solid var(--theme-line)!important}
+body.jezero-ui .topbar::before,body.jezero-ui .topbar::after,body.jezero-ui .brand::after{display:none!important}
+body.jezero-ui .brand{gap:12px!important}
+body.jezero-ui .brandLogo{width:36px!important;height:42px!important;filter:none!important}
+body.jezero-ui .brandText b{font:700 24px/1.1 'Segoe UI',sans-serif!important;letter-spacing:3px!important;color:var(--theme-text)!important}
+body.jezero-ui .brandText small{font:500 11px/1.5 'Segoe UI',sans-serif!important;letter-spacing:.3px!important;color:var(--theme-muted)!important}
+body.jezero-ui .brandText em{display:none!important}
+body.jezero-ui .missionHeaderStrip{display:flex!important;justify-content:center!important;gap:0!important;background:none!important;border:0!important;clip-path:none!important}
+body.jezero-ui .missionHeaderStrip>div{padding:0 20px!important;border:0!important;border-left:1px solid var(--theme-line)!important;background:none!important;min-width:92px!important}
+body.jezero-ui .missionHeaderStrip span{font:500 10px/1.5 'Segoe UI',sans-serif!important;letter-spacing:1px!important;color:var(--theme-muted)!important}
+body.jezero-ui .missionHeaderStrip b{font:600 13px/1.6 Consolas,monospace!important;color:var(--theme-text)!important}
+body.jezero-ui .topMeta{font:500 11px/1.5 'Segoe UI',sans-serif!important;letter-spacing:0!important;text-transform:none!important;white-space:normal!important;max-width:220px!important;text-align:right!important}
+body.jezero-ui .liveDot{box-shadow:none!important;width:6px!important;height:6px!important}
+body.jezero-ui .appShell{position:relative!important;height:calc(100dvh - var(--ui-top))!important;min-width:0!important;display:block!important}
+body.jezero-ui .mapPanel{position:absolute!important;inset:0!important;min-width:0!important;min-height:0!important}
+body.jezero-ui .mapPanel::before,body.jezero-ui .mapPanel::after{display:none!important}
+body.jezero-ui .moduleRail{position:absolute!important;inset:20px auto auto 12px!important;width:var(--ui-rail)!important;height:auto!important;max-height:none!important;max-width:none!important;transform:none!important;display:flex!important;flex-direction:column!important;gap:5px!important;padding:7px!important;background:var(--theme-panel)!important;border:1px solid var(--theme-line)!important;border-radius:16px!important;clip-path:none!important;box-shadow:0 8px 28px #0003!important;z-index:25!important}
+body.jezero-ui .moduleNav{width:56px!important;min-width:0!important;height:64px!important;min-height:64px!important;padding:8px 4px!important;border-radius:10px!important;border:0!important;clip-path:none!important;background:transparent!important;box-shadow:none!important;gap:5px!important;color:var(--theme-muted)!important}
+body.jezero-ui .moduleNav::before,body.jezero-ui .moduleNav::after{display:none!important}
+body.jezero-ui .moduleNav span{width:22px!important;height:22px!important;display:grid!important;place-items:center!important}
+body.jezero-ui .moduleNav svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+body.jezero-ui .moduleNav small{font:600 10px/1.2 'Segoe UI',sans-serif!important;letter-spacing:0!important;text-transform:none!important}
+body.jezero-ui .moduleNav.is-active{background:color-mix(in srgb,var(--theme-primary-2) 20%,var(--theme-panel))!important;color:var(--theme-accent-2)!important}
+body.jezero-ui .moduleNav:hover{background:var(--theme-panel-2)!important;color:var(--theme-text)!important}
+body.jezero-ui .sidebar,body.jezero-ui .details{position:absolute!important;top:20px!important;bottom:20px!important;width:var(--ui-panel)!important;padding:0!important;overflow:hidden!important;background:var(--theme-panel)!important;border:1px solid var(--theme-line)!important;border-radius:16px!important;clip-path:none!important;box-shadow:0 14px 40px #0004!important;backdrop-filter:none!important}
+body.jezero-ui .sidebar{left:calc(var(--ui-rail) + 24px)!important}
+body.jezero-ui .details{right:20px!important;width:var(--ui-detail)!important}
+body.jezero-ui .sidebar::before,body.jezero-ui .sidebar::after,body.jezero-ui .details::before,body.jezero-ui .details::after{display:none!important}
+body.jezero-ui .uiPanelHeader{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--theme-line);flex-shrink:0}
+body.jezero-ui .uiPanelHeader span{font-size:15px;font-weight:650}
+body.jezero-ui .uiPanelHeader button{width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--theme-muted);cursor:pointer;font-size:22px}
+body.jezero-ui .uiPanelHeader button:hover{background:var(--theme-panel-2)}
+body.jezero-ui .sidebar .modulePanel.is-active{display:flex!important;flex-direction:column!important;height:calc(100% - 54px)!important;min-height:0!important}
+body.jezero-ui .details .modulePanel.is-active{display:flex!important;flex-direction:column!important;height:100%!important;min-height:0!important}
+body.jezero-ui .panelScroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:18px;scrollbar-width:thin;scrollbar-color:var(--theme-line-strong) transparent;overscroll-behavior:contain}
+body.jezero-ui .panelScroll>section{margin:0 0 20px!important;padding:0 0 18px!important;border:0!important;border-bottom:1px solid var(--theme-line)!important}
+body.jezero-ui .panelScroll>section:last-child{border-bottom:0!important;margin-bottom:0!important}
+body.jezero-ui .sectionTitle{font:650 10px/1.5 'Segoe UI',sans-serif!important;letter-spacing:1.3px!important;color:var(--theme-muted)!important;border:0!important;padding:0!important;margin:0 0 12px!important;background:none!important;clip-path:none!important}
+body.jezero-ui .sectionTitle::before,body.jezero-ui .sectionTitle::after{display:none!important}
+body.jezero-ui .sidebar p,body.jezero-ui .details p{font:400 13px/1.55 'Segoe UI',sans-serif!important;color:var(--theme-muted)!important}
+body.jezero-ui .sidebar label,body.jezero-ui .details label{font-size:12px!important;line-height:1.4!important}
+body.jezero-ui .sidebar small,body.jezero-ui .details small{font-size:11px!important;line-height:1.45!important;letter-spacing:0!important}
+body.jezero-ui .moduleIntro{border:0!important;border-radius:0!important;padding:0!important;background:none!important;box-shadow:none!important;margin:0 0 16px!important;clip-path:none!important}
+body.jezero-ui .moduleIntro::before{display:none!important}
+body.jezero-ui .moduleIntro b{font:650 22px/1.2 'Segoe UI',sans-serif!important;letter-spacing:-.5px!important;color:var(--theme-text)!important}
+body.jezero-ui .moduleIntro p{margin:9px 0 0!important}
+body.jezero-ui .action,body.jezero-ui .coordinateInlineSubmit,body.jezero-ui .referenceAction{min-height:44px!important;padding:10px 14px!important;border-radius:9px!important;clip-path:none!important;font:600 13px/1.4 'Segoe UI',sans-serif!important;letter-spacing:0!important;box-shadow:none!important;background:var(--theme-panel-2)!important;border:1px solid var(--theme-line)!important}
+body.jezero-ui button:not(:disabled){cursor:pointer}
+body.jezero-ui button:disabled{opacity:.45!important;cursor:not-allowed!important}
+body.jezero-ui .action::before,body.jezero-ui .action::after,body.jezero-ui .coordinateInlineSubmit::before,body.jezero-ui .coordinateInlineSubmit::after{display:none!important}
+body.jezero-ui .primaryAction,body.jezero-ui .coordinateInlineSubmit{background:var(--theme-primary-2)!important;border-color:var(--theme-primary-2)!important;color:white!important}
+body.jezero-ui .uiWorkflow{display:flex;gap:8px;margin:18px 0}
+body.jezero-ui .uiWorkflow>span{flex:1;font-size:11px;line-height:1.5;color:var(--theme-muted);border-top:2px solid var(--theme-line);padding-top:8px}
+body.jezero-ui .uiWorkflow b{display:block;font:600 11px/1.5 Consolas,monospace;opacity:.65}
+body.jezero-ui .uiWorkflow .is-current{border-color:var(--theme-accent-2);color:var(--theme-accent-2)}
+body.jezero-ui .uiWorkflow .is-done{border-color:var(--theme-success)}
+body.jezero-ui .uiPointEntry{border:1px solid var(--theme-line);border-radius:12px;margin:14px 0;background:var(--theme-panel-2);overflow:hidden}
+body.jezero-ui .uiPointEntry>summary{display:flex;align-items:center;justify-content:space-between;list-style:none;padding:14px;font-size:13px;font-weight:600;cursor:pointer}
+body.jezero-ui summary::-webkit-details-marker{display:none}
+body.jezero-ui .uiPointEntry>summary::after{content:'+';font-size:20px;color:var(--theme-accent-2)}
+body.jezero-ui .uiPointEntry[open]>summary::after{content:'−'}
+body.jezero-ui .coordinateInline{margin:0!important;padding:0 14px 14px!important;border:0!important;border-radius:0!important;clip-path:none!important;box-shadow:none!important;background:none!important}
+body.jezero-ui .coordinateInline::before,body.jezero-ui .coordinateInline::after,body.jezero-ui .coordinateInlineHeader{display:none!important}
+body.jezero-ui .coordinateInlineHelp{font-size:12px!important;margin:0 0 12px!important}
+body.jezero-ui .coordinateInlineGrid{gap:10px!important}
+body.jezero-ui input:not([type=checkbox]):not([type=radio]),body.jezero-ui select,body.jezero-ui textarea{min-height:42px!important;font:400 14px/1.4 'Segoe UI',sans-serif!important;padding:9px 10px!important;border:1px solid var(--theme-line)!important;border-radius:7px!important;background:var(--theme-bg-2)!important;color:var(--theme-text)!important;box-shadow:none!important;clip-path:none!important}
+body.jezero-ui input::placeholder,body.jezero-ui textarea::placeholder{color:var(--theme-soft)!important;opacity:1!important}
+body.jezero-ui input[type=checkbox],body.jezero-ui input[type=radio]{width:17px!important;height:17px!important;accent-color:var(--theme-primary-2)}
+body.jezero-ui .uiPointOptions{margin:12px 0 0}
+body.jezero-ui .uiPointOptions>summary{font-size:12px;color:var(--theme-muted);cursor:pointer;padding:6px 0;list-style:none}
+body.jezero-ui .uiPointOptions>summary::before{content:'›';margin-right:7px;color:var(--theme-accent-2)}
+body.jezero-ui .uiPointOptions[open]>summary::before{content:'⌄'}
+body.jezero-ui .uiPointOptions[open] .coordinateInlineField{margin-top:10px!important}
+body.jezero-ui .coordinateInlineSubmit{margin-top:14px!important;width:100%!important}
+body.jezero-ui .uiMapPick{width:100%;display:flex;gap:8px;align-items:center;justify-content:center;padding:10px;border:1px dashed var(--theme-line-strong);border-radius:9px;color:var(--theme-accent-2);background:transparent;font-size:12px}
+body.jezero-ui .plannerFooter{flex-shrink:0;padding:14px 18px 16px;border-top:1px solid var(--theme-line);background:var(--theme-panel)}
+body.jezero-ui .plannerFooter #calculate{width:100%!important;margin:0!important;min-height:46px!important;background:var(--theme-primary-2)!important;background-image:none!important;border-color:var(--theme-primary-2)!important;box-shadow:none!important}
+body.jezero-ui .uiCalcHint{display:block;font-size:11px;color:var(--theme-muted);margin-bottom:10px}
+body.jezero-ui .plannerFooterTools{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px}
+body.jezero-ui .plannerFooterTools .action{width:auto!important;min-height:30px!important;padding:4px 0!important;margin:0!important;font-size:11px!important;background:transparent!important;border:0!important;color:var(--theme-muted)!important}
+body.jezero-ui .missionCounter{font:500 11px/1.5 'Segoe UI',sans-serif!important;padding:0!important;margin:0!important;border:0!important;background:none!important;gap:6px!important;min-width:0!important}
+body.jezero-ui .missionCounter span{font-size:10px!important;letter-spacing:0!important}
+body.jezero-ui .missionCounter b{font:600 14px/1.5 Consolas,monospace!important}
+body.jezero-ui .routeOrderNotice{padding:10px 12px!important;margin:0 0 12px!important;border-radius:8px!important;border:0!important;background:var(--theme-panel-2)!important;clip-path:none!important}
+body.jezero-ui .routeOrderNotice b{font:600 10px/1.5 'Segoe UI',sans-serif!important}
+body.jezero-ui .routeOrderNotice span{font:400 11px/1.5 'Segoe UI',sans-serif!important}
+body.jezero-ui .returnCheck{padding:9px 0!important;gap:8px!important}
+body.jezero-ui .returnCheck span{font:400 12px/1.45 'Segoe UI',sans-serif!important}
+body.jezero-ui .waypoint{border:1px solid var(--theme-line)!important;background:var(--theme-panel-2)!important;border-radius:10px!important;padding:12px!important;gap:10px!important;clip-path:none!important;box-shadow:none!important}
+body.jezero-ui .waypoint .wpName{padding:0!important;min-height:26px!important;background:transparent!important;border:0!important;border-radius:0!important;font-size:13px!important}
+body.jezero-ui .wpMeta>span{font-size:10px!important;line-height:1.5!important}
+body.jezero-ui .wpIndex{font:600 10px/1.4 Consolas,monospace!important}
+body.jezero-ui .wpActions button{min-width:30px!important;min-height:30px!important;border-radius:7px!important}
+body.jezero-ui .dwellEdit{font-size:9px!important}
+body.jezero-ui .dwellEdit input{min-height:30px!important;padding:4px!important;max-width:62px!important;font-size:12px!important}
+body.jezero-ui .strategyCards{gap:9px!important}
+body.jezero-ui .modeOption.strategyCard{grid-template-columns:36px 1fr!important;min-height:80px!important;border-radius:10px!important;padding:12px!important;clip-path:none!important;background:var(--theme-panel-2)!important;box-shadow:none!important}
+body.jezero-ui .strategyCard::before,body.jezero-ui .strategyCard::after{display:none!important}
+body.jezero-ui .strategyCard.is-selected{border-color:var(--theme-accent-2)!important;background:color-mix(in srgb,var(--theme-primary-2) 12%,var(--theme-panel))!important}
+body.jezero-ui .strategyIcon{width:32px!important;height:32px!important}
+body.jezero-ui .strategyCopy b{font:600 13px/1.5 'Segoe UI',sans-serif!important;letter-spacing:0!important}
+body.jezero-ui .strategyCopy em{font:500 10px/1.5 'Segoe UI',sans-serif!important;letter-spacing:0!important}
+body.jezero-ui .timelineEmpty,body.jezero-ui .historyEmpty{font:400 12px/1.5 'Segoe UI',sans-serif!important;border-radius:8px!important}
+body.jezero-ui .card{padding:0!important;margin:0 0 20px!important;background:none!important;border:0!important;box-shadow:none!important;clip-path:none!important}
+body.jezero-ui .card::before,body.jezero-ui .card::after{display:none!important}
+body.jezero-ui .metricGrid{gap:9px!important}
+body.jezero-ui .metricGrid>div{padding:13px!important;border-radius:10px!important;border:1px solid var(--theme-line)!important;background:var(--theme-panel-2)!important;clip-path:none!important;min-width:0!important}
+body.jezero-ui .metricGrid small{font:500 10px/1.45 'Segoe UI',sans-serif!important;letter-spacing:.4px!important;color:var(--theme-muted)!important}
+body.jezero-ui .metricGrid strong{font:600 22px/1.3 'Segoe UI',sans-serif!important;letter-spacing:-.5px!important;margin-top:7px!important}
+body.jezero-ui #routeName{font:650 22px/1.25 'Segoe UI',sans-serif!important;letter-spacing:-.5px!important}
+body.jezero-ui #routeDescription{font-size:12px!important;margin-top:12px!important}
+body.jezero-ui .pill{font:600 10px/1.5 'Segoe UI',sans-serif!important;padding:5px 9px!important;letter-spacing:0!important;border-radius:6px!important}
+body.jezero-ui .inputRow{gap:10px!important;grid-template-columns:1fr 80px 26px!important;align-items:center!important;padding:7px 0!important}
+body.jezero-ui .inputRow span{font:400 12px/1.45 'Segoe UI',sans-serif!important}
+body.jezero-ui .inputRow em{font:400 10px/1.4 'Segoe UI',sans-serif!important}
+body.jezero-ui .inputRow input{width:80px!important}
+body.jezero-ui .panelEdgeToggle{width:24px!important;height:44px!important;top:calc(50% - 22px)!important;border-radius:7px!important;clip-path:none!important;background:var(--theme-panel)!important;border:1px solid var(--theme-line)!important;box-shadow:none!important;font-size:20px!important}
+body.jezero-ui .panelEdgeToggleLeft{left:calc(var(--ui-rail) + var(--ui-panel) + 26px)!important}
+body.jezero-ui .panelEdgeToggleRight{right:calc(var(--ui-detail) + 20px)!important}
+body.jezero-ui.left-panel-hidden .panelEdgeToggleLeft{left:calc(var(--ui-rail) + 22px)!important}
+body.jezero-ui.right-panel-hidden .panelEdgeToggleRight{right:20px!important}
+body.jezero-ui .mapToolbar{top:20px!important;display:flex!important;justify-content:flex-end!important;padding:0!important}
+body.jezero-ui .mapToolbar>div:first-child{display:none!important}
+body.jezero-ui .mapCommandBar .toolCluster{border-radius:10px!important;background:var(--theme-panel)!important;border:1px solid var(--theme-line)!important;clip-path:none!important;min-height:42px!important;box-shadow:0 6px 18px #0003!important}
+body.jezero-ui .toolButton{font:500 12px/1.4 'Segoe UI',sans-serif!important;height:42px!important;min-height:42px!important;clip-path:none!important}
+body.jezero-ui .toolButton svg{width:18px!important;height:18px!important}
+body.jezero-ui .toolButton span{font-size:12px!important}
+body.jezero-ui .missionHud{top:76px!important;background:var(--theme-panel)!important;border-radius:10px!important;clip-path:none!important;border:1px solid var(--theme-line)!important;padding:0!important;box-shadow:none!important;max-width:650px!important}
+body.jezero-ui .missionHud.is-compact{height:auto!important;min-height:46px!important}
+body.jezero-ui .missionHudCell{padding:9px 12px!important;background:none!important}
+body.jezero-ui .missionHud .missionHudCell span{font:500 10px/1.5 'Segoe UI',sans-serif!important;letter-spacing:.5px!important}
+body.jezero-ui .missionHud .missionHudCell b{font:600 13px/1.5 Consolas,monospace!important}
+body.jezero-ui[data-mission-state=empty] .missionHud{display:none!important}
+body.jezero-ui .routeSequenceStrip{top:134px!important;bottom:auto!important;height:40px!important;min-height:0!important;max-height:48px!important;padding:6px 12px!important;border-radius:9px!important;clip-path:none!important;background:var(--theme-panel)!important}
+body.jezero-ui .mapInfo,body.jezero-ui .mapLayerDrawer{border-radius:12px!important;clip-path:none!important;background:var(--theme-panel)!important;box-shadow:0 12px 35px #0004!important}
+body.jezero-ui .mapLayerDrawer{padding:16px!important;width:320px!important;max-width:calc(100vw - 24px)!important}
+body.jezero-ui .mapLayerDrawer b{font-size:12px!important}
+body.jezero-ui .mapLayerDrawer small,body.jezero-ui .mapLegend small{font-size:11px!important}
+body.jezero-ui .mapVisualModeLabel,body.jezero-ui .mapQuickLayers label{font-size:12px!important}
+body.jezero-ui .mapInfo p{font-size:13px!important}
+body.jezero-ui .mapInfoTitle,body.jezero-ui #mapInfoTitle{font-size:18px!important}
+body.jezero-ui .uiCanvasWelcome{position:absolute;z-index:15;left:var(--v39-safe-left);right:var(--v39-safe-right);bottom:26px;max-width:430px;padding:24px;border:1px solid var(--theme-line);border-radius:16px;background:var(--theme-panel);box-shadow:0 12px 40px #0005}
+body.jezero-ui .uiCanvasWelcome[hidden]{display:none!important}
+body.jezero-ui .uiCanvasWelcome>span{font:600 10px/1.4 Consolas,monospace;letter-spacing:1.5px;color:var(--theme-accent-2)}
+body.jezero-ui .uiCanvasWelcome h1{font:650 26px/1.2 'Segoe UI',sans-serif;letter-spacing:-.6px;margin:10px 0}
+body.jezero-ui .uiCanvasWelcome p{font:400 13px/1.6 'Segoe UI',sans-serif;color:var(--theme-muted);margin:0 0 18px}
+body.jezero-ui .uiWelcomeActions{display:flex;gap:8px;flex-wrap:wrap}
+body.jezero-ui .uiWelcomeActions button{padding:10px 12px;border-radius:8px;border:1px solid var(--theme-line);background:var(--theme-panel-2);color:var(--theme-text);font:600 12px/1.4 'Segoe UI',sans-serif}
+body.jezero-ui .uiWelcomeActions button:first-child{background:var(--theme-primary-2);border-color:var(--theme-primary-2);color:white}
+body.jezero-ui:not([data-module=planner]) .uiCanvasWelcome{display:none!important}
+body.jezero-ui .mapMissionHint,body.jezero-ui .mapCoordChip,body.jezero-ui .mapScaleChip{font-size:10px!important;border-radius:6px!important;clip-path:none!important}
+body.jezero-ui .north{top:150px!important;width:34px!important;opacity:.65}
+body.jezero-ui .mapOverlay.topLeft,body.jezero-ui .mapOverlay.bottomCenter{display:none!important}
+body.jezero-ui .toast{bottom:24px!important;left:50%!important;transform:translateX(-50%)!important;max-width:min(440px,calc(100vw - 32px))!important;min-width:0!important;font:500 13px/1.5 'Segoe UI',sans-serif!important;padding:12px 16px!important;border-radius:10px!important;clip-path:none!important;z-index:100!important}
+body.jezero-ui .analyticsWorkspace{left:calc(var(--ui-rail) + 24px)!important;right:20px!important;top:20px!important;bottom:20px!important;border-radius:16px!important;clip-path:none!important;background:var(--theme-panel)!important;backdrop-filter:none!important}
+body.jezero-ui .analyticsHeader{background:none!important;padding:24px!important}
+body.jezero-ui .analyticsHeader h2{font:650 25px/1.2 'Segoe UI',sans-serif!important;letter-spacing:-.5px!important}
+body.jezero-ui .analyticsHeader span{font-size:10px!important}
+body.jezero-ui .analyticsHeader p{font-size:13px!important;line-height:1.5!important;max-width:700px!important}
+body.jezero-ui .analyticsToolbar{padding:12px 24px!important;gap:16px!important}
+body.jezero-ui .analyticsToolbar label{font:600 10px/1.4 'Segoe UI',sans-serif!important;letter-spacing:.8px!important}
+body.jezero-ui .analyticsToolbar button{font-size:12px!important;min-height:38px!important;clip-path:none!important;border-radius:7px!important}
+body.jezero-ui .analyticsSelectionReadout{font-size:12px!important}
+body.jezero-ui .analyticsScroll{padding:20px 24px!important}
+body.jezero-ui .analyticsCard{padding:20px!important;border-radius:12px!important;clip-path:none!important;background:var(--theme-panel-2)!important;box-shadow:none!important}
+body.jezero-ui .analyticsCard::before{display:none!important}
+body.jezero-ui .analyticsCardHead h3{font:600 16px/1.4 'Segoe UI',sans-serif!important;letter-spacing:0!important}
+body.jezero-ui .analyticsCardHead span{font-size:10px!important}
+body.jezero-ui .analyticsCardHead small{font-size:11px!important;line-height:1.5!important}
+body.jezero-ui .chartEmpty{font:400 13px/1.5 'Segoe UI',sans-serif!important;border-radius:8px!important}
+body.jezero-ui .v36SegmentTable th,body.jezero-ui .v36SegmentTable td{font-size:11px!important;padding:12px!important}
+body.jezero-ui .v36BarRow,body.jezero-ui .v35EvaLegend,body.jezero-ui .v35HealthItem{font-size:12px!important}
+body.jezero-ui .settingsField span,body.jezero-ui .themeChoice b,body.jezero-ui .historyItem strong{font-size:13px!important}
+body.jezero-ui .settingsField textarea{width:100%!important;min-height:110px!important}
+body.jezero-ui .themeChoice,body.jezero-ui .historyItem,body.jezero-ui .missionCard{border-radius:10px!important;clip-path:none!important;padding:12px!important;box-shadow:none!important}
+body.jezero-ui .historyActions button{font-size:11px!important;min-height:32px!important}
+body.jezero-ui .layerRow{padding:11px 0!important}
+body.jezero-ui .layerCopy strong{font-size:12px!important}
+body.jezero-ui .layerStatus{font-size:8px!important;letter-spacing:0!important}
+@media(min-width:1101px){body.jezero-ui .details{display:block!important}}
+@media(max-width:1200px) and (min-width:761px){body.jezero-ui{--ui-panel:306px;--ui-detail:274px}body.jezero-ui .topbar{grid-template-columns:220px minmax(0,1fr) 160px!important;padding:0 18px!important}body.jezero-ui .missionHeaderStrip>div{padding:0 12px!important;min-width:72px!important}body.jezero-ui .topMeta{max-width:160px!important}}
+@media(max-width:1100px) and (min-width:761px){body.jezero-ui{--v33-map-right:20px;--v39-safe-right:20px}body.jezero-ui .details,body.jezero-ui .panelEdgeToggleRight{display:none!important}body.jezero-ui .missionHeaderStrip>div:first-child{display:none!important}body.jezero-ui .analyticsHeaderMeta{display:none!important}}
+@media(max-width:760px){
+  body.jezero-ui{--ui-top:64px;--v33-map-left:12px;--v33-map-right:12px;--v39-safe-left:12px;--v39-safe-right:12px}
+  body.jezero-ui.left-panel-hidden{--v33-map-left:12px;--v39-safe-left:12px}
+  body.jezero-ui .topbar{grid-template-columns:1fr auto!important;padding:0 16px!important}
+  body.jezero-ui .brandText b{font-size:21px!important}.jezero-ui .brandText small{font-size:10px!important}
+  body.jezero-ui .brandLogo{width:28px!important;height:34px!important}
+  body.jezero-ui .topMeta{display:none!important}
+  body.jezero-ui .missionHeaderStrip{display:none!important}
+  body.jezero-ui .moduleRail{position:absolute!important;inset:auto 12px 12px!important;width:auto!important;max-width:none!important;flex-direction:row!important;gap:2px!important;padding:5px!important;border-radius:14px!important}
+  body.jezero-ui .moduleNav{flex:1!important;width:auto!important;min-height:54px!important;height:54px!important;gap:4px!important;padding:6px 2px!important}
+  body.jezero-ui .moduleNav small{font-size:10px!important}
+  body.jezero-ui .moduleNav svg{width:20px;height:20px}
+  body.jezero-ui .sidebar{top:12px!important;bottom:86px!important;left:12px!important;width:calc(100vw - 24px)!important;max-width:420px!important;transform:translateX(calc(-100% - 30px))!important;opacity:0!important;pointer-events:none!important;z-index:35!important;border-radius:14px!important}
+  body.jezero-ui .sidebar.mobile-open{transform:none!important;opacity:1!important;pointer-events:auto!important}
+  body.jezero-ui .details,body.jezero-ui .panelEdgeToggle{display:none!important}
+  body.jezero-ui .panelScroll{padding:16px}
+  body.jezero-ui .mapToolbar{top:12px!important;left:12px!important;right:12px!important}
+  body.jezero-ui .toolButton{height:40px!important;min-height:40px!important}
+  body.jezero-ui .toolButton span{display:none!important}
+  body.jezero-ui .mapLayerDrawer{right:0!important;top:50px!important}
+  body.jezero-ui .uiCanvasWelcome{left:12px;right:12px;bottom:94px;max-width:none;padding:20px}
+  body.jezero-ui .uiCanvasWelcome h1{font-size:24px}
+  body.jezero-ui:has(.sidebar.mobile-open) .uiCanvasWelcome,body.jezero-ui:has(.sidebar.mobile-open) .missionHud{visibility:hidden}
+  body.jezero-ui .missionHud,body.jezero-ui .missionHud.is-compact{top:66px!important;left:12px!important;right:12px!important;max-width:none!important;grid-template-columns:1fr 1fr!important;min-height:72px!important}
+  body.jezero-ui .missionHudCell{padding:8px 10px!important}
+  body.jezero-ui .missionHudCell span{font-size:9px!important}
+  body.jezero-ui .missionHudCell b{font-size:12px!important}
+  body.jezero-ui .routeSequenceStrip{top:154px!important;left:12px!important;right:12px!important}
+  body.jezero-ui .north{top:198px!important;right:16px!important}
+  body.jezero-ui .mapCoordChip{display:none!important}
+  body.jezero-ui .mapScaleChip{bottom:86px!important;right:12px!important}
+  body.jezero-ui .mapMissionHint{bottom:86px!important;left:12px!important;max-width:calc(100vw - 24px)!important}
+  body.jezero-ui .toast{bottom:90px!important}
+  body.jezero-ui .analyticsWorkspace{left:12px!important;right:12px!important;top:12px!important;bottom:86px!important}
+  body.jezero-ui .analyticsHeader{padding:18px!important}
+  body.jezero-ui .analyticsHeader h2{font-size:22px!important}
+  body.jezero-ui .analyticsHeaderMeta{display:none!important}
+  body.jezero-ui .analyticsToolbar{padding:12px 16px!important;flex-wrap:wrap!important}
+  body.jezero-ui .analyticsToolbar label{flex:1;min-width:130px}
+  body.jezero-ui .analyticsSelectionReadout{width:100%!important}
+  body.jezero-ui .analyticsScroll{padding:16px!important}
+  body.jezero-ui .analyticsGrid2{grid-template-columns:1fr!important}
+  body.jezero-ui .analyticsCard{padding:16px!important}
+  body.jezero-ui .analyticsCardHead{display:block!important}
+  body.jezero-ui .analyticsCardHead small{display:block!important;max-width:none!important;text-align:left!important;margin-top:5px!important}
+}
+@media(prefers-reduced-motion:reduce){body.jezero-ui *,body.jezero-ui *::before,body.jezero-ui *::after{scroll-behavior:auto!important;transition:none!important}}

@@ -1,8 +1,8 @@
 {
   "name": "jezero",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "private": true,
-  "description": "Plataforma modular para planificación y análisis de travesías científicas EVA en Marte.",
+  "description": "Plataforma modular para planificaciÃ³n y anÃ¡lisis de travesÃ­as cientÃ­ficas EVA en Marte.",
   "type": "module",
   "scripts": {
     "start": "node server.mjs",

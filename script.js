@@ -12,7 +12,7 @@ const DEFAULTS_KEY = 'jezero-operational-defaults-v29';
 const PANEL_STATE_KEY = 'jezero-panel-state-v34';
 const MAP_VIEW_KEY = 'jezero-map-view-v34';
 const BASE_MAP_KEY = 'jezero-base-map-v34';
-const JEZERO_UI_VERSION = 'V44';
+const JEZERO_UI_VERSION = 'V46';
 const ALGORITHM_VERSION = '44.0';
 
 let D;
@@ -570,9 +570,8 @@ async function refreshDerivedLayers(force=true){
   if(slopeLayer.getVisible()) markLayerLoading('slope');
   if(roughnessLayer.getVisible()) markLayerLoading('roughness');
   try{
-    await window.marsElevationReady;
     const samples=makeGridSamples(clipped,9,9);
-    const grid=await window.queryMarsElevations(samples.points);
+    const grid=await getElevations(samples.points);
     if(token!==derivedRefreshToken) return;
     const get=(r,c)=>grid[r*samples.cols+c];
     const slopeFeatures=[], roughFeatures=[];
@@ -614,6 +613,7 @@ const routing=window.JEZERO_ROUTING.createEngine({
 });
 const {haversine,pathMetrics,nearestNode,neighbors,heuristic,analyzeEdge,edgeCost,aStar,forceEndpoints,shortestLonDelta,interpolateLon,buildGrid,stddev,annotateGridTerrain,gridSizeForDistanceKm,calculateLeg,riskScore,riskLabel,availableMissionHours,estimateDuration,formatHours,formatSignedMargin,sequenceWithReturn,createLegCache,getCachedLeg,evaluateSequence,routeOrderGeodesicCost,heldKarpWaypointOrder,heuristicWaypointOrder,waypointOrderSeed,missionOrderObjective,refineWaypointOrder,chooseSequence,aggregateMission,validateFinalPath}=routing;
 async function getElevations(points){
+  if(window.JEZERO_DEMO?.enabled)return window.JEZERO_DEMO.sample(points);
   if(!window.marsElevationReady){
     throw new Error('La fuente global de elevación todavía está cargando. Espera unos segundos y vuelve a calcular.');
   }
@@ -1145,13 +1145,14 @@ async function exportMissionPdf(mode){
       calculationTimestamp:lastCalculatedAt?.toISOString?.()||null
     },
     dataSources:{
-      elevation:'MDEM200M mediante ArcGIS ElevationLayer',
+      elevation:window.JEZERO_DEMO?.enabled?'DEM sintético de demostración · NO SON DATOS NASA':'MDEM200M mediante ArcGIS ElevationLayer',
       cartography:'NASA / USGS / ESA / HRSC',
       map:'NASA Mars Trek / capas configuradas en JEZERO',
       marsRadiusKm:MARTIAN_RADIUS,
       demResolutionRequestedM:200,
       sampleQuality:'Índice de completitud y densidad del muestreo; no es una probabilidad de seguridad.'
     },
+    survival:window.JEZERO_SURVIVAL?.getSnapshot?.()||null,
     software:{
       name:'JEZERO',
       version:JEZERO_UI_VERSION,
@@ -1299,7 +1300,7 @@ function initializeSettings(){
 }
 function exportMissionJson(){
   const mode=document.querySelector('input[name="mode"]:checked')?.value||'balanced';
-  const payload={format:'JEZERO-MISSION',version:44,algorithmVersion:ALGORITHM_VERSION,exportedAt:new Date().toISOString(),missionMeta:getMissionSettings(),interface:{language:uiLang(),theme:themeInfo().key,routeAnimation:routeAnimationEnabled},points:missionPoints.map(p=>({lat:p.lat,lon:p.lon,name:p.name,type:p.type==='base'?'base':'target',dwellMin:Number(p.dwellMin)||0})),returnBase:$('returnBase')?.checked!==false,optimizeOrder:$('optimizeOrder')?.checked!==false,mode,params:readOperationalDefaults(),snapshot:currentMission?{calculatedAt:lastCalculatedAt?.toISOString(),algorithmVersion:ALGORITHM_VERSION,terrain:window.marsElevationInfo||null,strategies:validation.MODES.map(k=>pdfStrategyPayload(currentMission[k])).filter(Boolean),errors:{...currentMission.errors}}:null};
+  const payload={format:'JEZERO-MISSION',version:44,algorithmVersion:ALGORITHM_VERSION,exportedAt:new Date().toISOString(),missionMeta:getMissionSettings(),interface:{language:uiLang(),theme:themeInfo().key,routeAnimation:routeAnimationEnabled},points:missionPoints.map(p=>({lat:p.lat,lon:p.lon,name:p.name,type:p.type==='base'?'base':'target',dwellMin:Number(p.dwellMin)||0})),returnBase:$('returnBase')?.checked!==false,optimizeOrder:$('optimizeOrder')?.checked!==false,mode,params:readOperationalDefaults(),snapshot:currentMission?{calculatedAt:lastCalculatedAt?.toISOString(),algorithmVersion:ALGORITHM_VERSION,terrain:window.JEZERO_DEMO?.enabled?{source:'DEM sintético de demostración',resolutionM:200}:window.marsElevationInfo||null,survival:window.JEZERO_SURVIVAL?.getSnapshot?.()||null,strategies:validation.MODES.map(k=>pdfStrategyPayload(currentMission[k])).filter(Boolean),errors:{...currentMission.errors}}:null};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a');
   const code=(payload.missionMeta.missionCode||'mision').replace(/[^a-z0-9_-]+/gi,'-'); a.href=url; a.download=`jezero-${code}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1200);
   showToast(ui('Misión exportada a JSON.','Mission exported to JSON.'));
@@ -1573,3 +1574,31 @@ window.addEventListener('jezero:modulechange',()=>{
 });
 
 (async()=>{try{D=await fetch(DATA_URL).then(r=>r.json());await prepareLayerSources();initMap();initPanelControls();initMapVisualControls();initializeSettings();setLayerStatus('route','ACTIVA','live');setLayerStatus('points','ACTIVA','live');renderMissionList();renderHistory();updatePlanningUI();populateReferenceLayers();setLayerStatus('known','ACTIVA','live');scheduleNomenclatureRefresh(250);setLayerStatus('landing','ACTIVA','live');$('statusText').textContent='DATOS CARTOGRÁFICOS · NASA / USGS';}catch(e){showToast(ui('No se pudo cargar la configuración.','Configuration could not be loaded.'));console.error(e);}})();
+
+// Presentation actions expose existing operations without duplicating mission state.
+window.JEZERO_UI_ACTIONS=Object.freeze({
+  selectedMission:()=>selectedMission(),
+  allMissions:()=>currentMission,
+  missionSnapshot:()=>currentMission?{selectedMode:selectedMission()?.mode,strategies:validation.MODES.map(k=>pdfStrategyPayload(currentMission[k])).filter(Boolean)}:null,
+  selectMode:mode=>activateStrategyFromAnalytics(mode),
+  previewProgress:fraction=>{const points=analyticsSeries(selectedMission());const point=points[Math.round((points.length-1)*fraction)];if(point)syncAnalyticsCursor(point,{pin:false});},
+  async startSurvivalDemo(){
+    window.JEZERO_DEMO.enable();
+    const response=await fetch('/examples/survival-demo.json');if(!response.ok)throw new Error('No se pudo cargar el escenario de demo.');
+    const text=await response.text();validation.missionFile(JSON.parse(text));
+    await importMissionJsonFile({target:{files:[new File([text],'survival-demo.json',{type:'application/json'})],value:''}});
+    await calculateMission();if(!currentMission)throw new Error('La demo no pudo calcular su recorrido.');
+    map.getView().cancelAnimations();map.getView().fit(ol.extent.boundingExtent(missionPoints.map(p=>[p.lon,p.lat])),{padding:[170,370,90,450],maxZoom:12,duration:0});
+    map.renderSync();
+    $('toast')?.classList.add('hide');
+    window.JEZERO_MODULES.activate('survival');
+  },
+  beginMapSelection(){selecting=true;updatePlanningUI();showToast(ui('Toca el mapa para añadir un punto. Los puntos actuales se conservan.','Tap the map to add a point. Existing points are preserved.'));},
+  async loadExample(){
+    const response=await fetch('/examples/01-jezero-corto.json');
+    if(!response.ok)throw new Error(ui('No se pudo cargar el ejemplo.','The example could not be loaded.'));
+    const text=await response.text();validation.missionFile(JSON.parse(text));
+    await importMissionJsonFile({target:{files:[new File([text],'jezero-ejemplo.json',{type:'application/json'})],value:''}});
+    map?.getView()?.cancelAnimations();map?.getView()?.animate({center:[77.45338,18.44463],zoom:8,duration:350});
+  }
+});

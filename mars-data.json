@@ -1,12 +1,12 @@
 {
   "app": {
-    "name": "JEZERO",
+    "name": "JEZERO Survival Lab",
     "language": "es",
     "region": "Marte Global",
     "mode": "research-planning",
     "disclaimer": "Índice experimental de riesgo topográfico; no constituye certificación de seguridad para una misión tripulada.",
     "scope": "global",
-    "version": "V44"
+    "version": "V46"
   },
   "region": {
     "name": "Marte Global",
