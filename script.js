@@ -12,7 +12,7 @@ const DEFAULTS_KEY = 'jezero-operational-defaults-v29';
 const PANEL_STATE_KEY = 'jezero-panel-state-v34';
 const MAP_VIEW_KEY = 'jezero-map-view-v34';
 const BASE_MAP_KEY = 'jezero-base-map-v34';
-const JEZERO_UI_VERSION = 'V49';
+const JEZERO_UI_VERSION = 'V51';
 const ALGORITHM_VERSION = '44.0';
 
 let D;

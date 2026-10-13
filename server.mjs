@@ -203,7 +203,7 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/health') {
       return send(res, 200, {
         ok: true,
-        version:'V51',
+        version:'V52',
         check:'server-liveness',
         elevation: 'ArcGIS ElevationLayer · MDEM200M',
         note: 'La elevación se consulta en el navegador mediante queryElevation.'

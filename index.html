@@ -4,15 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>JEZERO — Centro de misión</title>
-  <link rel="icon" type="image/svg+xml" href="assets/jezero-mark.svg?v=51">
+  <link rel="icon" type="image/svg+xml" href="assets/jezero-mark.svg?v=52">
   <link rel="stylesheet" href="assets/vendor/ol.css">
-  <link rel="stylesheet" href="style.css?v=51">
-  <link rel="stylesheet" href="interface.css?v=51">
-  <link rel="stylesheet" href="survival.css?v=51">
-  <link rel="stylesheet" href="professional.css?v=51">
-  <link rel="stylesheet" href="polish.css?v=51">
-  <link rel="stylesheet" href="operations.css?v=51">
-  <script src="modules/theme.js?v=51"></script>
+  <link rel="stylesheet" href="style.css?v=52">
+  <link rel="stylesheet" href="interface.css?v=52">
+  <link rel="stylesheet" href="survival.css?v=52">
+  <link rel="stylesheet" href="professional.css?v=52">
+  <link rel="stylesheet" href="polish.css?v=52">
+  <link rel="stylesheet" href="operations.css?v=52">
+  <script src="modules/theme.js?v=52"></script>
 </head>
 <body class="jezero-ui" data-module="planner" data-mission-state="empty">
 <header class="topbar">
@@ -307,7 +307,7 @@
     <section id="operationsWorkspace" class="operationsWorkspace" aria-label="Centro de supervivencia">
  <header class="operationsHeader"><div><small data-ops-es="JEZERO / SOPORTE DE MISIÓN" data-ops-en="JEZERO / MISSION SUPPORT">JEZERO / SOPORTE DE MISIÓN</small><h2 data-ops-es="Centro de supervivencia" data-ops-en="Survival planning center">Centro de supervivencia</h2></div><div class="operationsActions"><button id="opsExport" type="button" data-ops-es="Guardar paquete ↓" data-ops-en="Save pack ↓">Guardar paquete ↓</button><button id="opsImport" type="button" data-ops-es="Abrir paquete ↑" data-ops-en="Open pack ↑">Abrir paquete ↑</button><button id="opsClose" type="button" aria-label="Cerrar soporte">×</button></div></header>
  <input id="opsFile" type="file" accept=".json,application/json" hidden>
- <div class="operationsLayout"><nav id="opsTabs" aria-label="Módulos de supervivencia"></nav><div class="operationsContent"><div id="opsError" role="alert" hidden></div><div class="opsContext"><label><span data-ops-es="Origen para refugios" data-ops-en="Shelter reference location">Origen para refugios</span><select id="opsOrigin"></select></label><span><b data-ops-es="Duración estimada" data-ops-en="Estimated duration">Duración estimada</b> <span id="opsDuration">—</span></span><b id="opsStatus" role="status"></b></div><div id="opsPanels"></div><p class="operationsFootnote" data-ops-es="Datos declarados y cálculos bajo supuestos. Sin inspección de hardware, protocolos certificados o telemetría automática. Guarda también tu misión JSON; importar este paquete no reemplaza su ruta." data-ops-en="Declared data and calculations under assumptions. No hardware inspection, certified protocols or automatic telemetry. Also save mission JSON; importing this pack does not replace its route.">Datos declarados y cálculos bajo supuestos. Sin inspección de hardware, protocolos certificados o telemetría automática. Guarda también tu misión JSON; importar este paquete no reemplaza su ruta.</p></div></div>
+ <div class="operationsLayout"><label class="opsSectionPicker"><span data-ops-es="Sección de soporte" data-ops-en="Support section">Sección de soporte</span><select id="opsSectionSelect" aria-controls="opsPanels"></select></label><nav id="opsTabs" aria-label="Módulos de supervivencia"></nav><div class="operationsContent"><div id="opsError" role="alert" hidden></div><div class="opsContext"><label><span data-ops-es="Origen para refugios" data-ops-en="Shelter reference location">Origen para refugios</span><select id="opsOrigin"></select></label><span><b data-ops-es="Duración estimada" data-ops-en="Estimated duration">Duración estimada</b> <span id="opsDuration">—</span></span><span><b data-ops-es="Tripulación del escenario" data-ops-en="Scenario crew">Tripulación del escenario</b> <span id="opsCrew"></span></span><b id="opsStatus" role="status"></b></div><div id="opsPanels"></div><p class="operationsFootnote" data-ops-es="Datos declarados y cálculos bajo supuestos. Sin inspección de hardware, protocolos certificados o telemetría automática. Guarda también tu misión JSON; importar este paquete no reemplaza su ruta." data-ops-en="Declared data and calculations under assumptions. No hardware inspection, certified protocols or automatic telemetry. Also save mission JSON; importing this pack does not replace its route.">Datos declarados y cálculos bajo supuestos. Sin inspección de hardware, protocolos certificados o telemetría automática. Guarda también tu misión JSON; importar este paquete no reemplaza su ruta.</p></div></div>
 </section>
     <section id="forecastWorkspace" class="forecastWorkspace" aria-label="Predicción meteorológica">
  <header class="workspaceHeading"><div><small>JEZERO / CLIMA</small><h2 data-weather-es="Predicción del próximo sol" data-weather-en="Next-sol forecast">Predicción del próximo sol</h2></div><button data-close-interface type="button" aria-label="Cerrar predicción">×</button></header>
@@ -583,24 +583,24 @@
 
 <script src="assets/vendor/ol.js"></script>
 <script src="mars-elevation.js"></script>
-<script src="modules/locale.js?v=51"></script>
-<script src="modules/i18n.js?v=51"></script>
-<script src="modules/map-detail.js?v=51"></script>
-<script src="modules/validation.cjs?v=51"></script>
-<script src="modules/route-engine.cjs?v=51"></script>
-<script src="script.js?v=51"></script>
-<script src="modules/module-shell.js?v=51"></script>
-<script src="modules/interface.js?v=51"></script>
-<script src="modules/survival-engine.cjs?v=51"></script>
+<script src="modules/locale.js?v=52"></script>
+<script src="modules/i18n.js?v=52"></script>
+<script src="modules/map-detail.js?v=52"></script>
+<script src="modules/validation.cjs?v=52"></script>
+<script src="modules/route-engine.cjs?v=52"></script>
+<script src="script.js?v=52"></script>
+<script src="modules/module-shell.js?v=52"></script>
+<script src="modules/interface.js?v=52"></script>
+<script src="modules/survival-engine.cjs?v=52"></script>
 
-<script src="modules/survival.js?v=51"></script>
-<script src="modules/help-english.js?v=51"></script>
-<script src="modules/help.js?v=51"></script>
-<script src="modules/workspace.js?v=51"></script>
-<script src="modules/forecast.js?v=51"></script>
-<script src="modules/operations-engine.cjs?v=51"></script>
-<script src="modules/operations-map.js?v=51"></script>
-<script src="modules/operations.js?v=51"></script>
-<script src="modules/offline.js?v=51"></script>
+<script src="modules/survival.js?v=52"></script>
+<script src="modules/help-english.js?v=52"></script>
+<script src="modules/help.js?v=52"></script>
+<script src="modules/workspace.js?v=52"></script>
+<script src="modules/forecast.js?v=52"></script>
+<script src="modules/operations-engine.cjs?v=52"></script>
+<script src="modules/operations-map.js?v=52"></script>
+<script src="modules/operations.js?v=52"></script>
+<script src="modules/offline.js?v=52"></script>
 </body>
 </html>

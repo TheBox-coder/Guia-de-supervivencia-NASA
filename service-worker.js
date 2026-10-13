@@ -1,4 +1,4 @@
-const CACHE='jezero-survival-v51';
+const CACHE='jezero-survival-v52';
 const FILES=['/operations.css','/modules/operations-engine.cjs','/modules/operations-map.js','/modules/operations.js','/modules/forecast.js','/polish.css','/modules/map-detail.js','/modules/workspace.js','/modules/locale.js','/modules/help-english.js','/MANUAL-HELP-EN.md','/professional.css','/modules/help.js','/MANUAL-DE-AYUDA.md','/assets/jezero-mark.svg','/','/index.html','/style.css','/interface.css','/survival.css','/mars-data.json','/mars-elevation.js','/script.js',
  '/assets/vendor/ol.js','/assets/vendor/ol.css','/assets/favicon.ico','/assets/mars-2020-logo.png',
  '/modules/theme.js','/modules/i18n.js','/modules/validation.cjs','/modules/route-engine.cjs','/modules/module-shell.js','/modules/interface.js','/modules/survival-engine.cjs','/modules/survival.js','/modules/offline.js',

@@ -134,3 +134,20 @@ Reload after updating the project. The cache updates when the server publishes t
 
 JEZERO is a planning tool with explainable models. It has no automatic link to current NASA telemetry and does not replace mission protocols.
 
+
+## Survival planning center · V51
+
+Open **Support** or use the Guide button. Save forms with **Save inputs** or **Save record**. Data is local and operator-declared.
+
+- **Shelters:** coordinates, capacity, availability, resources and source. Select a mission reference location. View map shows assets; Add as destination lets the existing route engine calculate the journey. Straight distance does not establish traversability or actual availability.
+- **Life support:** water in L and L/h; CO₂ removal capacity in kg and generation in kg/h; thermal energy in kWh and load in kW. All per person. Budgets use current calculated route or matching scenario duration. Thermal energy is not added again to the Guide battery. Air CO₂ concentration is not modeled.
+- **Radiation:** µSv/h rate, accumulated mSv, source and ISO timestamp with a zone. Projection assumes a constant rate. Mission limits are supplied by your team, not medical recommendations from the app. Missing, future or overly old readings remain pending.
+- **Communications:** checked link state, contacts and backup channels. Relays have coordinates and declared radius. Circles do not validate propagation, terrain, interference or real coverage.
+- **Equipment:** suit, rover, habitat, radio and dosimeter inventory; state, criticality, checks and maintenance. Checked state is not an automatic inspection.
+- **Contingencies:** record documented team protocols with source, responsible person and steps. Event categories include power failure, pressure loss, injury, link loss and blocked routes. The app does not generate certified medical treatments or procedures. Checkboxes record operator-declared steps in the log.
+- **Abort criteria:** maximum duration, minimum water, dose, slope, measurement age, mandatory return, link loss and critical faults. Causes are displayed separately; missing data is never a pass. Negative resource budgets are also flagged.
+- **Logbook:** notes, decisions, incidents and changes with UTC timestamps. This is an editable local journal, not an immutable forensic record.
+
+**Save pack** exports JEZERO-SUPPORT v1 with state, log, assessment and mission reference. **Open pack** validates before replacing support inputs and does not replace the route. Also save mission JSON. Import limit: 10 MB; 40 inventory records, 50 protocol steps and 500 log entries. Export and remove an entry to free log space. Clearing browser storage removes local copies.
+
+Measurement timestamps include a zone, for example `2026-10-12T14:00:00Z`; this is a format example, not a configured reading. Maintenance dates use UTC `YYYY-MM-DD`. The interface and records work offline after a complete first load; external imagery and elevation calculations require connection. No status authorizes departure or certifies safety.

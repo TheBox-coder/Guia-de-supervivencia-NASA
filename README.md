@@ -1,3 +1,5 @@
+> V51: abre SOPORTE para usar refugios, soporte vital, radiación, comunicaciones, equipo, contingencias, cancelación y bitácora. Consulta OPERACIONES.md y la nueva sección de ayuda.
+
 > V50: el botón CLIMA abre la proyección térmica del próximo sol basada en tus observaciones. Todos los botones de navegación cierran su interfaz al repetir el toque.
 
 > V49: correcciones de EVA, secuencia e iconos; detalle regional real CTX/HiRISE de NASA Trek; biblioteca local, recuperación de borradores y presupuesto explicable. Tutorial y manual completos en inglés y español. La resolución del DEM de cálculo permanece en ~200 m.
