@@ -35,6 +35,12 @@
     if(!dataset)missing.push('Carga observaciones de temperatura para estimar el clima.');
     if(!$('guideEquipmentConfirmed').checked)missing.push('Revisa y confirma el oxígeno, la batería y los consumos de tu equipo.');
     ready=missing.length===0;
+    const flags=[Boolean(m),Boolean(dataset),$('guideEquipmentConfirmed').checked&&!settingsInvalid];
+    const total=flags.filter(Boolean).length;
+    if($('missionReadinessRing'))$('missionReadinessRing').style.setProperty('--complete',`${total/3*100}%`);
+    set('missionReadinessCount',`${total}/3`);
+    set('missionReadinessLabel',ready?'Datos de entrada completos':'Preparación pendiente');
+    ['guideRouteStep','guideDataStep','guideEquipmentStep'].forEach((id,i)=>{if($(id))$(id).dataset.complete=String(flags[i]);});
     set('guideRouteState',m?'Recorrido calculado':'Pendiente: base y destino');
     set('guideDataState',dataset?'Archivo cargado':'Pendiente: observaciones');
     set('guideEquipmentState',$('guideEquipmentConfirmed').checked?'Valores confirmados':'Pendiente: revisar valores');
@@ -78,7 +84,13 @@
       $('survivalAssumptionsText').innerHTML=has?'<ul>'+snapshot.assumptions.map(a=>'<li>'+esc(a)+'</li>').join('')+'</ul>':'';
       $('resourceChart').innerHTML=has?chart(snapshot.timeline.map(p=>({...p,remainingPct:p.batteryKWh/snapshot.battery.capacityKWh*100,oxygenPct:p.oxygenKg/snapshot.oxygen.capacityKg*100,windowPct:p.remainingWindowHours/m.availableHours*100})),'remainingPct',{percent:true,overlays:[{key:'oxygenPct',color:'var(--theme-success)'},{key:'windowPct',color:'var(--theme-warning)',dash:'5 3'}]}):'<div class="chartEmpty">La autonomía aparece después de calcular una misión.</div>';
       document.querySelectorAll('[data-survival-scenario]').forEach(b=>{b.classList.toggle('is-active',b.dataset.survivalScenario===settings.scenario);b.setAttribute('aria-pressed',String(b.dataset.survivalScenario===settings.scenario));});
+      const brief=$('decisionBrief');if(brief){brief.hidden=!has;brief.innerHTML=has?[
+        {label:'Ventana de tiempo',value:snapshot.timeMarginHours*60,unit:'min',hint:'Reduce destinos o paradas y vuelve a calcular.'},
+        {label:'Reserva de oxígeno',value:snapshot.oxygen.marginKg,unit:'kg',hint:'Revisa la capacidad y el consumo de O₂, o acorta el recorrido.'},
+        {label:'Reserva de energía',value:snapshot.battery.marginKWh,unit:'kWh',hint:'Revisa capacidad, carga térmica y duración antes de recalcular.'}
+      ].map(x=>`<article data-deficit="${x.value<0}"><b>${x.label}</b><strong>${x.value<0?'−':'+'}${Math.abs(x.value).toFixed(x.unit==='min'?0:2)} ${x.unit}</strong><p>${x.value<0?x.hint:'Conserva la reserva exigida bajo los supuestos actuales.'}</p></article>`).join(''):'';}
       updateProgress();
+      window.dispatchEvent(new CustomEvent('jezero:weatherchange'));
     }catch(e){error(e.message);}
   }
   function updateProgress(){

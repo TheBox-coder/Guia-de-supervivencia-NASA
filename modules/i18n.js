@@ -4,6 +4,7 @@
   const VALID = new Set(['es','en']);
 
   const ES_EN = {
+    ...window.JEZERO_COPY?.phrases,
     'Flujo animado de la ruta':'Animated route flow','Muestra pequeños indicadores moviéndose en el sentido real de la caminata. No afecta el cálculo.':'Shows small indicators moving in the actual travel direction. It does not affect calculations.','Animación de ruta desactivada.':'Route animation disabled.','Flujo animado de ruta activado.':'Animated route flow enabled.',
     'EVA MISSION SYSTEM':'EVA MISSION SYSTEM',
     'TERRAIN · ROUTING · NAVIGATION':'TERRAIN · ROUTING · NAVIGATION',
@@ -104,6 +105,7 @@
   };
 
   function translatePattern(text, lang=current){
+    const extra=window.JEZERO_COPY?.pattern(text,lang);if(extra&&extra!==text)return extra;
     let s=String(text ?? '');
     if(lang==='en'){
       s=s.replace(/^(\d+) misiones$/,'$1 missions').replace(/^1 misión$/,'1 mission');

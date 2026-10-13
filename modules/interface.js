@@ -5,6 +5,8 @@
   const mobile=()=>window.matchMedia('(max-width:760px)').matches;
   let previousCount=-1,previousResult=false;
   const icons={
+    operations:'<path d="M12 3l8 4v5c0 5-8 9-8 9S4 17 4 12V7zM12 8v8m-4-4h8"/>',
+    weather:'<path d="M7 16H5a4 4 0 1 1 1-8 6 6 0 0 1 11-1 4 4 0 1 1 2 9h-2M8 20l1-2m3 2 1-2m3 2 1-2"/>',
     survival:'<path d="M12 3l8 4v5c0 5-8 9-8 9S4 17 4 12V7z"/><path d="M8 12l3 3 5-6"/>',
     explorer:'<circle cx="12" cy="12" r="8"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/>',
     planner:'<circle cx="6" cy="17" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 17h4a4 4 0 0 0 0-8H9a3 3 0 0 1 0-6h7"/>',
@@ -17,6 +19,7 @@
     if(host&&icon)host.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${icon}</svg>`;
   });
   function closePanel(){
+    if(window.JEZERO_MODULES?.close){window.JEZERO_MODULES.close();return;}
     if(mobile())document.querySelector('.sidebar')?.classList.remove('mobile-open');
     else{const state=window.JEZERO_PANELS?.get();window.JEZERO_PANELS?.set(false,state?.right);}
     document.querySelector(`[data-module-target="${document.body.dataset.module}"]`)?.focus();
@@ -63,19 +66,22 @@
     if(hasResult!==previousResult && !mobile() && document.body.dataset.module==='planner'){
       const state=window.JEZERO_PANELS?.get();window.JEZERO_PANELS?.set(state?.left!==false,hasResult);
     }
+    if(byId('evaReturnHome'))byId('evaReturnHome').disabled=!hasResult;
+    if(byId('evaEmptyState'))byId('evaEmptyState').hidden=hasResult;
     previousResult=hasResult;
   }
   const observer=new MutationObserver(update);
   ['pointCount','routeStatus'].forEach(id=>{const el=byId(id);if(el)observer.observe(el,{childList:true,subtree:true,characterData:true});});
   window.addEventListener('jezero:modulechange',()=>{
     const module=document.body.dataset.module;
-    if(!mobile())window.JEZERO_PANELS?.set(!['analysis','survival'].includes(module),module==='eva'||(module==='planner'&&previousResult));
+    if(document.body.dataset.interfaceOpen==='false'){window.JEZERO_PANELS?.set(false,false);update();return;}
+    if(!mobile())window.JEZERO_PANELS?.set(!['analysis','survival','weather','operations'].includes(module),module==='eva'||(module==='planner'&&previousResult));
     document.querySelector('.sidebar .modulePanel.is-active .panelScroll')?.scrollTo(0,0);
     update();
   });
   window.addEventListener('jezero:languagechange',update);
   if(!mobile()){
-    const state=window.JEZERO_PANELS?.get();window.JEZERO_PANELS?.set(document.body.dataset.module==='survival'?false:state?.left!==false,false);
+    const state=window.JEZERO_PANELS?.get();window.JEZERO_PANELS?.set(['survival','weather','operations'].includes(document.body.dataset.module)?false:state?.left!==false,false);
   }
   update();
 })();

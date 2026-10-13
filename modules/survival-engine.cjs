@@ -69,6 +69,11 @@
       return {hour,temperatureC:t,lowerC:t-model.errorC,upperC:t+model.errorC,pressurePa:model.pressurePa,windMps:model.windMps,dustIndex:dust};
     })};
   }
+  function observationForecast(dataset){
+    if(!dataset)return {status:'missing-data',model:null,series:[]};
+    const result=forecast({},dataset);
+    return {status:'projection',horizonSols:1,model:result.model,series:result.series};
+  }
   function terrain(mission){
     const m=mission?.metrics||{};
     return {slopeDeg:validation.numeric(m.maxSlopeDeg),roughnessDeg:validation.numeric(m.avgRoughnessDeg),sampleQuality:validation.numeric(m.avgConfidence),spacingM:mission?.legs?.length?Math.max(...mission.legs.map(l=>Number(l.gridSpacingKm)||0))*1000:null,
@@ -116,5 +121,5 @@
     const recommended=(feasible.length?feasible:rows).sort((a,b)=>b.timeMarginHours-a.timeMarginHours)[0];
     return {rows,recommendedMode:recommended?.mode||null,hasFeasible:feasible.length>0};
   }
-  return Object.freeze({MODEL_VERSION,SOL_HOURS,DEFAULTS,config,weatherData,weatherModel,forecast,temperature,terrain,evaluate,compare});
+  return Object.freeze({MODEL_VERSION,SOL_HOURS,DEFAULTS,config,weatherData,weatherModel,forecast,observationForecast,temperature,terrain,evaluate,compare});
 });

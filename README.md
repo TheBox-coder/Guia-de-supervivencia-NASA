@@ -1,3 +1,9 @@
+> V50: el botón CLIMA abre la proyección térmica del próximo sol basada en tus observaciones. Todos los botones de navegación cierran su interfaz al repetir el toque.
+
+> V49: correcciones de EVA, secuencia e iconos; detalle regional real CTX/HiRISE de NASA Trek; biblioteca local, recuperación de borradores y presupuesto explicable. Tutorial y manual completos en inglés y español. La resolución del DEM de cálculo permanece en ~200 m.
+
+> V48: centro de misión con jerarquía visual renovada, tutorial reanudable de siete pasos y manual de ayuda con búsqueda. El manual se abre desde Ayuda o la tecla ?. Consulta MANUAL-DE-AYUDA.md para la versión descargable.
+
 # JEZERO · Guía de planificación en Marte
 
 La experiencia principal utiliza cartografía y elevación remotas reales. No carga terreno sintético ni una misión de demostración.

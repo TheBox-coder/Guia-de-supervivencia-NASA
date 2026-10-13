@@ -12,6 +12,10 @@ const PORT = Number(process.env.PORT || 8000);
 const NOMENCLATURE_ENDPOINT = 'https://planetarynames.wr.usgs.gov/nomenclature/SearchResults';
 const nomenclatureCache = new Map();
 const PUBLIC_FILES = new Set([
+  '/operations.css','/modules/operations-engine.cjs','/modules/operations-map.js','/modules/operations.js',
+  '/modules/forecast.js',
+  '/polish.css','/modules/map-detail.js','/modules/workspace.js','/modules/locale.js','/modules/help-english.js','/MANUAL-HELP-EN.md',
+  '/professional.css','/modules/help.js','/MANUAL-DE-AYUDA.md',
   '/assets/jezero-mark.svg',
   '/service-worker.js','/modules/offline.js',
   '/survival.css','/modules/survival-engine.cjs','/modules/survival.js','/modules/demo.js','/examples/survival-demo.json','/assets/vendor/ol.js','/assets/vendor/ol.css',
@@ -199,7 +203,7 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/health') {
       return send(res, 200, {
         ok: true,
-        version:'V47',
+        version:'V51',
         check:'server-liveness',
         elevation: 'ArcGIS ElevationLayer · MDEM200M',
         note: 'La elevación se consulta en el navegador mediante queryElevation.'

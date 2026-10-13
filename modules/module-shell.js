@@ -2,13 +2,15 @@
   const MODULE_KEY = 'jezero-active-module-v46';
   const labels = {
     survival:'GUÍA',
+    operations:'SOPORTE',
+    weather:'CLIMA',
     explorer: 'MAPA',
     planner: 'MISIÓN',
     eva: 'EVA',
     analysis: 'RESULTADOS',
     settings: 'CONFIGURACIÓN'
   };
-  const labelFor = name => name==='survival'?'GUÍA':window.JEZERO_I18N?.moduleLabel?.(name) || labels[name];
+  const labelFor = name => name==='operations'?(window.JEZERO_I18N?.ui('SOPORTE','SUPPORT')):name==='weather'?(window.JEZERO_I18N?.ui('CLIMA','WEATHER')):name==='survival'?(window.JEZERO_I18N?.ui('GUÍA','GUIDE')):window.JEZERO_I18N?.moduleLabel?.(name) || labels[name];
 
   const qsa = (sel, root=document) => [...root.querySelectorAll(sel)];
   const byId = id => document.getElementById(id);
@@ -42,14 +44,16 @@
     });
   }
 
-  function activateModule(name, {save=true, openMobile=true}={}){
+  function activateModule(name, {save=true, openMobile=true, open=true}={}){
     if (!validModule(name)) name = 'planner';
     document.body.dataset.module = name;
+    document.body.dataset.interfaceOpen=String(open);
 
     qsa('[data-module-target]').forEach(btn => {
-      const active = btn.dataset.moduleTarget === name;
+      const active = open&&btn.dataset.moduleTarget === name;
       btn.classList.toggle('is-active', active);
       btn.setAttribute('aria-current', active ? 'page' : 'false');
+      btn.setAttribute('aria-expanded',String(active));
     });
     qsa('[data-module-panel]').forEach(panel => {
       panel.classList.toggle('is-active', panel.dataset.modulePanel === name);
@@ -63,7 +67,7 @@
 
     const sidebar = document.querySelector('.sidebar');
     if (sidebar && window.matchMedia('(max-width:760px)').matches && openMobile){
-      if(['analysis','survival'].includes(name))sidebar.classList.remove('mobile-open');else sidebar.classList.add('mobile-open');
+      if(['analysis','survival','weather','operations'].includes(name))sidebar.classList.remove('mobile-open');else sidebar.classList.add('mobile-open');
     }
 
     // OpenLayers recalcula correctamente el viewport al recibir un resize.
@@ -71,19 +75,19 @@
     window.dispatchEvent(new CustomEvent('jezero:modulechange', {detail:{module:name}}));
   }
 
-  qsa('[data-module-target]').forEach(btn => btn.addEventListener('click', () => {
-    const name = btn.dataset.moduleTarget;
-    const sidebar = document.querySelector('.sidebar');
-    const sameModule = document.body.dataset.module === name;
-
-    if (sidebar && window.matchMedia('(max-width:760px)').matches) {
-      if (sameModule) { if(['analysis','survival'].includes(name))sidebar.classList.remove('mobile-open');else sidebar.classList.toggle('mobile-open'); return; }
-      activateModule(name);
-      return;
-    }
-
-    // Module navigation keeps its purpose; panel visibility has dedicated controls.
-    activateModule(name);
+  function closeModule(){
+    document.body.dataset.interfaceOpen='false';
+    document.querySelector('.sidebar')?.classList.remove('mobile-open');
+    window.JEZERO_PANELS?.set(false,false);
+    qsa('[data-module-target]').forEach(btn=>{btn.classList.remove('is-active');btn.setAttribute('aria-expanded','false');btn.setAttribute('aria-current','false');});
+    window.dispatchEvent(new Event('resize'));
+    window.dispatchEvent(new CustomEvent('jezero:modulevisibility',{detail:{open:false}}));
+  }
+  qsa('[data-module-target]').forEach(btn=>btn.addEventListener('click',()=>{
+    const name=btn.dataset.moduleTarget,same=document.body.dataset.module===name;
+    const overlay=['survival','analysis','weather','operations'].includes(name);
+    const visible=document.body.dataset.interfaceOpen!=='false'&&(overlay||(matchMedia('(max-width:760px)').matches?document.querySelector('.sidebar')?.classList.contains('mobile-open'):window.JEZERO_PANELS?.get()?.left!==false));
+    if(same&&visible)closeModule();else activateModule(name);
   }));
 
   qsa('[data-jump-module]').forEach(btn => btn.addEventListener('click', () => activateModule(btn.dataset.jumpModule)));
@@ -128,7 +132,7 @@
   const initial = localStorage.getItem(MODULE_KEY) || 'survival';
   activateModule(validModule(initial) ? initial : 'survival', {save:false, openMobile:false});
 
-  window.addEventListener('jezero:languagechange',()=>activateModule(document.body.dataset.module||'planner',{save:false,openMobile:false}));
+  window.addEventListener('jezero:languagechange',()=>activateModule(document.body.dataset.module||'planner',{save:false,openMobile:false,open:document.body.dataset.interfaceOpen!=='false'}));
 
-  window.JEZERO_MODULES = Object.freeze({ activate: activateModule, labels:{...labels} });
+  window.JEZERO_MODULES = Object.freeze({ activate: activateModule, close:closeModule, labels:{...labels} });
 })();

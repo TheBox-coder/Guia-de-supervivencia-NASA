@@ -3,13 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>JEZERO — Survival Lab</title>
-  <link rel="icon" type="image/svg+xml" href="assets/jezero-mark.svg?v=47">
+  <title>JEZERO — Centro de misión</title>
+  <link rel="icon" type="image/svg+xml" href="assets/jezero-mark.svg?v=51">
   <link rel="stylesheet" href="assets/vendor/ol.css">
-  <link rel="stylesheet" href="style.css?v=47">
-  <link rel="stylesheet" href="interface.css?v=47">
-  <link rel="stylesheet" href="survival.css?v=47">
-  <script src="modules/theme.js?v=47"></script>
+  <link rel="stylesheet" href="style.css?v=51">
+  <link rel="stylesheet" href="interface.css?v=51">
+  <link rel="stylesheet" href="survival.css?v=51">
+  <link rel="stylesheet" href="professional.css?v=51">
+  <link rel="stylesheet" href="polish.css?v=51">
+  <link rel="stylesheet" href="operations.css?v=51">
+  <script src="modules/theme.js?v=51"></script>
 </head>
 <body class="jezero-ui" data-module="planner" data-mission-state="empty">
 <header class="topbar">
@@ -28,7 +31,7 @@
     <div><span>EVA / RUTA</span><b data-mirror="duration">—</b></div>
     <div><span>MARGEN / RUTA</span><b data-mirror="missionMargin">—</b></div>
   </div>
-  <div class="topMeta"><span class="liveDot"></span><span id="statusText">DATOS CARTOGRÁFICOS · NASA / USGS</span></div>
+  <div class="topMeta"><span class="liveDot"></span><span id="statusText">CARTOGRAFÍA NASA / USGS</span><button class="topbarHelp" type="button" data-open-help="start" title="Abrir manual (tecla ?)">? Ayuda</button></div>
 </header>
 
 <main class="appShell">
@@ -36,6 +39,8 @@
   <button class="panelEdgeToggle panelEdgeToggleRight" id="toggleRightPanel" type="button" aria-label="Ocultar panel derecho" title="Ocultar panel derecho">›</button>
   <nav class="moduleRail" aria-label="Áreas principales de JEZERO">
     <button class="moduleNav" data-module-target="survival" title="Supervivencia"><span>◇</span><small>GUÍA</small></button>
+    <button class="moduleNav" data-module-target="operations" title="Centro de supervivencia"><span>⊞</span><small>SOPORTE</small></button>
+    <button class="moduleNav" data-module-target="weather" title="Predicción de clima"><span>☁</span><small>CLIMA</small></button>
     <button class="moduleNav" data-module-target="explorer" title="Mapa"><span>⌖</span><small>MAPA</small></button>
     <button class="moduleNav is-active" data-module-target="planner" title="Misión"><span>⌁</span><small>MISIÓN</small></button>
     <button class="moduleNav" data-module-target="eva" title="EVA"><span>▲</span><small>EVA</small></button>
@@ -167,7 +172,7 @@
       </section>
 
       <section class="missionTimelinePanel">
-        <div class="sectionTitle">TIMELINE DE MISIÓN</div>
+        <div class="sectionTitle">Secuencia de la misión</div>
         <div id="missionTimeline" class="missionTimeline"><div class="timelineEmpty">BASE → PUNTOS → REGRESO</div></div>
       </section>
     </div><div class="plannerFooter"><span id="uiCalcHint" class="uiCalcHint">Añade una base y un objetivo para comenzar.</span><button class="action primaryAction" id="calculate" disabled><span>⌁</span> Calcular misión</button><div class="plannerFooterTools"><div class="missionCounter"><span>Puntos</span><b id="pointCount">0</b></div><button class="action ghost" id="planMode"><span>＋</span> Nueva misión</button><button class="action ghost" id="clearRoute"><span>×</span> Limpiar misión</button></div></div></div>
@@ -189,8 +194,8 @@
         <div><span>DIFICULTAD</span><b data-mirror="riskLabel">Sin evaluación</b></div>
       </section>
       <section>
-        <button id="evaReturnHome" class="returnHomeAction"><span>⌂</span><div><b>REGRESAR A BASE</b><small>Recalcular la misión asegurando el retorno a la base</small></div></button>
-        <button class="moduleJump" data-jump-module="planner"><span>⌁</span><div><b>Editar la misión</b><small>Ajustar puntos y restricciones</small></div></button>
+        <p id="evaEmptyState" class="evaEmptyState">Calcula una misión para revisar el recorrido y su retorno.</p><button id="evaReturnHome" class="returnHomeAction" disabled><span><svg class="actionIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10l9-7 9 7M5 9v12h14V9M9 21v-8h6v8"/></svg></span><div><b>Recalcular con regreso a la base</b><small>Incluye el retorno en el presupuesto de la misión.</small></div></button>
+        <button class="moduleJump" data-jump-module="planner"><span><svg class="actionIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3l5 5-12 12-6 1 1-6zM13 6l5 5"/></svg></span><div><b>Editar la misión</b><small>Edita los puntos y las restricciones del recorrido.</small></div></button>
       </section>
       <div class="evaAlertStrip"><span>TERRENO</span><b data-mirror="riskLabel">SIN EVALUACIÓN</b><span>TRANSIT.</span><b data-mirror="avgTransitability">—</b></div>
       <p class="safetyNote">Planificación y simulación. DEM nominal de ~200 m: no detecta obstáculos a escala humana. Calidad de muestreo = completitud y densidad, no probabilidad de seguridad. Las rutas se buscan dentro de un corredor limitado.</p>
@@ -299,26 +304,39 @@
   </aside>
 
   <section class="mapPanel">
+    <section id="operationsWorkspace" class="operationsWorkspace" aria-label="Centro de supervivencia">
+ <header class="operationsHeader"><div><small data-ops-es="JEZERO / SOPORTE DE MISIÓN" data-ops-en="JEZERO / MISSION SUPPORT">JEZERO / SOPORTE DE MISIÓN</small><h2 data-ops-es="Centro de supervivencia" data-ops-en="Survival planning center">Centro de supervivencia</h2></div><div class="operationsActions"><button id="opsExport" type="button" data-ops-es="Guardar paquete ↓" data-ops-en="Save pack ↓">Guardar paquete ↓</button><button id="opsImport" type="button" data-ops-es="Abrir paquete ↑" data-ops-en="Open pack ↑">Abrir paquete ↑</button><button id="opsClose" type="button" aria-label="Cerrar soporte">×</button></div></header>
+ <input id="opsFile" type="file" accept=".json,application/json" hidden>
+ <div class="operationsLayout"><nav id="opsTabs" aria-label="Módulos de supervivencia"></nav><div class="operationsContent"><div id="opsError" role="alert" hidden></div><div class="opsContext"><label><span data-ops-es="Origen para refugios" data-ops-en="Shelter reference location">Origen para refugios</span><select id="opsOrigin"></select></label><span><b data-ops-es="Duración estimada" data-ops-en="Estimated duration">Duración estimada</b> <span id="opsDuration">—</span></span><b id="opsStatus" role="status"></b></div><div id="opsPanels"></div><p class="operationsFootnote" data-ops-es="Datos declarados y cálculos bajo supuestos. Sin inspección de hardware, protocolos certificados o telemetría automática. Guarda también tu misión JSON; importar este paquete no reemplaza su ruta." data-ops-en="Declared data and calculations under assumptions. No hardware inspection, certified protocols or automatic telemetry. Also save mission JSON; importing this pack does not replace its route.">Datos declarados y cálculos bajo supuestos. Sin inspección de hardware, protocolos certificados o telemetría automática. Guarda también tu misión JSON; importar este paquete no reemplaza su ruta.</p></div></div>
+</section>
+    <section id="forecastWorkspace" class="forecastWorkspace" aria-label="Predicción meteorológica">
+ <header class="workspaceHeading"><div><small>JEZERO / CLIMA</small><h2 data-weather-es="Predicción del próximo sol" data-weather-en="Next-sol forecast">Predicción del próximo sol</h2></div><button data-close-interface type="button" aria-label="Cerrar predicción">×</button></header>
+ <div id="forecastEmpty" class="forecastEmpty"><h3 data-weather-es="Añade observaciones para predecir" data-weather-en="Add observations for a projection">Añade observaciones para predecir</h3><p data-weather-es="No hay mediciones cargadas. Importa tu archivo para proyectar la temperatura del próximo sol; no se genera clima ficticio." data-weather-en="No observations loaded. Import your file to project temperature for the next sol; fictional weather is not generated.">No hay mediciones cargadas. Importa tu archivo para proyectar la temperatura del próximo sol; no se genera clima ficticio.</p><button data-forecast-import type="button" data-weather-es="Añadir observaciones →" data-weather-en="Add observations →">Añadir observaciones →</button></div>
+ <div id="forecastResults" hidden><div class="forecastSummary"><div><span id="forecastSol"></span><strong id="forecastTemp"></strong><small id="forecastHourValue"></small></div><div><b data-weather-es="Fuente de observaciones" data-weather-en="Observation source">Fuente de observaciones</b><p id="forecastSource"></p><p id="forecastCoverage"></p></div></div><div id="forecastChart"></div><label class="forecastHourLabel"><span data-weather-es="Explora la hora local" data-weather-en="Explore local time">Explora la hora local</span><input id="forecastHour" type="range" min="0" max="23" value="12"></label><div id="forecastHours"></div><p id="forecastBand"></p><div class="forecastFacts"><article><b data-weather-es="Hora más templada del modelo" data-weather-en="Warmest modeled hour">Hora más templada del modelo</b><strong id="forecastWarm"></strong></article><article><b data-weather-es="Presión observada · mediana" data-weather-en="Observed pressure · median">Presión observada · mediana</b><strong id="forecastPressure"></strong></article><article><b data-weather-es="Viento observado · mediana" data-weather-en="Observed wind · median">Viento observado · mediana</b><strong id="forecastWind"></strong></article></div><p data-weather-es="Proyección térmica por patrón diario. No predice tormentas ni garantiza condiciones seguras. Presión y viento son observaciones, no predicciones." data-weather-en="Temperature projection from a daily pattern. It does not predict storms or guarantee safe conditions. Pressure and wind are observations, not predictions.">Proyección térmica por patrón diario. No predice tormentas ni garantiza condiciones seguras. Presión y viento son observaciones, no predicciones.</p><button data-forecast-import type="button" data-weather-es="Cambiar observaciones" data-weather-en="Change observations">Cambiar observaciones</button></div>
+</section>
     <div id="demoModeBadge" class="demoModeBadge" hidden>DEMO · TERRENO SINTÉTICO, NO NASA</div>
 <section id="survivalWorkspace" class="survivalWorkspace" aria-label="Guía de supervivencia en Marte">
   <div class="survivalScroll">
+    <div class="workspaceHeading"><div><small>JEZERO / OPERACIONES</small><h2>Centro de misión</h2></div><div class="workspaceActions"><button id="missionLibraryOpen" type="button">Misiones</button><button type="button" data-mission-file-action="importMissionJson">Abrir misión ↑</button><button id="workspaceSaveMission" type="button" data-mission-file-action="exportMissionJson" disabled>Guardar misión ↓</button><span class="workspaceLabel">V51</span></div></div>
+    <div id="draftRecovery" class="draftRecovery" hidden><div><b>Encontramos un borrador</b><p>Recupera tus puntos y parámetros guardados en este navegador.</p></div><div><button id="draftRecover" type="button">Recuperar</button><button id="draftDismiss" type="button">Descartar</button></div></div>
     <header class="survivalHero">
-      <div><div class="survivalEyebrow">JEZERO / SURVIVAL LAB <span id="survivalDataBadge">PLANIFICACIÓN</span></div>
-        <h1>Explora Marte.<br><em>Planifica tu regreso.</em></h1>
+      <div><div class="survivalEyebrow">PLANIFICA · EVALÚA · REGRESA <span id="survivalDataBadge">PLANIFICACIÓN</span></div>
+        <h1>Tu próxima salida.<br><em>Un regreso planificado.</em></h1>
         <p>Elige dónde ir, añade tus datos y revisa si tus recursos alcanzan para regresar.</p>
         <div class="survivalHeroActions"><button id="survivalPlan" class="survivalPrimary" type="button">1. Crear mi misión ↗</button><button id="survivalGoData" type="button">2. Añadir datos del clima</button></div>
       </div>
-      <div class="survivalDecision" id="survivalDecision"><span>TU MISIÓN, DE UN VISTAZO</span><strong id="survivalStatus">Define una misión</strong><p id="survivalReason">Empieza por elegir una base y un destino en el mapa.</p><div class="survivalDecisionFacts"><div><small>TIEMPO PARA SALIR Y VOLVER</small><b id="survivalTime">—</b></div><div><small>TIEMPO DE RESERVA</small><b id="survivalMargin">—</b></div></div></div>
+      <div class="survivalDecision" id="survivalDecision"><span>TU MISIÓN, DE UN VISTAZO</span><strong id="survivalStatus">Define una misión</strong><p id="survivalReason">Empieza por elegir una base y un destino en el mapa.</p><div class="missionReadiness"><div class="readinessRing" id="missionReadinessRing"><b id="missionReadinessCount">0/3</b></div><div><strong id="missionReadinessLabel">Preparación pendiente</strong><small>Recorrido · clima · equipo</small></div></div><div class="survivalDecisionFacts"><div><small>TIEMPO PARA SALIR Y VOLVER</small><b id="survivalTime">—</b></div><div><small>TIEMPO DE RESERVA</small><b id="survivalMargin">—</b></div></div></div>
     </header>
-    <div class="guideSteps" aria-label="Pasos de preparación"><button id="guideRouteStep" type="button"><b>1 · Elige tu recorrido</b><span id="guideRouteState">Base, destino y regreso</span></button><button id="guideDataStep" type="button"><b>2 · Añade el clima</b><span id="guideDataState">Observaciones de tu región</span></button><button id="guideEquipmentStep" type="button"><b>3 · Revisa tu equipo</b><span id="guideEquipmentState">Oxígeno, batería y reserva</span></button></div><div class="guideView"><button id="guideDetails" type="button" aria-expanded="false">Ver detalles técnicos y escenarios</button><button id="survivalQuickExport" type="button">Guardar evaluación ↓</button></div><div class="survivalProvenance"><span id="terrainSourceBadge">TERRENO: SIN RUTA</span><span id="weatherSourceBadge">CLIMA: PENDIENTE</span><span>RECURSOS: MODELO EDITABLE</span><span id="connectionState">CONEXIÓN DISPONIBLE</span><span>RADIACIÓN: SIN MEDICIÓN</span></div>
+    <div class="guideSteps" aria-label="Pasos de preparación"><button id="guideRouteStep" type="button"><b>1 · Elige tu recorrido</b><span id="guideRouteState">Base, destino y regreso</span></button><button id="guideDataStep" type="button"><b>2 · Añade el clima</b><span id="guideDataState">Observaciones de tu región</span></button><button id="guideEquipmentStep" type="button"><b>3 · Revisa tu equipo</b><span id="guideEquipmentState">Oxígeno, batería y reserva</span></button></div><div class="guideView"><button id="openOperations" type="button">Centro de supervivencia ↗</button><button id="guideDetails" type="button" aria-expanded="false">Ver detalles técnicos y escenarios</button><button id="survivalQuickExport" type="button">Guardar evaluación ↓</button></div><div class="survivalProvenance"><span id="terrainSourceBadge">TERRENO: SIN RUTA</span><span id="weatherSourceBadge">CLIMA: PENDIENTE</span><span>RECURSOS: MODELO EDITABLE</span><span id="connectionState">CONEXIÓN DISPONIBLE</span><span>RADIACIÓN: SIN MEDICIÓN</span></div>
     <div class="survivalTabs" role="group" aria-label="Escenario ambiental"><span>¿Qué pasa si…?</span><button data-survival-scenario="nominal" class="is-active" type="button">Operación nominal</button><button data-survival-scenario="dust" type="button">Polvo denso</button><button data-survival-scenario="power" type="button">Fallo de batería</button><button id="survivalExport" type="button">↓ Exportar evaluación</button></div>
     <div id="survivalError" class="survivalError" role="alert" hidden></div>
+    <div class="onboardingStrip"><div><b>Una misión, paso a paso.</b><p>Aprende a usar tus datos, revisar recursos y leer las alertas.</p></div><button type="button" data-open-tutorial="resume">Abrir tutorial →</button></div>
     <div class="survivalGrid">
       <article class="survivalCard weatherCard"><div class="survivalCardHeading"><div><span>01 / ENTORNO</span><h2>Clima para tu recorrido</h2></div><span class="survivalTag" id="weatherModelBadge">MODELO ILUSTRATIVO</span></div>
         <div class="weatherMetrics"><div><small>TEMPERATURA / EVA</small><strong id="weatherTemperature">—</strong></div><div><small>PRESIÓN OBSERVADA</small><strong id="weatherPressure">—</strong></div><div><small>VIENTO OBSERVADO</small><strong id="weatherWind">Sin datos</strong></div></div>
         <div id="weatherChart" class="weatherChart" aria-label="Proyección horaria de temperatura"></div>
         <div class="weatherLegend"><span><i></i>Temperatura modelada</span><span><i></i>Banda ilustrativa / error de ajuste</span><span>Hora local marciana</span></div>
-        <p class="survivalNote" id="weatherModelNote"></p>
+        <p class="survivalNote" id="weatherModelNote"></p><button id="openWeatherForecast" type="button">Ver predicción del próximo sol ↗</button>
         <div class="survivalInlineControls"><label>Hora local de salida <input id="survivalStartHour" type="number" min="0" max="23" step="1" value="10"></label><label>Polvo supuesto <input id="survivalDust" type="range" min="0" max="100" step="5" value="10"><output id="survivalDustValue">10/100</output></label></div>
       </article>
       <article class="survivalCard resourceCard" id="guideEquipmentCard"><div class="survivalCardHeading"><div><span>02 / AUTONOMÍA</span><h2>Recursos para regresar</h2></div><span class="survivalTag">POR PERSONA</span></div>
@@ -328,12 +346,13 @@
       </article>
       <article class="survivalCard timelineCard"><div class="survivalCardHeading"><div><span>03 / RECORRIDO</span><h2>El margen se consume</h2></div><b id="survivalTimelineTime">—</b></div><div id="resourceChart" class="resourceChart"></div><div class="weatherLegend"><span>Azul: batería</span><span>Verde: O₂</span><span>Amarillo discontinuo: ventana</span></div><label class="survivalTimelineLabel" for="survivalProgress">Explorar el tiempo de la EVA <input id="survivalProgress" type="range" min="0" max="24" value="0"></label><div class="timelineReadout"><span id="progressOxygen">O₂ —</span><span id="progressBattery">Batería —</span><span id="progressWindow">Ventana —</span></div><p class="survivalNote">Proyección del presupuesto del escenario; no localización ni telemetría de un astronauta.</p></article>
       <article class="survivalCard terrainCard"><div class="survivalCardHeading"><div><span>04 / SUPERFICIE</span><h2>Lo que el suelo permite saber</h2></div><span class="survivalTag" id="soilClassification">SIN RUTA</span></div><div class="soilMetrics"><div><small>PENDIENTE MÁXIMA</small><b id="soilSlope">—</b></div><div><small>RUGOSIDAD</small><b id="soilRoughness">—</b></div><div><small>CALIDAD DE MUESTREO</small><b id="soilQuality">—</b></div><div><small>ESPACIAMIENTO DE MALLA</small><b id="soilSpacing">—</b></div></div><label class="survivalSurfaceLabel">Comportamiento del suelo en el escenario <select id="survivalSurface"><option value="unknown">Desconocido · sin ajuste</option><option value="firm">Firme · supuesto</option><option value="loose">Suelto · supuesto (+15% tiempo)</option></select></label><div class="soilUnknowns"><span>Composición: no observada</span><span>Capacidad portante: no medida</span><span>Agua utilizable: no medida</span></div><p class="survivalNote">Un DEM describe relieve, no mineralogía ni toxicidad. En Jezero hay evidencia de rocas ígneas y sedimentos del delta; no asignamos esa composición a cada píxel de tu ruta.</p><a href="https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-makes-new-discoveries-in-mars-jezero-crater/" target="_blank" rel="noreferrer">Contexto geológico NASA ↗</a></article>
-      <article class="survivalCard survivalWide"><div class="survivalCardHeading"><div><span>05 / DECISIÓN</span><h2>Alertas con una causa</h2></div><span class="survivalTag">EXPLICABLE</span></div><div id="survivalAlerts" class="survivalAlerts"></div><div id="survivalComparison" class="survivalComparison"></div></article>
+      <article class="survivalCard survivalWide"><div class="survivalCardHeading"><div><span>05 / DECISIÓN</span><h2>Alertas con una causa</h2></div><span class="survivalTag">EXPLICABLE</span></div><div id="survivalAlerts" class="survivalAlerts"></div><div id="decisionBrief" class="decisionBrief" aria-label="Revisa el excedente o déficit respecto a las reservas declaradas." hidden></div><div id="survivalComparison" class="survivalComparison"></div></article>
       <article class="survivalCard"><div class="survivalCardHeading"><div><span>06 / PREPARACIÓN</span><h2>Antes de salir</h2></div><b id="survivalChecklistCount">0/6</b></div><div class="survivalChecklist">
         <label><input type="checkbox" data-survival-check="route">Ruta y retorno revisados</label><label><input type="checkbox" data-survival-check="pressure">Integridad y presurización verificadas con el equipo</label><label><input type="checkbox" data-survival-check="resources">O₂, energía y reservas verificados</label><label><input type="checkbox" data-survival-check="comms">Enlace de comunicaciones comprobado</label><label><input type="checkbox" data-survival-check="shelter">Refugio y criterios de aborto definidos</label><label><input type="checkbox" data-survival-check="environment">Meteorología y dosimetría revisadas</label>
         </div><p class="survivalNote">Checklist declarado por el usuario. No sustituye verificaciones del hardware ni protocolos de misión.</p></article>
       <article class="survivalCard guideDataCard" id="guideDataCard"><div class="survivalCardHeading"><div><span>DATOS DEL CLIMA</span><h2>Tus observaciones</h2></div><span class="survivalTag">IMPORTACIÓN LOCAL</span></div><p>Carga tus observaciones de temperatura. Sin ellas, la app deja el clima y la autonomía pendientes. Se guardan en este navegador para continuar después.</p><div class="survivalDataActions"><button id="survivalImportWeather" type="button">↑ Importar observaciones</button><button id="survivalSampleWeather" type="button">↓ Plantilla vacía CSV</button><button id="survivalClearWeather" type="button">Quitar observaciones</button></div><input id="survivalWeatherFile" type="file" accept=".json,.csv,application/json,text/csv" hidden><div class="survivalInputs weatherImportLocation"><label>Fuente de las mediciones CSV <input id="weatherSourceName" type="text" maxlength="160" placeholder="Instrumento, archivo o conjunto de datos"></label><label>Latitud declarada de CSV <input id="weatherLatitude" type="number" min="-90" max="90" step="0.00001" value="18.44463"></label><label>Longitud declarada de CSV <input id="weatherLongitude" type="number" min="-180" max="180" step="0.00001" value="77.45088"></label></div><div id="survivalDatasetStatus" class="survivalDatasetStatus">Todavía no hay observaciones.</div><details class="survivalAssumptions"><summary>Formato, unidades y utilidad de los datos</summary><p>JSON normalizado o CSV con <code>sol, localHour, temperatureC, pressurePa, windMps</code>. Temperatura en °C, presión en Pa, viento en m/s. Las columnas de presión y viento pueden estar vacías. Necesitamos al menos 12 muestras que cubran 6 franjas de 3 horas.</p><p>La temperatura alimenta una proyección por patrón diario y la demanda térmica del escenario. Presión y viento se muestran como observaciones: no se convierten automáticamente en garantías de seguridad. La plantilla está vacía: complétala con tus mediciones y declara su procedencia.</p></details></article>
     </div>
+    <section class="guideSupport"><div><h3>Ayuda cuando la necesites</h3><p>Formatos de datos, conceptos y soluciones a los errores más frecuentes.</p></div><button type="button" data-open-help="problems">Consultar el manual ↗</button></section>
     <footer class="survivalFooter"><span>JEZERO · GUÍA DE PLANIFICACIÓN EN MARTE</span><p>Tus rutas usan cartografía real; las proyecciones dependen de las observaciones y supuestos declarados. No hay conexión automática a telemetría actual. <a href="https://www.nasa.gov/directorates/stmd/nasas-first-weather-report-from-jezero-crater-on-mars/" target="_blank" rel="noreferrer">MEDA: referencia histórica ↗</a> · <a href="https://science.nasa.gov/mars/facts/" target="_blank" rel="noreferrer">Entorno de Marte ↗</a> · <a href="https://www.nasa.gov/missions/mars-science-laboratory/how-nasas-curiosity-rover-is-making-mars-safer-for-astronauts/" target="_blank" rel="noreferrer">Radiación ↗</a></p></footer>
   </div>
 </section>
@@ -356,10 +375,10 @@
             <button id="zoomIn" class="toolButton iconOnly" title="Acercar" aria-label="Acercar"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
             <button id="zoomOut" class="toolButton iconOnly" title="Alejar" aria-label="Alejar"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
           </div>
-          <div class="toolCluster primaryTools" role="group" aria-label="Herramientas del mapa">
-            <button id="center" class="toolButton" title="Centrar Marte"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span>Centro</span></button>
-            <button id="toggleLayerDrawer" class="toolButton mapToolWide" type="button" aria-expanded="false" aria-controls="mapLayerDrawer"><svg viewBox="0 0 24 24"><path d="M4 7l8-4 8 4-8 4zM4 12l8 4 8-4M4 17l8 4 8-4"/></svg><span>Capas</span></button>
-            <button id="focusMap" class="toolButton mapToolWide" type="button" title="Ocultar o mostrar ambos paneles"><svg viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg><span>Mapa</span></button>
+          <div class="toolCluster primaryTools" role="group" aria-label="Herramientas del mapa"><button id="mapJezeroDetail" class="toolButton" title="Centrar en Jezero" aria-label="Centrar en Jezero"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M8 14l3-6 5 8M3 12h3m12 0h3M12 3v3m0 12v3"/></svg><span>Jezero</span></button>
+            <button id="center" class="toolButton" title="Ajustar a mi misión" aria-label="Ajustar a mi misión"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span>Ajustar</span></button>
+            <button id="toggleLayerDrawer" class="toolButton mapToolWide" title="Abrir capas" aria-label="Abrir capas" type="button" aria-expanded="false" aria-controls="mapLayerDrawer"><svg viewBox="0 0 24 24"><path d="M4 7l8-4 8 4-8 4zM4 12l8 4 8-4M4 17l8 4 8-4"/></svg><span>Capas</span></button>
+            <button id="focusMap" class="toolButton mapToolWide" type="button" title="Enfocar el mapa" aria-label="Enfocar el mapa"><svg viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg><span>Mapa</span></button>
           </div>
         </div>
         <div class="mapLayerDrawer" id="mapLayerDrawer" aria-hidden="true">
@@ -382,7 +401,7 @@
           <div class="mapQuickLayers">
             <label><input type="checkbox" data-quick-layer="slope"><span><b>Pendiente</b><small>Derivada del DEM</small></span></label>
             <label><input type="checkbox" data-quick-layer="roughness"><span><b>Rugosidad</b><small>Variación local</small></span></label>
-            <label><input type="checkbox" data-quick-layer="route" checked><span><b>Rutas EVA</b><small>Corredor y alternativas</small></span></label>
+            <label><input type="checkbox" data-imagery-detail checked><span><b>Detalle automático CTX / HiRISE en Jezero</b><small>Cobertura regional. La imagen no cambia el DEM de ~200 m.</small></span></label><label><input type="checkbox" data-quick-layer="route" checked><span><b>Rutas EVA</b><small>Corredor y alternativas</small></span></label>
             <label><input type="checkbox" data-quick-layer="points" checked><span><b>Puntos de misión</b><small>Base y paradas</small></span></label>
             <label><input type="checkbox" data-quick-layer="known" checked><span><b>Nombres IAU / USGS</b><small>Se cargan por zona al acercar</small></span></label>
             <label><input type="checkbox" data-quick-layer="landing" checked><span><b>Aterrizajes</b><small>NASA + Zhurong y referencias históricas</small></span></label>
@@ -420,7 +439,7 @@
 
     <section class="analyticsWorkspace" id="analyticsWorkspace" aria-label="Centro de análisis de la misión">
       <header class="analyticsHeader">
-        <div><span>JEZERO / MISSION ANALYTICS V47</span><h2>Resultados de la misión</h2><p>Compara las alternativas y explora cómo cambia el terreno a lo largo del recorrido.</p></div>
+        <div><span>JEZERO / MISSION ANALYTICS V51</span><h2>Resultados de la misión</h2><p>Compara las alternativas y explora cómo cambia el terreno a lo largo del recorrido.</p></div>
         <div class="analyticsHeaderMeta"><b id="analyticsRouteName">SIN MISIÓN</b><span id="analyticsGeneratedAt">CALCULA UNA RUTA</span></div>
       </header>
       <div class="analyticsToolbar">
@@ -469,6 +488,7 @@
     <div class="mapMissionHint" id="mapMissionHint" aria-live="polite" title="Modo de edición de misión">
       <span class="mapMissionHintIcon">＋</span><span id="selectionHint"></span>
     </div>
+    <div id="imageryDetailStatus" class="imageryDetailStatus" role="status">Viking · mosaico global</div>
     <div class="mapCoordChip" id="coordReadout" title="Coordenadas del cursor">18.44463° N · 77.45088° E</div>
     <div class="mapScaleChip" id="scale" title="Anchura aproximada de la vista">VISTA ~0 km</div>
 
@@ -563,15 +583,24 @@
 
 <script src="assets/vendor/ol.js"></script>
 <script src="mars-elevation.js"></script>
-<script src="modules/i18n.js?v=47"></script>
-<script src="modules/validation.cjs?v=47"></script>
-<script src="modules/route-engine.cjs?v=47"></script>
-<script src="script.js?v=47"></script>
-<script src="modules/module-shell.js?v=47"></script>
-<script src="modules/interface.js?v=47"></script>
-<script src="modules/survival-engine.cjs?v=47"></script>
+<script src="modules/locale.js?v=51"></script>
+<script src="modules/i18n.js?v=51"></script>
+<script src="modules/map-detail.js?v=51"></script>
+<script src="modules/validation.cjs?v=51"></script>
+<script src="modules/route-engine.cjs?v=51"></script>
+<script src="script.js?v=51"></script>
+<script src="modules/module-shell.js?v=51"></script>
+<script src="modules/interface.js?v=51"></script>
+<script src="modules/survival-engine.cjs?v=51"></script>
 
-<script src="modules/survival.js?v=47"></script>
-<script src="modules/offline.js?v=47"></script>
+<script src="modules/survival.js?v=51"></script>
+<script src="modules/help-english.js?v=51"></script>
+<script src="modules/help.js?v=51"></script>
+<script src="modules/workspace.js?v=51"></script>
+<script src="modules/forecast.js?v=51"></script>
+<script src="modules/operations-engine.cjs?v=51"></script>
+<script src="modules/operations-map.js?v=51"></script>
+<script src="modules/operations.js?v=51"></script>
+<script src="modules/offline.js?v=51"></script>
 </body>
 </html>

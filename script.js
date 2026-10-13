@@ -12,7 +12,7 @@ const DEFAULTS_KEY = 'jezero-operational-defaults-v29';
 const PANEL_STATE_KEY = 'jezero-panel-state-v34';
 const MAP_VIEW_KEY = 'jezero-map-view-v34';
 const BASE_MAP_KEY = 'jezero-base-map-v34';
-const JEZERO_UI_VERSION = 'V46';
+const JEZERO_UI_VERSION = 'V49';
 const ALGORITHM_VERSION = '44.0';
 
 let D;
@@ -52,11 +52,11 @@ window.addEventListener('jezero:themechange',()=>{
 function buildLayers(){
   const projection = ol.proj.get('EPSG:4326');
   const globalExtent = [-180,-90,180,90];
-  const resolutions = Array.from({length:13},(_,z)=>0.703125/Math.pow(2,z));
+  const resolutions = Array.from({length:18},(_,z)=>0.703125/Math.pow(2,z));
   const tileGrid = new ol.tilegrid.TileGrid({extent:globalExtent,origin:[-180,90],resolutions,tileSize:256});
   const xyz = (url,maxZoom=12,extraClass='') => new ol.layer.Tile({
     className:`ol-layer jezero-base-map-layer ${extraClass}`.trim(),
-    source:new ol.source.XYZ({projection,tileGrid,maxZoom,wrapX:true,crossOrigin:'anonymous',url,transition:0}),
+    source:new ol.source.XYZ({projection,tileGrid:new ol.tilegrid.TileGrid({extent:globalExtent,origin:[-180,90],resolutions:resolutions.slice(0,maxZoom+1),tileSize:256}),maxZoom,wrapX:true,crossOrigin:'anonymous',url,transition:0}),
     opacity:1,zIndex:1
   });
 
@@ -120,13 +120,14 @@ async function prepareLayerSources(){
 function initMap(){
   const projection = ol.proj.get('EPSG:4326');
   const layers = buildLayers().layers;
-  map = new ol.Map({ target:'map', layers, view:new ol.View({ projection, center:[0,0], zoom:1.5, resolutions:Array.from({length:13},(_,z)=>0.703125/Math.pow(2,z)) }), controls:[] });
+  map = new ol.Map({ target:'map', layers, view:new ol.View({ projection, center:[0,0], zoom:1.5, resolutions:Array.from({length:18},(_,z)=>0.703125/Math.pow(2,z)) }), controls:[] });
+  window.JEZERO_IMAGERY?.install(map);
   map.on('pointermove', evt=>{ const c=evt.coordinate; if(c) $('coordReadout').textContent=`${formatLat(c[1])} · ${formatLon(c[0])}`; });
   map.on('singleclick', onMapClick);
   map.on('moveend', ()=>{ updateMapScale(); if(slopeLayer?.getVisible()||roughnessLayer?.getVisible()) refreshDerivedLayers(false); scheduleNomenclatureRefresh(); });
-  $('zoomIn').onclick=()=>map.getView().setZoom(Math.min(12,map.getView().getZoom()+.7));
+  $('zoomIn').onclick=()=>map.getView().setZoom(Math.min(17,map.getView().getZoom()+.7));
   $('zoomOut').onclick=()=>map.getView().setZoom(Math.max(0,map.getView().getZoom()-.7));
-  $('center').onclick=()=>centerGlobal();
+  $('center').onclick=()=>fitCurrentMission();
   centerGlobal();
   updateMapScale();
   drawPointMarkers();
@@ -456,6 +457,7 @@ function setBaseFromLanding(feature){
   showToast(`${feature.get('name')} quedó establecida como BASE (P0).`); closeReferencePopup();
 }
 
+function fitCurrentMission(){if(!missionPoints.length){centerGlobal();return;}map.getView().fit(ol.extent.boundingExtent(missionPoints.map(p=>[p.lon,p.lat])),{padding:[70,70,100,70],maxZoom:12.5,duration:400});}
 function centerGlobal(){ map.getView().animate({center:[0,0],zoom:1.5,duration:350}); }
 function normalizeLon(lon){ let x=((lon+180)%360+360)%360-180; return Math.abs(x)===180?180:x; }
 function clampLat(lat){ return clamp(lat,-89.5,89.5); }
@@ -934,7 +936,7 @@ function updateRouteSequenceStrip(mission){
 function renderMissionTimeline(mission){
   const host=$('missionTimeline');if(!host)return;
   const seq=mission?.includedPoints||mission?.sequence||missionPoints;
-  if(!seq?.length){host.innerHTML='<div class="timelineEmpty">BASE → PUNTOS → REGRESO</div>';return;}
+  if(!seq?.length){host.innerHTML='<div class="timelineEmpty"><b>Tu recorrido aparecerá aquí</b><p>Añade una base y un destino. Al calcular verás las paradas y el regreso.</p></div>';return;}
   let visit=0;
   host.innerHTML=seq.map((p,i)=>{
     const base=p.type==='base'||i===0,home=base&&i===seq.length-1&&i>0;
@@ -1047,6 +1049,7 @@ function updatePlanningUI(){
   if(hintBox) hintBox.classList.toggle('is-visible',Boolean(selecting));
   const active=currentMission?.[document.querySelector('input[name="mode"]:checked')?.value||'balanced']||null;
   renderMissionList();renderMissionTimeline(active);updateRouteSequenceStrip(active);updateMissionHud(active);updateHeaderStatus();updateSettingsSummary();
+  document.dispatchEvent(new CustomEvent("jezero:missionedited"));
 }
 
 function newMission(){ missionPoints=[];currentMission=null;selecting=true;routeLayer.getSource().clear();drawPointMarkers();renderMissionList();resetMetrics();updatePlanningUI(); }
@@ -1499,6 +1502,7 @@ function setBaseMapMode(mode,{persist=true}={}){
   updateBaseMapStatus(mode);
   document.querySelector('.mapPanel')?.setAttribute('data-base-map',mode);
   if(persist) localStorage.setItem(BASE_MAP_KEY,mode);
+  window.JEZERO_IMAGERY?.setMode(mode);
   requestAnimationFrame(()=>map?.render?.());
 }
 document.querySelectorAll('[data-base-map]').forEach(el=>el.addEventListener('change',()=>{if(el.checked)setBaseMapMode(el.dataset.baseMap);}));
@@ -1576,7 +1580,10 @@ window.addEventListener('jezero:modulechange',()=>{
 (async()=>{try{D=await fetch(DATA_URL).then(r=>r.json());await prepareLayerSources();initMap();initPanelControls();initMapVisualControls();initializeSettings();setLayerStatus('route','ACTIVA','live');setLayerStatus('points','ACTIVA','live');renderMissionList();renderHistory();updatePlanningUI();populateReferenceLayers();setLayerStatus('known','ACTIVA','live');scheduleNomenclatureRefresh(250);setLayerStatus('landing','ACTIVA','live');$('statusText').textContent='DATOS CARTOGRÁFICOS · NASA / USGS';}catch(e){showToast(ui('No se pudo cargar la configuración.','Configuration could not be loaded.'));console.error(e);}})();
 
 // Presentation actions expose existing operations without duplicating mission state.
+function missionDraft(){return {format:'JEZERO-MISSION',version:44,missionMeta:getMissionSettings(),interface:{language:uiLang(),theme:themeInfo().key},points:missionPoints.map(p=>({lat:p.lat,lon:p.lon,name:p.name,type:p.type==='base'?'base':'target',dwellMin:Number(p.dwellMin)||0})),returnBase:$('returnBase').checked,optimizeOrder:$('optimizeOrder')?.checked!==false,mode:document.querySelector('input[name="mode"]:checked')?.value||'balanced',params:readOperationalDefaults()};}
 window.JEZERO_UI_ACTIONS=Object.freeze({
+  missionDraft,
+  async loadMissionPayload(payload){validation.missionFile(payload);await importMissionJsonFile({target:{files:[new File([JSON.stringify(payload)],'mission.json',{type:'application/json'})],value:''}});fitCurrentMission();},
   selectedMission:()=>selectedMission(),
   allMissions:()=>currentMission,
   missionSnapshot:()=>currentMission?{selectedMode:selectedMission()?.mode,strategies:validation.MODES.map(k=>pdfStrategyPayload(currentMission[k])).filter(Boolean)}:null,
