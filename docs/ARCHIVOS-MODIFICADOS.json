@@ -1,0 +1,248 @@
+[
+  {
+    "path": ".gitignore",
+    "status": "modified",
+    "sha256": "35f11efef3d0b9c8df891e7e51e5704c646cdabbe07232dfceddf6f8887b345a",
+    "bytes": 88
+  },
+  {
+    "path": "CHANGELOG-JEZERO-4-P0.md",
+    "status": "new",
+    "sha256": "433a37c7134b03cc8f76d02ba05a0f097f8f219c183ec13bdcd9637cd311bd6b",
+    "bytes": 963
+  },
+  {
+    "path": "control.css",
+    "status": "new",
+    "sha256": "ba5b817e25655181e1a3fb6d0ac52ea8543f22d5f1429bad9b6b116ede20a7c7",
+    "bytes": 7364
+  },
+  {
+    "path": "elevations.mjs",
+    "status": "modified",
+    "sha256": "9c40a036dd58ec9c752e751d1aa3305948248e3b7fde5c976a48da3fb88600d0",
+    "bytes": 49
+  },
+  {
+    "path": "health.mjs",
+    "status": "modified",
+    "sha256": "f960d1a175878626b33e40744881e9dffc6cf5686512290de8bb02689e6f64d3",
+    "bytes": 321
+  },
+  {
+    "path": "index.html",
+    "status": "modified",
+    "sha256": "0cfbf7a764fb874e9aac3a3b6cff67430c0d2630ceef246276e05ec8bc776db2",
+    "bytes": 69350
+  },
+  {
+    "path": "legacy-elevation.mjs",
+    "status": "new",
+    "sha256": "0b6de7a1d66564feff179774cc499d0e10b161adf1b453d7697debcbdb6531a2",
+    "bytes": 3269
+  },
+  {
+    "path": "MANUAL-DE-AYUDA.md",
+    "status": "modified",
+    "sha256": "2558a2eddcbf7fa5ccb4b0801e2c4354cf0f78813d1ff77f6387d475bfdf1fec",
+    "bytes": 14274
+  },
+  {
+    "path": "MANUAL-HELP-EN.md",
+    "status": "modified",
+    "sha256": "6b88b6d9102b884bb2162bcfb278df2387ef9be1d5adaf760828f58e75d0e809",
+    "bytes": 11759
+  },
+  {
+    "path": "package-lock.json",
+    "status": "modified",
+    "sha256": "17339dba50cc20aa1a0bddc25d2bad1e0caf90364cc9ad88787fe31d488523b3",
+    "bytes": 247
+  },
+  {
+    "path": "package.json",
+    "status": "modified",
+    "sha256": "449eefa56c99c0edf0bc8a7df5f1e08b6f779416f0e2d6e78aac8b1613ea0568",
+    "bytes": 373
+  },
+  {
+    "path": "README.md",
+    "status": "modified",
+    "sha256": "43ff92d1bfe52d7eeb400c6cb8a0979135097fd5c7c1cdf8bc346152db8229c6",
+    "bytes": 4213
+  },
+  {
+    "path": "script.js",
+    "status": "modified",
+    "sha256": "d236722adfa3aa725bfe4d63a6e0b59af53e7c641a9ae0466c5df9e5fadeac81",
+    "bytes": 120140
+  },
+  {
+    "path": "server.mjs",
+    "status": "modified",
+    "sha256": "0aeccda2e35cad33123388d91ed42684a30bdbd9165469bccc0b31b81a726934",
+    "bytes": 12727
+  },
+  {
+    "path": "service-worker.js",
+    "status": "modified",
+    "sha256": "d9a632ee3e43f198a194f688e5e93835e04482cb69b507aa11e4a0086f4806ee",
+    "bytes": 2155
+  },
+  {
+    "path": "docs/ARQUITECTURA-ACTUAL.md",
+    "status": "new",
+    "sha256": "9aeacad8c6b17c00fd55228328f548417e8a78dabebed88eb800b460e3801902",
+    "bytes": 3907
+  },
+  {
+    "path": "docs/AUDITORIA-JEZERO-4.md",
+    "status": "new",
+    "sha256": "7618719a8f2cdfb2e801d968812f7705ae667a885da047f489e8a8abddbf61b3",
+    "bytes": 7137
+  },
+  {
+    "path": "docs/auditoria-navegador-base.json",
+    "status": "new",
+    "sha256": "53bbc7216a0b77ecd8b8c598c1ff9c7ce0cd4485b286a5879d71fd828ccfb61d",
+    "bytes": 45283
+  },
+  {
+    "path": "docs/ESTADO-JEZERO-4.md",
+    "status": "new",
+    "sha256": "5ba7fb238c33c949f69988a9865c4931d983805c1765def70c8bacdd028d8052",
+    "bytes": 5990
+  },
+  {
+    "path": "docs/linea-base.json",
+    "status": "new",
+    "sha256": "8520e7d7dd91634c3a8de49b847da83adb7ca1d4a90048f11240d15c7eede5f7",
+    "bytes": 19765
+  },
+  {
+    "path": "docs/MATRIZ-CONTROLES.csv",
+    "status": "new",
+    "sha256": "63c98930b5b6e90975eb6af756a1ac486eb233f087ea87d82fbf25dd9ef4c302",
+    "bytes": 39855
+  },
+  {
+    "path": "docs/MATRIZ-DE-RIESGOS.md",
+    "status": "new",
+    "sha256": "32edd5fbcd6fe9cb514bea977a664dfcca647c93d607291dc5033fdb9177ded0",
+    "bytes": 2526
+  },
+  {
+    "path": "docs/mediciones-p0.json",
+    "status": "new",
+    "sha256": "576bb259162f62e7ffd065f06319fb7a85fe3dc6179e19e1100eda667696c51e",
+    "bytes": 578
+  },
+  {
+    "path": "docs/PLAN-DE-MIGRACION.md",
+    "status": "new",
+    "sha256": "e7384810251377069c83162551c2936f3ecfb4eceddcdc77be683c26ebf5ed9e",
+    "bytes": 4491
+  },
+  {
+    "path": "docs/verificacion-navegador-p0.json",
+    "status": "new",
+    "sha256": "dbf952241e0b05a8f3621ec418b150abf38ba49f19fab089ffe097a6c4c102c7",
+    "bytes": 1538
+  },
+  {
+    "path": "modules/assurance.cjs",
+    "status": "new",
+    "sha256": "7183b25f098eb7de710c575b2cb2d52ef855645bd1b704245ab9ab96fb8ed0b9",
+    "bytes": 5471
+  },
+  {
+    "path": "modules/help-english.js",
+    "status": "modified",
+    "sha256": "9270d7524d56719f996def0d8df92a8953b0a23d6a0475b3dd15524eceeb501a",
+    "bytes": 11052
+  },
+  {
+    "path": "modules/help.js",
+    "status": "modified",
+    "sha256": "a676b82b29e08ed91603eb808b541cc0c599d1abd7c27f84a25d56036a9b3385",
+    "bytes": 23992
+  },
+  {
+    "path": "modules/interface.js",
+    "status": "modified",
+    "sha256": "a8cbd62bb523eb68e12e2793f721ce9d553c86cfb0946cb9b9e87b9ca8ac882b",
+    "bytes": 6492
+  },
+  {
+    "path": "modules/mission-control-engine.cjs",
+    "status": "new",
+    "sha256": "860b2de3638d2cb5381217ddd4090943d694554b7adb6eeab4e9d98b98440080",
+    "bytes": 3710
+  },
+  {
+    "path": "modules/mission-control.js",
+    "status": "new",
+    "sha256": "f7858f21cdda7881e6458835d9832e9bf426c38aad59a43df7a48eec31794d02",
+    "bytes": 17523
+  },
+  {
+    "path": "modules/module-shell.js",
+    "status": "modified",
+    "sha256": "0c0ff5335dfa01a7acfb46bea4ec5d685a55cd940ed06cc8f4015444e670e8b7",
+    "bytes": 7243
+  },
+  {
+    "path": "modules/operations.js",
+    "status": "modified",
+    "sha256": "f131b90bb95479e83d613e084ad4eea677f49bac94043f7666ad357479f29ec5",
+    "bytes": 27173
+  },
+  {
+    "path": "modules/survival.js",
+    "status": "modified",
+    "sha256": "25e5948eb16d8bcbec3b10e2616543597b11902ed44f1ee99e400a80467ea9a1",
+    "bytes": 19230
+  },
+  {
+    "path": "modules/workspace.js",
+    "status": "modified",
+    "sha256": "5dc0b3b1b95c77a4ba83addb4654d7c4a6758f604971dbfda0d7dbb446fc79a7",
+    "bytes": 5995
+  },
+  {
+    "path": "qa/jezero4-browser.mjs",
+    "status": "new",
+    "sha256": "050d2cbee97e2d858765f3bf92a3e4c87b190360249b67c6933d700a3b18935e",
+    "bytes": 10629
+  },
+  {
+    "path": "tests/control.test.mjs",
+    "status": "new",
+    "sha256": "a6d5a3c04453cb692391584571d7f53dc4c9fad51beab6d9b113dd1faa8f8219",
+    "bytes": 3767
+  },
+  {
+    "path": "tests/legacy-elevation.test.mjs",
+    "status": "new",
+    "sha256": "6e76c8045d10b2a855aec7f90da0d5d7b09362b8d42f196374cf946f0998691e",
+    "bytes": 2388
+  },
+  {
+    "path": "tests/server.test.mjs",
+    "status": "modified",
+    "sha256": "a18fefb1acadcf070be916d156abc50e4b2dd2c540acd5360bc38f4b77cb1b29",
+    "bytes": 4336
+  },
+  {
+    "path": "netlify/functions/elevations.mjs",
+    "status": "modified",
+    "sha256": "6354fba533a6f993405646da5b343765422ebc7648045fd5d8c476939652e673",
+    "bytes": 53
+  },
+  {
+    "path": "netlify/functions/health.mjs",
+    "status": "modified",
+    "sha256": "f960d1a175878626b33e40744881e9dffc6cf5686512290de8bb02689e6f64d3",
+    "bytes": 321
+  }
+]

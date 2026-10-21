@@ -1,0 +1,280 @@
+﻿tag,id,tipo,etiqueta,modulo,estado,evidencia
+BUTTON,,button,? Ayuda,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,toggleLeftPanel,button,Mostrar panel izquierdo,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,toggleRightPanel,button,Mostrar panel derecho,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,GUÍA,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,SOPORTE,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,CLIMA,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,MAPA,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,MISIÓN,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,EVA,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,RESULTADOS,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,CONFIG.,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,uiClosePanel,button,Cerrar panel,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,landingSiteSelect,select-one,Selecciona un sitio de aterrizaje…Viking 1 · Chryse PlanitiaViking 2 · Utopia PlanitiaMars Pathfinder / Sojourner · Ares VallisSpirit · Gusev CraterOpportunity · Meridiani PlanumPh,explorer,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,useSelectedLanding,submit,⌂ Usar como base,explorer,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,radio,baseMapLeft,explorer,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,radio,baseMapLeft,explorer,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,radio,baseMapLeft,explorer,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,explorer,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,explorer,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,explorer,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,explorer,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,explorer,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,explorer,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,"⌁Construir misiónBase, puntos y rutas",explorer,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+A,sourcesBtn,,FUENTES NASA ↗,explorer,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,coordLatInput,text,,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,coordLonInput,text,,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,coordNameInput,text,,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,coordTypeInput,select-one,Punto de misiónBase,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,coordDwellInput,number,,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,coordinateAdd,submit,＋Agregar punto,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,uiPickOnMap,button,⌖ Añadir directamente en el mapa,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,addBase,submit,⌂ Usar el primer punto como base,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,optimizeOrder,checkbox,,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,returnBase,checkbox,,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,radio,mode,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,radio,mode,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,radio,mode,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,calculate,submit,⌁ Calcular misión,planner,Ejercitado en navegador P0,qa/jezero4-browser.mjs
+BUTTON,planMode,submit,＋ Nueva misión,planner,Ejercitado en navegador P0,qa/jezero4-browser.mjs
+BUTTON,clearRoute,submit,× Limpiar misión,planner,Ejercitado en navegador P0,qa/jezero4-browser.mjs
+BUTTON,evaReturnHome,submit,Recalcular con regreso a la baseIncluye el retorno en el presupuesto de la misión.,eva,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,Editar la misiónEdita los puntos y las restricciones del recorrido.,eva,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,saveMission,submit,▣ Guardar misión y generar PDF completo,analysis,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,languageSetting,select-one,Idioma,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,routeAnimationSetting,checkbox,Flujo animado de la ruta,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,radio,themeSetting,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,radio,themeSetting,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,radio,themeSetting,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,radio,themeSetting,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,radio,themeSetting,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,radio,themeSetting,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,missionNameSetting,text,,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,missionCodeSetting,text,,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,crewSetting,text,,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+TEXTAREA,missionNotesSetting,textarea,,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,saveDefaultsBtn,submit,↓ Guardar parámetros actuales como predeterminados,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,restoreDefaultsBtn,submit,↻ Aplicar parámetros predeterminados,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,exportMissionJson,submit,⇩ Exportar misión a JSON,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,importMissionJson,submit,⇧ Importar misión desde JSON,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,importMissionFile,file,,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,clearHistoryBtn,submit,× Borrar historial local,settings,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,opsExport,button,Guardar paquete ↓,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,opsImport,button,Abrir paquete ↑,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,opsClose,button,Cerrar soporte,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,opsFile,file,,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,opsSectionSelect,select-one,ResumenRefugiosSoporte vitalRadiaciónComunicacionesEquipamientoContingenciasCancelaciónBitácora,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Resumen,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Refugios,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Soporte vital,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Radiación,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Comunicaciones,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Equipamiento,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Contingencias,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Cancelación,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Bitácora,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,opsOrigin,select-one,Define una base en Misión,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Ruta calculadaDatos pendientes,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Refugios documentadosDatos pendientes,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Presupuesto de aguaDatos pendientes,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Captura de CO₂Datos pendientes,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Equipo térmicoDatos pendientes,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Medición de radiaciónDatos pendientes,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Enlace de comunicaciónDatos pendientes,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Estado del equipoDatos pendientes,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Protocolos documentadosDatos pendientes,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Límites de la misiónDatos pendientes,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,hidden,id,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-shelters-name,text,name,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-shelters-lat,number,lat,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-shelters-lon,number,lon,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-shelters-capacity,number,capacity,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-shelters-available,checkbox,available,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-shelters-waterL,number,waterL,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-shelters-oxygenKg,number,oxygenKg,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-shelters-energyKWh,number,energyKWh,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-shelters-source,text,source,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-shelters-updatedAt,text,updatedAt,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,Guardar registro,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Limpiar formulario,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,hidden,id,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-resources-waterL,number,waterL,operationsWorkspace,Ejercitado en navegador P0,qa/jezero4-browser.mjs
+INPUT,ops-resources-waterRateLH,number,waterRateLH,operationsWorkspace,Ejercitado en navegador P0,qa/jezero4-browser.mjs
+INPUT,ops-resources-co2CapacityKg,number,co2CapacityKg,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-resources-co2RateKgH,number,co2RateKgH,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-resources-thermalKWh,number,thermalKWh,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-resources-thermalKW,number,thermalKW,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-resources-source,text,source,operationsWorkspace,Ejercitado en navegador P0,qa/jezero4-browser.mjs
+BUTTON,,submit,Guardar datos,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,hidden,id,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-radiation-rateUSvH,number,rateUSvH,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-radiation-accumulatedMSv,number,accumulatedMSv,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-radiation-source,text,source,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-radiation-measuredAt,text,measuredAt,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,Guardar datos,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,hidden,id,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,ops-communications-status,select-one,DesconocidoComprobadoDegradadoPerdido,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-communications-source,text,source,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-communications-checkedAt,text,checkedAt,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-communications-contact,text,contact,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,Guardar datos,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,hidden,id,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-relays-name,text,name,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-relays-lat,number,lat,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-relays-lon,number,lon,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-relays-radiusKm,number,radiusKm,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-relays-source,text,source,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-relays-updatedAt,text,updatedAt,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,Guardar registro,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Limpiar formulario,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,hidden,id,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-equipment-name,text,name,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,ops-equipment-type,select-one,TrajeVehículoHábitatRadioDosímetroOtro,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,ops-equipment-status,select-one,Sin verificarRevisadoMantenimientoAveriado,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-equipment-critical,checkbox,critical,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-equipment-source,text,source,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-equipment-checkedAt,text,checkedAt,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-equipment-serviceDue,date,serviceDue,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+TEXTAREA,ops-equipment-notes,textarea,notes,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,Guardar registro,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Limpiar formulario,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,hidden,id,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-procedures-name,text,name,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+TEXTAREA,ops-procedures-trigger,textarea,trigger,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-procedures-responsible,text,responsible,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-procedures-source,text,source,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+TEXTAREA,ops-procedures-steps,textarea,steps,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,ops-procedures-shelterId,select-one,Sin asociar,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-procedures-reviewed,checkbox,reviewed,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,Guardar registro,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Limpiar formulario,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,hidden,id,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-criteria-maxDurationH,number,maxDurationH,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-criteria-minWaterL,number,minWaterL,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-criteria-maxDoseMSv,number,maxDoseMSv,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-criteria-maxSlopeDeg,number,maxSlopeDeg,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-criteria-sensorAgeH,number,sensorAgeH,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-criteria-requireReturn,checkbox,requireReturn,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-criteria-stopOnLinkLoss,checkbox,stopOnLinkLoss,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-criteria-stopOnEquipmentFault,checkbox,stopOnEquipmentFault,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,ops-criteria-source,text,source,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,Guardar datos,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,hidden,id,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,ops-log-kind,select-one,NotaDecisiónIncidente,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+TEXTAREA,ops-log-text,textarea,text,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,submit,Registrar entrada,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Limpiar formulario,operationsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Cerrar predicción,forecastWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Añadir observaciones →,forecastWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,forecastHour,range,,forecastWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Cambiar observaciones,forecastWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,missionLibraryOpen,button,Misiones,survivalWorkspace,Ejercitado en navegador P0,qa/jezero4-browser.mjs
+BUTTON,,button,Abrir misión ↑,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,workspaceSaveMission,button,Guardar misión ↓,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,draftRecover,button,Recuperar,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,draftDismiss,button,Descartar,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,survivalPlan,button,1. Crear mi misión ↗,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,survivalGoData,button,2. Añadir datos del clima,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,guideRouteStep,button,1 · Elige tu recorridoPendiente: base y destino,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,guideDataStep,button,2 · Añade el climaPendiente: observaciones,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,guideEquipmentStep,button,3 · Revisa tu equipoPendiente: revisar valores,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,openOperations,button,Centro de supervivencia ↗,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,guideDetails,button,Ver detalles técnicos y escenarios,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,survivalQuickExport,button,Guardar evaluación ↓,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Operación nominal,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Polvo denso,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Fallo de batería,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,survivalExport,button,↓ Exportar evaluación,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Abrir tutorial →,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,openWeatherForecast,button,Ver predicción del próximo sol ↗,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,survivalStartHour,number,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,survivalDust,range,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,survivalCrew,number,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,survivalReserve,number,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,survivalOxygenCapacity,number,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,survivalOxygenRate,number,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,survivalBatteryCapacity,number,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,survivalPower,number,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,guideEquipmentConfirmed,checkbox,,survivalWorkspace,Ejercitado en navegador P0,qa/jezero4-browser.mjs
+INPUT,survivalProgress,range,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,survivalSurface,select-one,Desconocido · sin ajusteFirme · supuestoSuelto · supuesto (+15% tiempo),survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+A,,,Contexto geológico NASA ↗,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,survivalImportWeather,button,↑ Importar observaciones,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,survivalSampleWeather,button,↓ Plantilla vacía CSV,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,survivalClearWeather,button,Quitar observaciones,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,survivalWeatherFile,file,,survivalWorkspace,Ejercitado en navegador P0,qa/jezero4-browser.mjs
+INPUT,weatherSourceName,text,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,weatherLatitude,number,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,weatherLongitude,number,,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Consultar el manual ↗,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+A,,,MEDA: referencia histórica ↗,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+A,,,Entorno de Marte ↗,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+A,,,Radiación ↗,survivalWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,uiStartMission,button,Elegir una base,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,zoomIn,submit,Acercar,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,zoomOut,submit,Alejar,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,mapJezeroDetail,submit,Centrar en Jezero,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,center,submit,Ajustar a mi misión,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,toggleLayerDrawer,button,Abrir capas,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,focusMap,button,Enfocar el mapa,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,closeLayerDrawer,button,×,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,baseMapMode,select-one,"Marte real · Viking VIS
+              Topografía · MOLA + HRSC
+              Híbrido · imagen + relieve",,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,mapVisualMode,select-one,"Geología · color MOLA
+              Relieve · contraste
+              Monocromo científico
+              EVA · baja luminosidad",,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,,checkbox,,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,toggleMapLegend,button,＋,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,missionHudToggle,button,Expandir o contraer estado de misión,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+SELECT,analyticsStrategySelect,select-one,EquilibradaMás directaMenor exposición,analyticsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,analyticsClearSelection,button,× LIMPIAR SELECCIÓN,analyticsWorkspace,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,mapInfoClose,submit,×,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+A,mapInfoSource,,Fuente,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,mapInfoUseBase,submit,Usar como base,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,mapInfoAdd,submit,Agregar a misión,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,speed,number,,planner,Ejercitado en navegador P0,qa/jezero4-browser.mjs
+INPUT,evaTime,number,,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,returnMargin,number,,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,maxSlopeLimit,number,,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,minTransitability,number,,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,minConfidence,number,,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,recalculate,submit,↻ Recalcular misión,planner,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Abrir Guía de supervivencia ↗,eva,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Cerrar manual,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+INPUT,helpQuery,search,,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+A,,,Descargar manual ↓,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Primeros pasos,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Crear y calcular una misión,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Importar observaciones del clima,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Configurar oxígeno y batería,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Entender resultados y alertas,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Relieve y análisis del suelo,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,"Guardar, recuperar y trabajar sin conexión",,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Resolver problemas,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Glosario y alcance,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Centro de supervivencia,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,helpStartTutorial,button,Abrir tutorial →,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,,button,Cerrar tutorial,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,tutorialTry,button,Ver la preparación,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,tutorialBack,button,← Anterior,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,tutorialNext,button,Siguiente →,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,tutorialContinue,button,Continuar →,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,tutorialDockClose,button,Pausar tutorial,,Inventariado; interacción individual pendiente,Inspección DOM; no se afirma clic completo
+BUTTON,libraryClose,button,Cerrar biblioteca,,Ejercitado en navegador P0,qa/jezero4-browser.mjs
+BUTTON,librarySave,button,Guardar una copia de la misión actual,,Ejercitado en navegador P0,qa/jezero4-browser.mjs

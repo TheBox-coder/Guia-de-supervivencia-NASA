@@ -12,6 +12,7 @@ const PORT = Number(process.env.PORT || 8000);
 const NOMENCLATURE_ENDPOINT = 'https://planetarynames.wr.usgs.gov/nomenclature/SearchResults';
 const nomenclatureCache = new Map();
 const PUBLIC_FILES = new Set([
+  '/control.css','/modules/assurance.cjs','/modules/mission-control-engine.cjs','/modules/mission-control.js',
   '/operations.css','/modules/operations-engine.cjs','/modules/operations-map.js','/modules/operations.js',
   '/modules/forecast.js',
   '/polish.css','/modules/map-detail.js','/modules/workspace.js','/modules/locale.js','/modules/help-english.js','/MANUAL-HELP-EN.md',
@@ -163,11 +164,13 @@ async function serveStatic(req, res, url) {
 
 async function readJson(req, maxBytes = 2_000_000) {
   return await new Promise((resolve, reject) => {
-    let size = 0;
+    let size = 0, rejected = false;
     const chunks = [];
     req.on('data', chunk => {
+      if (rejected) return;
       size += chunk.length;
       if (size > maxBytes) {
+        rejected = true;
         chunks.length=0;
         reject(Object.assign(new Error('Solicitud demasiado grande.'),{statusCode:413}));
         return;
@@ -175,6 +178,7 @@ async function readJson(req, maxBytes = 2_000_000) {
       chunks.push(chunk);
     });
     req.on('end', () => {
+      if (rejected) return;
       try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}')); }
       catch { reject(Object.assign(new Error('JSON de misión inválido.'),{statusCode:400})); }
     });
@@ -203,7 +207,7 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/health') {
       return send(res, 200, {
         ok: true,
-        version:'V52',
+        version:'4.0.0-p0',
         check:'server-liveness',
         elevation: 'ArcGIS ElevationLayer · MDEM200M',
         note: 'La elevación se consulta en el navegador mediante queryElevation.'

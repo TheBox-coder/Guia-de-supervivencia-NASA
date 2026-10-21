@@ -133,7 +133,7 @@
     }catch(e){error(e.message);}finally{event.target.value='';}
   });
   $('survivalSampleWeather').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob(['sol,localHour,temperatureC,pressurePa,windMps\n'],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='jezero-plantilla-observaciones.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
-  $('survivalClearWeather').addEventListener('click',()=>{dataset=null;try{localStorage.removeItem(KEY+'-weather');}catch{}error();render();});
+  $('survivalClearWeather').addEventListener('click',()=>{if(dataset&&!window.confirm(window.JEZERO_I18N.ui('¿Quitar las observaciones guardadas en este navegador?','Remove observations saved in this browser?')))return;dataset=null;try{localStorage.removeItem(KEY+'-weather');}catch{}error();render();});
   function checklist(){const checked=[...document.querySelectorAll('[data-survival-check]')].filter(el=>el.checked);set('survivalChecklistCount',`${checked.length}/6`);try{localStorage.setItem(KEY+'-checklist',JSON.stringify(checked.map(el=>el.dataset.survivalCheck)));}catch{}}
   try{const checked=JSON.parse(localStorage.getItem(KEY+'-checklist')||'[]');document.querySelectorAll('[data-survival-check]').forEach(el=>el.checked=checked.includes(el.dataset.survivalCheck));}catch{}
   document.querySelectorAll('[data-survival-check]').forEach(el=>el.addEventListener('change',checklist));checklist();

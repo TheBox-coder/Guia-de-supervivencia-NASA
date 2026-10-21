@@ -1,0 +1,21 @@
+{
+  "checks": [
+    "New installations start at Mission Control with unknown resources and no generated weather",
+    "Nine areas accessible without document overflow in es at four widths",
+    "Nine areas accessible without document overflow in en at four widths",
+    "Mobile section selector and open/close toggle work",
+    "Legacy mission imports and calculates three strategies using an explicit flat DEM test double",
+    "Consolidated resources reproduce the current legacy calculation after real weather import and equipment confirmation",
+    "Water zero is preserved, deficits are visible and contingency shortcut opens the existing functional checklist editor",
+    "Evidence JSON contains actual inputs, recomputed outputs, model versions, equations and limitations",
+    "Changing a route input invalidates consolidated resource results",
+    "Local mission deletion requires confirmation; cancel preserves the copy",
+    "Support record deletion cancellation preserves the asset",
+    "Canceling new/clear mission preserves the current mission",
+    "Model equations are inspectable; open details survive language change and the help dialog opens",
+    "Cached shell reloads offline, retains inputs and refuses to reuse a route from a previous session",
+    "Existing selected area and support storage remain compatible without a migration"
+  ],
+  "errors": [],
+  "scope": "External services blocked. Flat terrain and synthetic observations supplied only in an isolated test context, never user data."
+}

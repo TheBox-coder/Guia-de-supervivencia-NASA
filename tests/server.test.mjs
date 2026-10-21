@@ -8,10 +8,10 @@ test('HTTP publication, input validation, PDF and rate limit',async t=>{
  t.after(()=>child.kill());
  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('server timeout')),7000);child.stdout.once('data',()=>{clearTimeout(timer);resolve();});child.once('error',reject);});
  const origin='http://127.0.0.1:18766';
- for(const file of ['/','/script.js','/modules/validation.cjs','/modules/route-engine.cjs','/mars-data.json','/assets/favicon.ico']){
+ for(const file of ['/','/script.js','/modules/validation.cjs','/modules/route-engine.cjs','/modules/assurance.cjs','/modules/mission-control-engine.cjs','/modules/mission-control.js','/control.css','/mars-data.json','/assets/favicon.ico']){
   const response=await fetch(origin+file);assert.equal(response.status,200,file);assert.equal(response.headers.get('x-content-type-options'),'nosniff');assert.ok(response.headers.get('content-security-policy'));
  }
- for(const file of ['/server.mjs','/pdf-report.mjs','/package.json','/db-schema.sql','/.git/config','/README.md','/tests/server.test.mjs','/data/mars-data.json','/%2e%2e%5cserver.mjs'])assert.equal((await fetch(origin+file)).status,404,file);
+ for(const file of ['/server.mjs','/pdf-report.mjs','/package.json','/db-schema.sql','/docs/linea-base.json','/legacy-elevation.mjs','/.git/config','/README.md','/tests/server.test.mjs','/data/mars-data.json','/%2e%2e%5cserver.mjs'])assert.equal((await fetch(origin+file)).status,404,file);
  assert.equal((await fetch(origin+'/%zz')).status,400);
  assert.equal((await fetch(origin+'/api/mars-nomenclature')).status,400);
  assert.equal((await fetch(origin+'/api/mars-nomenclature?west=-190&east=0&south=0&north=10')).status,400);
@@ -29,6 +29,9 @@ test('HTTP publication, input validation, PDF and rate limit',async t=>{
  const pdf=Buffer.from(await response.arrayBuffer());assert.equal(pdf.subarray(0,8).toString(),'%PDF-1.4');assert.match(pdf.toString('latin1'),/%%EOF/);
  for(const invalid of [{...report,selectedMode:'risk'},{...report,selected:{...m,legs:[]}},{...report,mission:{name:'x'.repeat(6000)}}])assert.equal((await post(JSON.stringify(invalid))).status,400);
  assert.equal((await post(' '.repeat(2_000_001))).status,413);
+ const http=await import('node:http');
+ const chunkedStatus=await new Promise((resolve,reject)=>{const req=http.request(origin+'/api/mission-pdf',{method:'POST',headers:{'content-type':'application/json'}},res=>{res.resume();resolve(res.statusCode);});req.on('error',reject);for(let i=0;i<6;i++)req.write(' '.repeat(500_000));req.end();});
+ assert.equal(chunkedStatus,413);
  let limited=false;
  for(let i=0;i<15;i++){const r=await post('{}');if(r.status===429){limited=true;assert.equal(r.headers.get('retry-after'),'60');break;}}
  assert.equal(limited,true);

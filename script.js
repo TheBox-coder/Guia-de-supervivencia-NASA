@@ -1052,7 +1052,7 @@ function updatePlanningUI(){
   document.dispatchEvent(new CustomEvent("jezero:missionedited"));
 }
 
-function newMission(){ missionPoints=[];currentMission=null;selecting=true;routeLayer.getSource().clear();drawPointMarkers();renderMissionList();resetMetrics();updatePlanningUI(); }
+function newMission(){ if(missionPoints.length&&!window.confirm(ui('¿Iniciar otra misión? El plan actual se reemplazará. Exporta una copia si deseas conservarlo.','Start another mission? The current plan will be replaced. Export a copy to keep it.')))return; missionPoints=[];currentMission=null;selecting=true;routeLayer.getSource().clear();drawPointMarkers();renderMissionList();resetMetrics();updatePlanningUI(); }
 function setLanding(){
   const base={lat:LANDING.lat,lon:LANDING.lon,name:'Base: Perseverance',type:'base',required:true,dwellMin:0};
   // Perseverance queda automáticamente como P0/base de la misión.
@@ -1083,7 +1083,7 @@ function resetMetrics(){
   if($('saveMission'))$('saveMission').disabled=true;
   renderTerrainProfile(null); renderMissionAnalytics(null); renderMissionTimeline(null); updateRouteSequenceStrip(null); updateMissionHud(null); updateHeaderStatus(); updateStrategyCards(null);
 }
-function clearMission(){missionPoints=[];currentMission=null;selecting=false;routeLayer.getSource().clear();drawPointMarkers();renderMissionList();resetMetrics();updatePlanningUI();}
+function clearMission(){if(missionPoints.length&&!window.confirm(ui('¿Vaciar el plan actual? Guarda una copia antes de continuar.','Clear the current plan? Save a copy before continuing.')))return;missionPoints=[];currentMission=null;selecting=false;routeLayer.getSource().clear();drawPointMarkers();renderMissionList();resetMetrics();updatePlanningUI();}
 function setBusy(b,msg){busy=b;$('calculate').disabled=b||missionPoints.length<2;$('recalculate').disabled=b||!currentMission;$('saveMission').disabled=b||!currentMission;if(msg)$('statusText').textContent=msg;else $('statusText').textContent='DATOS CARTOGRÁFICOS · NASA / USGS';}
 
 function getHistory(){ try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch{return[];} }

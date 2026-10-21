@@ -1,0 +1,17 @@
+{
+  "scope": "Uncompressed JS/CSS/CJS source sizes, including vendored OpenLayers. Not transferred bytes, latency, memory or field performance.",
+  "baselineBytes": 1461320,
+  "afterBytes": 1499085,
+  "baselineTestCount": 46,
+  "afterTestCount": 58,
+  "browserChecks": 15,
+  "browserErrors": 0,
+  "externalServices": "blocked in browser tests",
+  "unchangedCoreHashes": {
+    "modules/route-engine.cjs": true,
+    "modules/survival-engine.cjs": true,
+    "modules/operations-engine.cjs": true,
+    "modules/validation.cjs": true,
+    "pdf-report.mjs": true
+  }
+}

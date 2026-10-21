@@ -1,8 +1,8 @@
 {
   "name": "jezero",
-  "version": "3.0.0",
+  "version": "4.0.0-p0",
   "private": true,
-  "description": "Plataforma modular para planificaciÃ³n y anÃ¡lisis de travesÃ­as cientÃ­ficas EVA en Marte.",
+  "description": "JEZERO Survival Intelligence: planificación, simulación educativa y trazabilidad de modelos.",
   "type": "module",
   "scripts": {
     "start": "node server.mjs",

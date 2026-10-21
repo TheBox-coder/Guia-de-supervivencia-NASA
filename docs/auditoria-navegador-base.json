@@ -1,0 +1,2117 @@
+{
+  "runs": [
+    {
+      "width": 360,
+      "module": "survival",
+      "bodyModule": "survival",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "module": "operations",
+      "bodyModule": "operations",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "module": "weather",
+      "bodyModule": "weather",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "module": "planner",
+      "bodyModule": "planner",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "module": "explorer",
+      "bodyModule": "explorer",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "module": "eva",
+      "bodyModule": "eva",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "module": "analysis",
+      "bodyModule": "analysis",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "module": "settings",
+      "bodyModule": "settings",
+      "overflow": false
+    },
+    {
+      "width": 585,
+      "module": "survival",
+      "bodyModule": "survival",
+      "overflow": false
+    },
+    {
+      "width": 585,
+      "module": "operations",
+      "bodyModule": "operations",
+      "overflow": false
+    },
+    {
+      "width": 585,
+      "module": "weather",
+      "bodyModule": "weather",
+      "overflow": false
+    },
+    {
+      "width": 585,
+      "module": "planner",
+      "bodyModule": "planner",
+      "overflow": false
+    },
+    {
+      "width": 585,
+      "module": "explorer",
+      "bodyModule": "explorer",
+      "overflow": false
+    },
+    {
+      "width": 585,
+      "module": "eva",
+      "bodyModule": "eva",
+      "overflow": false
+    },
+    {
+      "width": 585,
+      "module": "analysis",
+      "bodyModule": "analysis",
+      "overflow": false
+    },
+    {
+      "width": 585,
+      "module": "settings",
+      "bodyModule": "settings",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "module": "survival",
+      "bodyModule": "survival",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "module": "operations",
+      "bodyModule": "operations",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "module": "weather",
+      "bodyModule": "weather",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "module": "planner",
+      "bodyModule": "planner",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "module": "explorer",
+      "bodyModule": "explorer",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "module": "eva",
+      "bodyModule": "eva",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "module": "analysis",
+      "bodyModule": "analysis",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "module": "settings",
+      "bodyModule": "settings",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "module": "survival",
+      "bodyModule": "survival",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "module": "operations",
+      "bodyModule": "operations",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "module": "weather",
+      "bodyModule": "weather",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "module": "planner",
+      "bodyModule": "planner",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "module": "explorer",
+      "bodyModule": "explorer",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "module": "eva",
+      "bodyModule": "eva",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "module": "analysis",
+      "bodyModule": "analysis",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "module": "settings",
+      "bodyModule": "settings",
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "controls": [
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "? Ayuda",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "toggleLeftPanel",
+      "type": "button",
+      "label": "Mostrar panel izquierdo",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "toggleRightPanel",
+      "type": "button",
+      "label": "Mostrar panel derecho",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "GUÍA",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "SOPORTE",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "CLIMA",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "MAPA",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "MISIÓN",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "EVA",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "RESULTADOS",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "CONFIG.",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "uiClosePanel",
+      "type": "button",
+      "label": "Cerrar panel",
+      "module": null
+    },
+    {
+      "tag": "SELECT",
+      "id": "landingSiteSelect",
+      "type": "select-one",
+      "label": "Selecciona un sitio de aterrizaje…Viking 1 · Chryse PlanitiaViking 2 · Utopia PlanitiaMars Pathfinder / Sojourner · Ares VallisSpirit · Gusev CraterOpportunity · Meridiani PlanumPh",
+      "module": "explorer"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "useSelectedLanding",
+      "type": "submit",
+      "label": "⌂ Usar como base",
+      "module": "explorer"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "radio",
+      "label": "baseMapLeft",
+      "module": "explorer"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "radio",
+      "label": "baseMapLeft",
+      "module": "explorer"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "radio",
+      "label": "baseMapLeft",
+      "module": "explorer"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": "explorer"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": "explorer"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": "explorer"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": "explorer"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": "explorer"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": "explorer"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "⌁Construir misiónBase, puntos y rutas",
+      "module": "explorer"
+    },
+    {
+      "tag": "A",
+      "id": "sourcesBtn",
+      "type": "",
+      "label": "FUENTES NASA ↗",
+      "module": "explorer"
+    },
+    {
+      "tag": "INPUT",
+      "id": "coordLatInput",
+      "type": "text",
+      "label": "",
+      "module": "planner"
+    },
+    {
+      "tag": "INPUT",
+      "id": "coordLonInput",
+      "type": "text",
+      "label": "",
+      "module": "planner"
+    },
+    {
+      "tag": "INPUT",
+      "id": "coordNameInput",
+      "type": "text",
+      "label": "",
+      "module": "planner"
+    },
+    {
+      "tag": "SELECT",
+      "id": "coordTypeInput",
+      "type": "select-one",
+      "label": "Punto de misiónBase",
+      "module": "planner"
+    },
+    {
+      "tag": "INPUT",
+      "id": "coordDwellInput",
+      "type": "number",
+      "label": "",
+      "module": "planner"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "coordinateAdd",
+      "type": "submit",
+      "label": "＋Agregar punto",
+      "module": "planner"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "uiPickOnMap",
+      "type": "button",
+      "label": "⌖ Añadir directamente en el mapa",
+      "module": "planner"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "addBase",
+      "type": "submit",
+      "label": "⌂ Usar el primer punto como base",
+      "module": "planner"
+    },
+    {
+      "tag": "INPUT",
+      "id": "optimizeOrder",
+      "type": "checkbox",
+      "label": "",
+      "module": "planner"
+    },
+    {
+      "tag": "INPUT",
+      "id": "returnBase",
+      "type": "checkbox",
+      "label": "",
+      "module": "planner"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "radio",
+      "label": "mode",
+      "module": "planner"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "radio",
+      "label": "mode",
+      "module": "planner"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "radio",
+      "label": "mode",
+      "module": "planner"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "calculate",
+      "type": "submit",
+      "label": "⌁ Calcular misión",
+      "module": "planner"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "planMode",
+      "type": "submit",
+      "label": "＋ Nueva misión",
+      "module": "planner"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "clearRoute",
+      "type": "submit",
+      "label": "× Limpiar misión",
+      "module": "planner"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "evaReturnHome",
+      "type": "submit",
+      "label": "Recalcular con regreso a la baseIncluye el retorno en el presupuesto de la misión.",
+      "module": "eva"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "Editar la misiónEdita los puntos y las restricciones del recorrido.",
+      "module": "eva"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "saveMission",
+      "type": "submit",
+      "label": "▣ Guardar misión y generar PDF completo",
+      "module": "analysis"
+    },
+    {
+      "tag": "SELECT",
+      "id": "languageSetting",
+      "type": "select-one",
+      "label": "Idioma",
+      "module": "settings"
+    },
+    {
+      "tag": "INPUT",
+      "id": "routeAnimationSetting",
+      "type": "checkbox",
+      "label": "Flujo animado de la ruta",
+      "module": "settings"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "radio",
+      "label": "themeSetting",
+      "module": "settings"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "radio",
+      "label": "themeSetting",
+      "module": "settings"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "radio",
+      "label": "themeSetting",
+      "module": "settings"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "radio",
+      "label": "themeSetting",
+      "module": "settings"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "radio",
+      "label": "themeSetting",
+      "module": "settings"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "radio",
+      "label": "themeSetting",
+      "module": "settings"
+    },
+    {
+      "tag": "INPUT",
+      "id": "missionNameSetting",
+      "type": "text",
+      "label": "",
+      "module": "settings"
+    },
+    {
+      "tag": "INPUT",
+      "id": "missionCodeSetting",
+      "type": "text",
+      "label": "",
+      "module": "settings"
+    },
+    {
+      "tag": "INPUT",
+      "id": "crewSetting",
+      "type": "text",
+      "label": "",
+      "module": "settings"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "missionNotesSetting",
+      "type": "textarea",
+      "label": "",
+      "module": "settings"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "saveDefaultsBtn",
+      "type": "submit",
+      "label": "↓ Guardar parámetros actuales como predeterminados",
+      "module": "settings"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "restoreDefaultsBtn",
+      "type": "submit",
+      "label": "↻ Aplicar parámetros predeterminados",
+      "module": "settings"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "exportMissionJson",
+      "type": "submit",
+      "label": "⇩ Exportar misión a JSON",
+      "module": "settings"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "importMissionJson",
+      "type": "submit",
+      "label": "⇧ Importar misión desde JSON",
+      "module": "settings"
+    },
+    {
+      "tag": "INPUT",
+      "id": "importMissionFile",
+      "type": "file",
+      "label": "",
+      "module": "settings"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "clearHistoryBtn",
+      "type": "submit",
+      "label": "× Borrar historial local",
+      "module": "settings"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "opsExport",
+      "type": "button",
+      "label": "Guardar paquete ↓",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "opsImport",
+      "type": "button",
+      "label": "Abrir paquete ↑",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "opsClose",
+      "type": "button",
+      "label": "Cerrar soporte",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "opsFile",
+      "type": "file",
+      "label": "",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "SELECT",
+      "id": "opsSectionSelect",
+      "type": "select-one",
+      "label": "ResumenRefugiosSoporte vitalRadiaciónComunicacionesEquipamientoContingenciasCancelaciónBitácora",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Resumen",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Refugios",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Soporte vital",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Radiación",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Comunicaciones",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Equipamiento",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Contingencias",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Cancelación",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Bitácora",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "SELECT",
+      "id": "opsOrigin",
+      "type": "select-one",
+      "label": "Define una base en Misión",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Ruta calculadaDatos pendientes",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Refugios documentadosDatos pendientes",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Presupuesto de aguaDatos pendientes",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Captura de CO₂Datos pendientes",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Equipo térmicoDatos pendientes",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Medición de radiaciónDatos pendientes",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Enlace de comunicaciónDatos pendientes",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Estado del equipoDatos pendientes",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Protocolos documentadosDatos pendientes",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Límites de la misiónDatos pendientes",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "hidden",
+      "label": "id",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-shelters-name",
+      "type": "text",
+      "label": "name",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-shelters-lat",
+      "type": "number",
+      "label": "lat",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-shelters-lon",
+      "type": "number",
+      "label": "lon",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-shelters-capacity",
+      "type": "number",
+      "label": "capacity",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-shelters-available",
+      "type": "checkbox",
+      "label": "available",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-shelters-waterL",
+      "type": "number",
+      "label": "waterL",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-shelters-oxygenKg",
+      "type": "number",
+      "label": "oxygenKg",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-shelters-energyKWh",
+      "type": "number",
+      "label": "energyKWh",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-shelters-source",
+      "type": "text",
+      "label": "source",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-shelters-updatedAt",
+      "type": "text",
+      "label": "updatedAt",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "Guardar registro",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Limpiar formulario",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "hidden",
+      "label": "id",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-resources-waterL",
+      "type": "number",
+      "label": "waterL",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-resources-waterRateLH",
+      "type": "number",
+      "label": "waterRateLH",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-resources-co2CapacityKg",
+      "type": "number",
+      "label": "co2CapacityKg",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-resources-co2RateKgH",
+      "type": "number",
+      "label": "co2RateKgH",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-resources-thermalKWh",
+      "type": "number",
+      "label": "thermalKWh",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-resources-thermalKW",
+      "type": "number",
+      "label": "thermalKW",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-resources-source",
+      "type": "text",
+      "label": "source",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "Guardar datos",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "hidden",
+      "label": "id",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-radiation-rateUSvH",
+      "type": "number",
+      "label": "rateUSvH",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-radiation-accumulatedMSv",
+      "type": "number",
+      "label": "accumulatedMSv",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-radiation-source",
+      "type": "text",
+      "label": "source",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-radiation-measuredAt",
+      "type": "text",
+      "label": "measuredAt",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "Guardar datos",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "hidden",
+      "label": "id",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "SELECT",
+      "id": "ops-communications-status",
+      "type": "select-one",
+      "label": "DesconocidoComprobadoDegradadoPerdido",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-communications-source",
+      "type": "text",
+      "label": "source",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-communications-checkedAt",
+      "type": "text",
+      "label": "checkedAt",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-communications-contact",
+      "type": "text",
+      "label": "contact",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "Guardar datos",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "hidden",
+      "label": "id",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-relays-name",
+      "type": "text",
+      "label": "name",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-relays-lat",
+      "type": "number",
+      "label": "lat",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-relays-lon",
+      "type": "number",
+      "label": "lon",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-relays-radiusKm",
+      "type": "number",
+      "label": "radiusKm",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-relays-source",
+      "type": "text",
+      "label": "source",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-relays-updatedAt",
+      "type": "text",
+      "label": "updatedAt",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "Guardar registro",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Limpiar formulario",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "hidden",
+      "label": "id",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-equipment-name",
+      "type": "text",
+      "label": "name",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "SELECT",
+      "id": "ops-equipment-type",
+      "type": "select-one",
+      "label": "TrajeVehículoHábitatRadioDosímetroOtro",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "SELECT",
+      "id": "ops-equipment-status",
+      "type": "select-one",
+      "label": "Sin verificarRevisadoMantenimientoAveriado",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-equipment-critical",
+      "type": "checkbox",
+      "label": "critical",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-equipment-source",
+      "type": "text",
+      "label": "source",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-equipment-checkedAt",
+      "type": "text",
+      "label": "checkedAt",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-equipment-serviceDue",
+      "type": "date",
+      "label": "serviceDue",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "ops-equipment-notes",
+      "type": "textarea",
+      "label": "notes",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "Guardar registro",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Limpiar formulario",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "hidden",
+      "label": "id",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-procedures-name",
+      "type": "text",
+      "label": "name",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "ops-procedures-trigger",
+      "type": "textarea",
+      "label": "trigger",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-procedures-responsible",
+      "type": "text",
+      "label": "responsible",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-procedures-source",
+      "type": "text",
+      "label": "source",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "ops-procedures-steps",
+      "type": "textarea",
+      "label": "steps",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "SELECT",
+      "id": "ops-procedures-shelterId",
+      "type": "select-one",
+      "label": "Sin asociar",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-procedures-reviewed",
+      "type": "checkbox",
+      "label": "reviewed",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "Guardar registro",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Limpiar formulario",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "hidden",
+      "label": "id",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-criteria-maxDurationH",
+      "type": "number",
+      "label": "maxDurationH",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-criteria-minWaterL",
+      "type": "number",
+      "label": "minWaterL",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-criteria-maxDoseMSv",
+      "type": "number",
+      "label": "maxDoseMSv",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-criteria-maxSlopeDeg",
+      "type": "number",
+      "label": "maxSlopeDeg",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-criteria-sensorAgeH",
+      "type": "number",
+      "label": "sensorAgeH",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-criteria-requireReturn",
+      "type": "checkbox",
+      "label": "requireReturn",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-criteria-stopOnLinkLoss",
+      "type": "checkbox",
+      "label": "stopOnLinkLoss",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-criteria-stopOnEquipmentFault",
+      "type": "checkbox",
+      "label": "stopOnEquipmentFault",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "ops-criteria-source",
+      "type": "text",
+      "label": "source",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "Guardar datos",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "hidden",
+      "label": "id",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "SELECT",
+      "id": "ops-log-kind",
+      "type": "select-one",
+      "label": "NotaDecisiónIncidente",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "ops-log-text",
+      "type": "textarea",
+      "label": "text",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "submit",
+      "label": "Registrar entrada",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Limpiar formulario",
+      "module": "operationsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Cerrar predicción",
+      "module": "forecastWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Añadir observaciones →",
+      "module": "forecastWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "forecastHour",
+      "type": "range",
+      "label": "",
+      "module": "forecastWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Cambiar observaciones",
+      "module": "forecastWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "missionLibraryOpen",
+      "type": "button",
+      "label": "Misiones",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Abrir misión ↑",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "workspaceSaveMission",
+      "type": "button",
+      "label": "Guardar misión ↓",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "draftRecover",
+      "type": "button",
+      "label": "Recuperar",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "draftDismiss",
+      "type": "button",
+      "label": "Descartar",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "survivalPlan",
+      "type": "button",
+      "label": "1. Crear mi misión ↗",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "survivalGoData",
+      "type": "button",
+      "label": "2. Añadir datos del clima",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "guideRouteStep",
+      "type": "button",
+      "label": "1 · Elige tu recorridoPendiente: base y destino",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "guideDataStep",
+      "type": "button",
+      "label": "2 · Añade el climaPendiente: observaciones",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "guideEquipmentStep",
+      "type": "button",
+      "label": "3 · Revisa tu equipoPendiente: revisar valores",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "openOperations",
+      "type": "button",
+      "label": "Centro de supervivencia ↗",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "guideDetails",
+      "type": "button",
+      "label": "Ver detalles técnicos y escenarios",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "survivalQuickExport",
+      "type": "button",
+      "label": "Guardar evaluación ↓",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Operación nominal",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Polvo denso",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Fallo de batería",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "survivalExport",
+      "type": "button",
+      "label": "↓ Exportar evaluación",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Abrir tutorial →",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "openWeatherForecast",
+      "type": "button",
+      "label": "Ver predicción del próximo sol ↗",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "survivalStartHour",
+      "type": "number",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "survivalDust",
+      "type": "range",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "survivalCrew",
+      "type": "number",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "survivalReserve",
+      "type": "number",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "survivalOxygenCapacity",
+      "type": "number",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "survivalOxygenRate",
+      "type": "number",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "survivalBatteryCapacity",
+      "type": "number",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "survivalPower",
+      "type": "number",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "guideEquipmentConfirmed",
+      "type": "checkbox",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "survivalProgress",
+      "type": "range",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "SELECT",
+      "id": "survivalSurface",
+      "type": "select-one",
+      "label": "Desconocido · sin ajusteFirme · supuestoSuelto · supuesto (+15% tiempo)",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "A",
+      "id": "",
+      "type": "",
+      "label": "Contexto geológico NASA ↗",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "survivalImportWeather",
+      "type": "button",
+      "label": "↑ Importar observaciones",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "survivalSampleWeather",
+      "type": "button",
+      "label": "↓ Plantilla vacía CSV",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "survivalClearWeather",
+      "type": "button",
+      "label": "Quitar observaciones",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "survivalWeatherFile",
+      "type": "file",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "weatherSourceName",
+      "type": "text",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "weatherLatitude",
+      "type": "number",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "INPUT",
+      "id": "weatherLongitude",
+      "type": "number",
+      "label": "",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Consultar el manual ↗",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "A",
+      "id": "",
+      "type": "",
+      "label": "MEDA: referencia histórica ↗",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "A",
+      "id": "",
+      "type": "",
+      "label": "Entorno de Marte ↗",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "A",
+      "id": "",
+      "type": "",
+      "label": "Radiación ↗",
+      "module": "survivalWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "uiStartMission",
+      "type": "button",
+      "label": "Elegir una base",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "zoomIn",
+      "type": "submit",
+      "label": "Acercar",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "zoomOut",
+      "type": "submit",
+      "label": "Alejar",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "mapJezeroDetail",
+      "type": "submit",
+      "label": "Centrar en Jezero",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "center",
+      "type": "submit",
+      "label": "Ajustar a mi misión",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "toggleLayerDrawer",
+      "type": "button",
+      "label": "Abrir capas",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "focusMap",
+      "type": "button",
+      "label": "Enfocar el mapa",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "closeLayerDrawer",
+      "type": "button",
+      "label": "×",
+      "module": null
+    },
+    {
+      "tag": "SELECT",
+      "id": "baseMapMode",
+      "type": "select-one",
+      "label": "Marte real · Viking VIS\n              Topografía · MOLA + HRSC\n              Híbrido · imagen + relieve",
+      "module": null
+    },
+    {
+      "tag": "SELECT",
+      "id": "mapVisualMode",
+      "type": "select-one",
+      "label": "Geología · color MOLA\n              Relieve · contraste\n              Monocromo científico\n              EVA · baja luminosidad",
+      "module": null
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": null
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": null
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": null
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": null
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": null
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": null
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "type": "checkbox",
+      "label": "",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "toggleMapLegend",
+      "type": "button",
+      "label": "＋",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "missionHudToggle",
+      "type": "button",
+      "label": "Expandir o contraer estado de misión",
+      "module": null
+    },
+    {
+      "tag": "SELECT",
+      "id": "analyticsStrategySelect",
+      "type": "select-one",
+      "label": "EquilibradaMás directaMenor exposición",
+      "module": "analyticsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "analyticsClearSelection",
+      "type": "button",
+      "label": "× LIMPIAR SELECCIÓN",
+      "module": "analyticsWorkspace"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "mapInfoClose",
+      "type": "submit",
+      "label": "×",
+      "module": null
+    },
+    {
+      "tag": "A",
+      "id": "mapInfoSource",
+      "type": "",
+      "label": "Fuente",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "mapInfoUseBase",
+      "type": "submit",
+      "label": "Usar como base",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "mapInfoAdd",
+      "type": "submit",
+      "label": "Agregar a misión",
+      "module": null
+    },
+    {
+      "tag": "INPUT",
+      "id": "speed",
+      "type": "number",
+      "label": "",
+      "module": "planner"
+    },
+    {
+      "tag": "INPUT",
+      "id": "evaTime",
+      "type": "number",
+      "label": "",
+      "module": "planner"
+    },
+    {
+      "tag": "INPUT",
+      "id": "returnMargin",
+      "type": "number",
+      "label": "",
+      "module": "planner"
+    },
+    {
+      "tag": "INPUT",
+      "id": "maxSlopeLimit",
+      "type": "number",
+      "label": "",
+      "module": "planner"
+    },
+    {
+      "tag": "INPUT",
+      "id": "minTransitability",
+      "type": "number",
+      "label": "",
+      "module": "planner"
+    },
+    {
+      "tag": "INPUT",
+      "id": "minConfidence",
+      "type": "number",
+      "label": "",
+      "module": "planner"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "recalculate",
+      "type": "submit",
+      "label": "↻ Recalcular misión",
+      "module": "planner"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Abrir Guía de supervivencia ↗",
+      "module": "eva"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Cerrar manual",
+      "module": null
+    },
+    {
+      "tag": "INPUT",
+      "id": "helpQuery",
+      "type": "search",
+      "label": "",
+      "module": null
+    },
+    {
+      "tag": "A",
+      "id": "",
+      "type": "",
+      "label": "Descargar manual ↓",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Primeros pasos",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Crear y calcular una misión",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Importar observaciones del clima",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Configurar oxígeno y batería",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Entender resultados y alertas",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Relieve y análisis del suelo",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Guardar, recuperar y trabajar sin conexión",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Resolver problemas",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Glosario y alcance",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Centro de supervivencia",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "helpStartTutorial",
+      "type": "button",
+      "label": "Abrir tutorial →",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "type": "button",
+      "label": "Cerrar tutorial",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "tutorialTry",
+      "type": "button",
+      "label": "Ver la preparación",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "tutorialBack",
+      "type": "button",
+      "label": "← Anterior",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "tutorialNext",
+      "type": "button",
+      "label": "Siguiente →",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "tutorialContinue",
+      "type": "button",
+      "label": "Continuar →",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "tutorialDockClose",
+      "type": "button",
+      "label": "Pausar tutorial",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "libraryClose",
+      "type": "button",
+      "label": "Cerrar biblioteca",
+      "module": null
+    },
+    {
+      "tag": "BUTTON",
+      "id": "librarySave",
+      "type": "button",
+      "label": "Guardar una copia de la misión actual",
+      "module": null
+    }
+  ]
+}
