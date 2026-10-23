@@ -4,56 +4,56 @@
   const THEMES = {
     'nasa-classic': {
       label:{es:'NASA Clásico',en:'NASA Classic'},
-      description:{es:'Azul NASA, rojo de misión y blanco técnico.',en:'NASA blue, mission red and technical white.'},
+      description:{es:'Azul aeroespacial, terracota y blanco técnico de alta precisión.',en:'Aerospace navy, warm terracotta and high-precision technical white.'},
       colors:{
-        bg:'#020611',bg2:'#040B16',panel:'#06101F',panel2:'#08192D',panel3:'#0C2440',line:'#1F4F7D',lineStrong:'#4F95D1',
-        text:'#F7FBFF',muted:'#A9BFD4',soft:'#6E8BA6',primary:'#0B3D91',primary2:'#1769D2',accent:'#FC3D21',accent2:'#55C8FF',
-        success:'#54D6A5',warning:'#FFC857',danger:'#FC3D21',grid:'rgba(72,142,207,.15)',glow:'rgba(23,105,210,.22)',mapText:'#FFFFFF'
+        bg:'#090d16',bg2:'#0d1424',panel:'#111a2e',panel2:'#16223b',panel3:'#1c2b4a',line:'#1e3256',lineStrong:'#2d4b80',
+        text:'#f8fafc',muted:'#94a3b8',soft:'#64748b',primary:'#1d4ed8',primary2:'#3b82f6',accent:'#ea580c',accent2:'#38bdf8',
+        success:'#10b981',warning:'#f59e0b',danger:'#ef4444',grid:'rgba(59,130,246,.04)',glow:'rgba(59,130,246,.08)',mapText:'#FFFFFF'
       }
     },
     'artemis-lunar': {
       label:{es:'Artemis Lunar',en:'Artemis Lunar'},
-      description:{es:'Grafito, plata lunar y azul frío de navegación.',en:'Graphite, lunar silver and cold navigation blue.'},
+      description:{es:'Grafito obsidiana, plata lunar y cobalto frío de navegación.',en:'Obsidian graphite, lunar silver and cold navigation cobalt.'},
       colors:{
-        bg:'#07090C',bg2:'#0C1015',panel:'#10151B',panel2:'#151C24',panel3:'#1B2632',line:'#344657',lineStrong:'#7A9AB8',
-        text:'#F4F7FA',muted:'#B6C0CA',soft:'#7D8C99',primary:'#263B52',primary2:'#5EA6FF',accent:'#D9E3ED',accent2:'#81D4FF',
-        success:'#68D6A2',warning:'#F2C65C',danger:'#FF5B4D',grid:'rgba(170,195,218,.12)',glow:'rgba(94,166,255,.18)',mapText:'#FFFFFF'
+        bg:'#0b0d11',bg2:'#111419',panel:'#161a22',panel2:'#1c222c',panel3:'#242b38',line:'#26303e',lineStrong:'#3d4b60',
+        text:'#f1f5f9',muted:'#94a3b8',soft:'#64748b',primary:'#2563eb',primary2:'#60a5fa',accent:'#cbd5e1',accent2:'#93c5fd',
+        success:'#10b981',warning:'#f59e0b',danger:'#ef4444',grid:'rgba(148,163,184,.04)',glow:'rgba(96,165,250,.06)',mapText:'#FFFFFF'
       }
     },
     'deep-space': {
       label:{es:'Espacio Profundo',en:'Deep Space'},
-      description:{es:'Índigo, violeta y cian para una consola futurista.',en:'Indigo, violet and cyan for a futuristic console.'},
+      description:{es:'Crepúsculo índigo, violeta sutil y cian para instrumentación moderna.',en:'Twilight indigo, subtle violet and cyan for modern instrumentation.'},
       colors:{
-        bg:'#05040B',bg2:'#090713',panel:'#0F0B1E',panel2:'#17102A',panel3:'#21163A',line:'#46346B',lineStrong:'#8C6BE0',
-        text:'#FAF8FF',muted:'#BDB2D7',soft:'#8175A0',primary:'#432B80',primary2:'#7056D9',accent:'#D14CFF',accent2:'#3DDCFF',
-        success:'#54E0A0',warning:'#F5C860',danger:'#FF5268',grid:'rgba(115,86,217,.14)',glow:'rgba(209,76,255,.16)',mapText:'#FFFFFF'
+        bg:'#0a0912',bg2:'#100e1b',panel:'#151224',panel2:'#1c1830',panel3:'#252040',line:'#322a54',lineStrong:'#4d4180',
+        text:'#f8f7ff',muted:'#a59fc4',soft:'#6e6790',primary:'#4f46e5',primary2:'#6366f1',accent:'#a855f7',accent2:'#38bdf8',
+        success:'#10b981',warning:'#f59e0b',danger:'#ef4444',grid:'rgba(99,102,241,.04)',glow:'rgba(168,85,247,.06)',mapText:'#FFFFFF'
       }
     },
     'mars-science': {
       label:{es:'Ciencia Marciana',en:'Mars Science'},
-      description:{es:'Rojo mineral, cobre y azul de instrumentación.',en:'Mineral red, copper and instrumentation blue.'},
+      description:{es:'Basalto umber, terracota cálido y cobre técnico.',en:'Umber basalt, warm terracotta and technical copper.'},
       colors:{
-        bg:'#080505',bg2:'#100807',panel:'#170B0A',panel2:'#21100E',panel3:'#2C1713',line:'#653527',lineStrong:'#C96A4B',
-        text:'#FFF7F2',muted:'#D2B8AA',soft:'#95776B',primary:'#7D2A1C',primary2:'#C4472F',accent:'#F49B63',accent2:'#6BC7F0',
-        success:'#5ED09B',warning:'#FFCC66',danger:'#FF4935',grid:'rgba(196,71,47,.12)',glow:'rgba(244,155,99,.14)',mapText:'#FFFFFF'
+        bg:'#0d0a08',bg2:'#140f0c',panel:'#1a1410',panel2:'#221a15',panel3:'#2b211b',line:'#3b2c23',lineStrong:'#5c4537',
+        text:'#faf5ef',muted:'#baa596',soft:'#7e6c60',primary:'#9a3412',primary2:'#c2410c',accent:'#ea580c',accent2:'#38bdf8',
+        success:'#10b981',warning:'#f59e0b',danger:'#ef4444',grid:'rgba(194,65,12,.04)',glow:'rgba(234,88,12,.06)',mapText:'#FFFFFF'
       }
     },
     'aurora-teal': {
       label:{es:'Aurora Teal',en:'Aurora Teal'},
-      description:{es:'Verde azulado, menta y azul eléctrico científico.',en:'Teal, mint and scientific electric blue.'},
+      description:{es:'Picea oscura, verde eucalipto y menta de alta visibilidad.',en:'Dark spruce, eucalyptus green and high-visibility mint.'},
       colors:{
-        bg:'#020A0B',bg2:'#041213',panel:'#071A1C',panel2:'#0A2427',panel3:'#0D3034',line:'#205B60',lineStrong:'#3AB8B9',
-        text:'#F2FFFF',muted:'#A8CFD0',soft:'#6D999B',primary:'#0D5C63',primary2:'#168E96',accent:'#29E6C7',accent2:'#55B7FF',
-        success:'#4DE3A4',warning:'#F6C453',danger:'#FF5C5C',grid:'rgba(41,230,199,.10)',glow:'rgba(22,142,150,.18)',mapText:'#FFFFFF'
+        bg:'#070d0f',bg2:'#0b1417',panel:'#101c20',panel2:'#16262c',panel3:'#1e333a',line:'#264149',lineStrong:'#3a606b',
+        text:'#f0fdf4',muted:'#86a3a9',soft:'#5a757b',primary:'#0f766e',primary2:'#14b8a6',accent:'#10b981',accent2:'#38bdf8',
+        success:'#10b981',warning:'#f59e0b',danger:'#ef4444',grid:'rgba(20,184,166,.04)',glow:'rgba(20,184,166,.06)',mapText:'#FFFFFF'
       }
     },
     'eva-contrast': {
       label:{es:'EVA Alto Contraste',en:'EVA High Contrast'},
-      description:{es:'Negro, blanco y amarillo para máxima lectura operacional.',en:'Black, white and yellow for maximum operational readability.'},
+      description:{es:'Pizarra profunda, ámbar operacional y blanco nítido con lectura AAA.',en:'Deep slate, operational amber and crisp white with AAA readability.'},
       colors:{
-        bg:'#000000',bg2:'#050607',panel:'#0B0D0F',panel2:'#11151A',panel3:'#171C22',line:'#4B535C',lineStrong:'#F5F7FA',
-        text:'#FFFFFF',muted:'#D1D7DD',soft:'#929AA3',primary:'#252B32',primary2:'#F5F7FA',accent:'#FFE600',accent2:'#48C6FF',
-        success:'#39E58C',warning:'#FFE600',danger:'#FF3B30',grid:'rgba(255,255,255,.10)',glow:'rgba(255,230,0,.12)',mapText:'#FFFFFF'
+        bg:'#04060a',bg2:'#080c14',panel:'#0e1420',panel2:'#141d2e',panel3:'#1c283e',line:'#334155',lineStrong:'#64748b',
+        text:'#ffffff',muted:'#cbd5e1',soft:'#94a3b8',primary:'#1d4ed8',primary2:'#60a5fa',accent:'#f59e0b',accent2:'#38bdf8',
+        success:'#10b981',warning:'#f59e0b',danger:'#ef4444',grid:'rgba(255,255,255,.03)',glow:'rgba(245,158,11,.05)',mapText:'#FFFFFF'
       }
     }
   };
@@ -72,7 +72,9 @@
       '--bg':colors.bg,'--panel':colors.panel,'--panel-2':colors.panel2,'--panel-3':colors.panel3,'--line':colors.line,'--text':colors.text,
       '--muted':colors.muted,'--soft':colors.soft,'--mars':colors.accent,'--mars-2':colors.primary,'--sand':colors.accent2,'--teal':colors.success,
       '--cyan':colors.accent2,'--danger':colors.danger,'--warning':colors.warning,'--nasa-blue':colors.primary,'--nasa-blue-bright':colors.primary2,
-      '--nasa-red':colors.accent,'--mission-white':colors.text
+      '--nasa-red':colors.accent,'--mission-white':colors.text,
+      '--surface-canvas':colors.bg,'--surface-panel':colors.panel,'--surface-card':colors.panel2,'--surface-elevated':colors.panel3,
+      '--border-subtle':colors.line,'--border-strong':colors.lineStrong,'--text-primary':colors.text,'--text-secondary':colors.muted
     };
     Object.entries(vars).forEach(([k,v])=>root.style.setProperty(k,v));
   }
@@ -119,7 +121,6 @@
     getLabel:(key=currentKey(),lang=language())=>{const i=THEMES[normalize(key)],l=lang==='en'?'en':'es';return i.label[l];}
   });
 
-  // Aplicación temprana para evitar un destello del tema predeterminado.
   setTheme(currentKey(),{persist:false,emit:false});
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initControls,{once:true}); else initControls();
 })();

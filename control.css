@@ -1,67 +1,526 @@
-/* Mission Control is isolated from the legacy map and panel styles. */
-.homeWorkspace{display:none;position:absolute;inset:16px 20px 20px calc(var(--ui-rail) + 24px);z-index:23;background:var(--theme-bg);border:1px solid var(--theme-line);border-radius:18px;color:var(--theme-text);overflow:hidden;flex-direction:column;color-scheme:dark}
-body[data-module=home][data-interface-open=true] .homeWorkspace{display:flex}
-body[data-module=home] :is(.sidebar,.details,.panelEdgeToggle,.mapToolbar,.missionHud,.uiCanvasWelcome,.imageryDetailStatus,.mapCoordChip,.mapScaleChip,.north){display:none!important}
-body[data-module=home][data-interface-open=false] .mapToolbar{display:flex!important}
-body[data-module=home][data-interface-open=true] .mapPanel{visibility:hidden}
-.controlHeader{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid var(--theme-line);gap:20px;flex-shrink:0}
-.controlEyebrow{font:600 10px/1.6 Consolas,monospace;letter-spacing:1.6px;color:var(--theme-accent-2)}
-.controlHeader h1{font:600 24px/1.3 'Segoe UI',sans-serif;margin:3px 0}
-.controlActions{display:flex;gap:8px;flex-wrap:wrap}
-.homeWorkspace button,.mobileModuleBar button{border:1px solid var(--theme-line);background:var(--theme-panel-2);color:var(--theme-text);border-radius:9px;padding:10px 14px;min-height:42px;font:600 13px/1.4 'Segoe UI',sans-serif;cursor:pointer}
-.homeWorkspace button:hover{border-color:var(--theme-accent-2);background:var(--theme-panel-3)}
-.homeWorkspace :is(button,summary,a):focus-visible,.mobileModuleBar :is(select,button):focus-visible{outline:2px solid var(--theme-accent-2);outline-offset:3px}
-.controlScroll{min-height:0;overflow:auto;padding:28px;scrollbar-width:thin;scrollbar-color:var(--theme-line-strong) transparent;overscroll-behavior:contain;scrollbar-gutter:stable}
-.controlHero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;padding:0 0 24px;border-bottom:1px solid var(--theme-line);margin-bottom:24px}
-.controlHero h2{font:600 clamp(24px,2.5vw,36px)/1.2 'Segoe UI',sans-serif;letter-spacing:-.8px;margin:8px 0 12px;overflow-wrap:anywhere}
-.controlHero p{font:14px/1.8 'Segoe UI',sans-serif;color:var(--theme-muted);max-width:650px;margin:0}
-.homeWorkspace .controlPrimary{background:var(--theme-accent-2);border-color:var(--theme-accent-2);color:#080f1c;padding:13px 20px}
-.controlMeta{display:flex;flex-wrap:wrap;gap:12px 24px;margin:18px 0 0;font-size:12px;color:var(--theme-muted)}
-.controlMeta strong{color:var(--theme-text)}
-.controlGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.controlMetric{border:1px solid var(--theme-line);border-radius:12px;background:var(--theme-panel);padding:20px;min-width:0}
-.controlMetric>h3{font-size:13px;margin:0;color:var(--theme-muted);font-weight:600}
-.controlMetric>strong{display:block;font:500 30px/1.3 'Segoe UI',sans-serif;letter-spacing:-.6px;margin:9px 0}
-.controlMetric small{font-size:11px;color:var(--theme-muted);line-height:1.7;display:block}
-.controlMetric[data-deficit=true]{border-color:var(--theme-danger)}
-.controlMetric[data-deficit=true]>strong{color:var(--theme-danger)}
-.controlOrigin{display:inline-block;font:600 10px/1.4 Consolas,monospace;color:var(--theme-accent-2);border:1px solid var(--theme-line);border-radius:5px;padding:4px 7px;margin-bottom:8px}
-.controlSplit{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px;margin-top:24px}
-.controlBox{padding:22px;border:1px solid var(--theme-line);background:var(--theme-panel);border-radius:12px;min-width:0}
-.controlBox h2,.controlAssurance h2{font-size:17px;margin:0 0 16px}
-.controlSteps{display:grid;gap:10px}
-.controlSteps button{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:12px;text-align:left;background:transparent;border-color:var(--theme-line);padding:12px}
-.controlSteps em{font:12px Consolas,monospace;color:var(--theme-accent-2);font-style:normal}
-.controlSteps span{font-size:13px}
-.controlSteps small{display:block;color:var(--theme-muted);font-weight:400;font-size:11px;margin-top:4px;line-height:1.6}
-.controlWeather p,.controlAssurance p,.controlNotice{color:var(--theme-muted);font-size:13px;line-height:1.8}
-.controlWeather strong{font-size:15px;overflow-wrap:anywhere}
-.controlWeather button{margin:10px 8px 0 0}
-.controlNotice{padding:14px 16px;border-left:3px solid var(--theme-warning);background:var(--theme-panel-2);border-radius:0 8px 8px 0;margin:20px 0}
-.controlNotice[hidden]{display:none}
-.controlAssurance{margin-top:24px;padding-top:24px;border-top:1px solid var(--theme-line)}
-.controlAssurance summary{cursor:pointer;font-weight:600;font-size:14px;min-height:44px;padding:12px 0}
-.controlAssurance details{border-top:1px solid var(--theme-line)}
-.controlAssurance code{display:block;white-space:pre-wrap;overflow-wrap:anywhere;padding:10px 12px;background:var(--theme-panel-2);font:12px/1.8 Consolas,monospace;border-radius:8px;margin:8px 0}
-.controlAssurance a{color:var(--theme-accent-2);font-size:12px;line-height:2;overflow-wrap:anywhere}
-.controlFoot{margin:24px 0 0;color:var(--theme-muted);font-size:11px;line-height:1.8}
-.mobileModuleBar{display:none}
-.controlSkip{position:fixed;left:16px;top:-100px;z-index:1000;padding:12px;background:var(--theme-panel);color:var(--theme-text)}
-.controlSkip:focus{top:8px}
-@media(max-width:1050px){.controlGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.controlSplit{grid-template-columns:1fr}.controlHero{grid-template-columns:1fr}.controlHero>button{justify-self:start}}
-@media(max-width:760px){
- body.jezero-ui .moduleRail{display:none!important}
- .mobileModuleBar{display:flex;position:absolute;inset:auto 12px 12px;z-index:26;align-items:center;gap:10px;border:1px solid var(--theme-line);border-radius:12px;padding:8px 10px;background:var(--theme-panel);min-height:58px;color:var(--theme-text)}
- .mobileModuleBar label{flex:1;display:flex;align-items:center;gap:12px;min-width:0;font:600 11px 'Segoe UI',sans-serif;color:var(--theme-muted)}
- .mobileModuleBar select{flex:1;min-width:0;width:auto;height:40px;border:1px solid var(--theme-line);border-radius:8px;padding:8px 10px;background:var(--theme-panel-2);color:var(--theme-text);font:600 13px 'Segoe UI',sans-serif;color-scheme:dark}
- .mobileModuleBar button{flex-shrink:0;min-width:42px;padding:9px}
- .homeWorkspace{inset:12px 12px 88px;border-radius:14px}
- .controlHeader{padding:14px 16px;gap:10px;align-items:flex-start}
- .controlHeader h1{font-size:19px}.controlEyebrow{font-size:8px;letter-spacing:1px}
- .controlActions{gap:6px}.controlActions button{padding:8px 10px;font-size:12px}
- .controlScroll{padding:18px 16px}.controlHero{gap:16px;margin-bottom:18px;padding-bottom:18px}.controlHero h2{font-size:26px}.controlHero p{font-size:13px}
- .controlGrid{gap:10px}.controlMetric{padding:15px}.controlMetric>strong{font-size:24px}.controlMetric small{font-size:10px}.controlSplit{gap:14px;margin-top:18px}.controlBox{padding:16px}
- body.jezero-ui:has(.tutorialDock:not([hidden])) .homeWorkspace{bottom:142px}
+/* ==========================================================================
+   MISSION CONTROL DASHBOARD (Linear / Vercel Aesthetic)
+   ========================================================================== */
+
+.homeWorkspace {
+  display: none;
+  position: absolute;
+  inset: 16px 20px 20px calc(var(--ui-rail) + 24px);
+  z-index: 23;
+  background: var(--surface-canvas);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  color: var(--text-primary);
+  overflow: hidden;
+  flex-direction: column;
+  box-shadow: var(--shadow-top-highlight), var(--shadow-lg);
 }
-@media(max-width:400px){.controlGrid{grid-template-columns:1fr}.controlHeader{flex-wrap:wrap}.controlActions{width:100%}.controlActions button:last-child{margin-left:auto}.controlMeta{gap:8px 15px}}
-@media(prefers-reduced-motion:reduce){.homeWorkspace *{scroll-behavior:auto!important}}
+
+body[data-module="home"][data-interface-open="true"] .homeWorkspace {
+  display: flex;
+}
+
+body[data-module="home"] :is(.sidebar, .details, .panelEdgeToggle, .mapToolbar, .missionHud, .uiCanvasWelcome, .imageryDetailStatus, .mapCoordChip, .mapScaleChip, .north) {
+  display: none !important;
+}
+
+body[data-module="home"][data-interface-open="false"] .mapToolbar {
+  display: flex !important;
+}
+
+body[data-module="home"][data-interface-open="true"] .mapPanel {
+  visibility: hidden;
+}
+
+/* Header */
+.controlHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-panel);
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.controlEyebrow {
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  color: var(--color-accent-alt);
+  text-transform: uppercase;
+}
+
+.controlHeader h1 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin: 2px 0 0;
+  color: var(--text-primary);
+}
+
+.controlActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.homeWorkspace button, .mobileModuleBar button {
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  min-height: 38px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+}
+
+.homeWorkspace button:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-card-hover);
+}
+
+.homeWorkspace :is(button, summary, a):focus-visible,
+.mobileModuleBar :is(select, button):focus-visible {
+  outline: 2px solid var(--color-primary-bright);
+  outline-offset: 2px;
+}
+
+/* Content Scroll */
+.controlScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 28px 32px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+  overscroll-behavior: contain;
+}
+
+/* Hero Section */
+.controlHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: center;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 24px;
+}
+
+.controlHero h2 {
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  margin: 6px 0 10px;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+.controlHero p {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  max-width: 640px;
+  margin: 0;
+}
+
+.homeWorkspace .controlPrimary {
+  background: var(--color-primary-bright);
+  border-color: var(--color-primary-bright);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 10px 20px;
+  font-size: 13.5px;
+  min-height: 42px;
+  box-shadow: var(--shadow-sm);
+}
+
+.homeWorkspace .controlPrimary:hover {
+  background: color-mix(in srgb, var(--color-primary-bright) 88%, #ffffff);
+  border-color: color-mix(in srgb, var(--color-primary-bright) 88%, #ffffff);
+}
+
+.controlMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.controlMeta strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Warning / Notice Banner */
+.controlNotice {
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 35%, transparent);
+  background: color-mix(in srgb, var(--color-warning) 10%, var(--surface-card));
+  color: #fef08a;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.controlNotice[hidden] {
+  display: none;
+}
+
+/* Metrics Grid */
+.controlGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.controlMetric {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  padding: 18px 20px;
+  min-width: 0;
+  box-shadow: var(--shadow-top-highlight), var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s ease;
+}
+
+.controlMetric:hover {
+  border-color: var(--border-strong);
+}
+
+.controlMetric > h3 {
+  font-size: 12.5px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.controlMetric > strong {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, "JetBrains Mono", Consolas, monospace;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin: 10px 0 6px;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.controlMetric small {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  display: block;
+  margin-top: 3px;
+}
+
+.controlMetric[data-deficit="true"] {
+  border-color: color-mix(in srgb, var(--color-danger) 60%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--surface-card));
+}
+
+.controlMetric[data-deficit="true"] > strong {
+  color: #fca5a5;
+}
+
+.controlOrigin {
+  align-self: flex-start;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  color: var(--color-accent-alt);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-panel);
+  border-radius: var(--radius-sm);
+  padding: 3px 7px;
+  margin-bottom: 10px;
+}
+
+/* Split Columns */
+.controlSplit {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.controlBox {
+  padding: 20px 24px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  min-width: 0;
+  box-shadow: var(--shadow-top-highlight), var(--shadow-sm);
+}
+
+.controlBox h2, .controlAssurance h2 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  margin: 0 0 16px;
+  color: var(--text-primary);
+}
+
+/* Steps List (Linear style items) */
+.controlSteps {
+  display: grid;
+  gap: 8px;
+}
+
+.controlSteps button {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  background: var(--surface-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  transition: all 0.15s ease;
+}
+
+.controlSteps button:hover {
+  background: var(--surface-card-hover);
+  border-color: var(--border-strong);
+}
+
+.controlSteps em {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-accent-alt);
+  font-style: normal;
+}
+
+.controlSteps span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.controlSteps small {
+  display: block;
+  color: var(--text-secondary);
+  font-weight: 400;
+  font-size: 11.5px;
+  margin-top: 2px;
+  line-height: 1.45;
+}
+
+/* Environmental & Offline status */
+.controlWeather p, .controlAssurance p {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.controlWeather strong {
+  display: block;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.controlWeather button {
+  margin: 12px 8px 0 0;
+}
+
+#controlOffline {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  margin-top: 14px;
+  line-height: 1.5;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
+}
+
+/* Scientific Assurance Section */
+.controlAssurance {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.controlAssurance details {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.controlAssurance summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px 0;
+  color: var(--text-primary);
+}
+
+.controlAssurance summary:hover {
+  color: var(--color-accent-alt);
+}
+
+.controlAssurance code {
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 10px 14px;
+  background: var(--surface-input);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.6;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  color: var(--color-accent-alt);
+  margin: 8px 0;
+}
+
+.controlAssurance a {
+  color: var(--color-accent-alt);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.controlAssurance a:hover {
+  text-decoration: underline;
+}
+
+.controlFoot {
+  margin-top: 28px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.controlSkip {
+  position: fixed;
+  left: 16px;
+  top: -100px;
+  z-index: 1000;
+  padding: 10px 14px;
+  background: var(--surface-panel);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+}
+
+.controlSkip:focus {
+  top: 12px;
+}
+
+.mobileModuleBar {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 1050px) {
+  .controlGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .controlSplit {
+    grid-template-columns: 1fr;
+  }
+  .controlHero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .homeWorkspace {
+    inset: 12px 12px 84px;
+    border-radius: var(--radius-lg);
+  }
+
+  .controlHeader {
+    padding: 14px 18px;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .controlHeader h1 {
+    font-size: 18px;
+  }
+
+  .controlScroll {
+    padding: 16px;
+  }
+
+  .controlGrid {
+    gap: 10px;
+  }
+
+  .controlMetric {
+    padding: 14px;
+  }
+
+  .controlMetric > strong {
+    font-size: 22px;
+  }
+
+  .mobileModuleBar {
+    display: flex;
+    position: absolute;
+    inset: auto 12px 12px;
+    z-index: 26;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 8px 12px;
+    background: var(--surface-panel);
+    min-height: 52px;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .mobileModuleBar label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+  }
+
+  .mobileModuleBar select {
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--surface-card);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .mobileModuleBar button {
+    flex-shrink: 0;
+    min-width: 38px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .controlGrid {
+    grid-template-columns: 1fr;
+  }
+  .controlActions {
+    width: 100%;
+  }
+}

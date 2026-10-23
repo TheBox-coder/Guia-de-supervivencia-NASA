@@ -1,70 +1,659 @@
-/* V48: mission workspace and integrated assistance. All colors follow the selected theme. */
-body.jezero-ui{--ui-panel:352px;--ui-detail:316px}
-body.jezero-ui .topbar{grid-template-columns:250px minmax(0,1fr) 240px!important}
-body.jezero-ui .topMeta{display:flex;align-items:center;justify-content:flex-end;gap:8px;max-width:240px!important}
-body.jezero-ui .topMeta #statusText{font-size:9px;max-width:100px;text-align:left;line-height:1.5}
-body.jezero-ui .topbarHelp{border:1px solid var(--theme-line);background:var(--theme-panel-2);border-radius:8px;padding:9px 13px;color:var(--theme-text);font:600 12px 'Segoe UI',sans-serif;cursor:pointer;white-space:nowrap}
-body.jezero-ui .topbarHelp:hover{border-color:var(--theme-accent-2)}
-body.jezero-ui .survivalWorkspace{border:0;background:linear-gradient(125deg,color-mix(in srgb,var(--theme-panel) 85%,var(--theme-accent-2)),var(--theme-bg) 43%);border-radius:18px;box-shadow:0 22px 80px #0004}
-.survivalScroll{padding:28px 34px 40px}
-.workspaceHeading{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:22px;border-bottom:1px solid var(--theme-line);margin-bottom:24px}
-.workspaceHeading small{font-size:10px;letter-spacing:1.4px;color:var(--theme-muted);display:block;margin-bottom:5px}
-.workspaceHeading h2{font-size:18px;letter-spacing:-.3px;margin:0;font-weight:600}
-.workspaceHeading .workspaceLabel{font:500 11px Consolas,monospace;padding:8px 11px;border:1px solid var(--theme-line);border-radius:20px;color:var(--theme-muted);white-space:nowrap}
-.survivalHero{position:relative;padding:4px 0 22px;grid-template-columns:minmax(0,1.15fr) minmax(310px,.85fr);gap:30px}
-.survivalHero h1{font-size:clamp(34px,3.15vw,48px);line-height:1.12;letter-spacing:-1.7px;max-width:620px;margin:14px 0 20px}
-.survivalHero p{font-size:15px;max-width:540px}
-.survivalEyebrow{color:var(--theme-muted);font-size:10px;letter-spacing:1.5px}
-.survivalEyebrow::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--theme-accent-2);margin-right:8px}
-.survivalHeroActions{margin-top:22px;gap:10px}
-.survivalWorkspace button{transition:background .15s,border-color .15s,transform .15s;font-size:13px;min-height:44px;padding:11px 16px;border-radius:9px}
-.survivalWorkspace .survivalPrimary{box-shadow:0 5px 18px color-mix(in srgb,var(--theme-primary-2) 23%,transparent)}
-.survivalDecision{background:linear-gradient(140deg,var(--theme-panel-2),var(--theme-panel));padding:24px;border-radius:16px;box-shadow:0 10px 30px #0002}
-.survivalDecision::after{content:'';position:absolute;width:150px;height:150px;border:1px solid color-mix(in srgb,var(--theme-line) 50%,transparent);border-radius:50%;right:-90px;top:-80px;box-shadow:0 0 0 22px color-mix(in srgb,var(--theme-line) 10%,transparent),0 0 0 46px color-mix(in srgb,var(--theme-line) 8%,transparent);pointer-events:none}
-.survivalDecision>strong{font-size:24px;max-width:350px}.survivalDecision p{font-size:14px}
-.missionReadiness{display:flex;align-items:center;gap:14px;margin:18px 0;padding-bottom:18px;border-bottom:1px solid var(--theme-line)}
-.readinessRing{--complete:0%;width:48px;height:48px;flex-shrink:0;border-radius:50%;background:conic-gradient(var(--theme-accent-2) var(--complete),var(--theme-line) 0);display:grid;place-items:center}
-.readinessRing b{display:grid;place-items:center;border-radius:50%;width:38px;height:38px;background:var(--theme-panel-2);font:600 12px Consolas,monospace}
-.missionReadiness small{display:block;font-size:12px;color:var(--theme-muted)}.missionReadiness strong{font-size:14px}
-.survivalDecisionFacts small{font-size:10px;line-height:1.5}.survivalDecisionFacts b{font-size:22px}
-.guideSteps{gap:14px;margin:4px 0 18px}.guideSteps button{padding:18px 20px;position:relative;overflow:hidden;background:var(--theme-panel);min-height:112px;text-align:left;border-radius:13px;display:flex;align-items:flex-start;flex-direction:column}
-.guideSteps button:hover{background:var(--theme-panel-2)}.guideSteps b{font-size:16px}.guideSteps span{font-size:13px;padding-right:14px}.guideSteps button::after{content:'↗';position:absolute;right:18px;bottom:15px;color:var(--theme-accent-2);font-size:19px}
-.guideSteps button[data-complete=true]{border-color:color-mix(in srgb,var(--theme-success) 50%,var(--theme-line))}.guideSteps button[data-complete=true]::after{content:'✓';color:var(--theme-success)}
-.guideView{align-items:center;margin:0 0 22px}.guideView #survivalQuickExport{margin-left:auto}
-.onboardingStrip{display:flex;align-items:center;justify-content:space-between;gap:20px;border:1px solid var(--theme-line);background:linear-gradient(100deg,color-mix(in srgb,var(--theme-primary-2) 13%,var(--theme-panel)),var(--theme-panel));border-radius:12px;padding:16px 20px;margin:0 0 24px}
-.onboardingStrip b{font-size:14px}.onboardingStrip p{font-size:13px;color:var(--theme-muted);margin:4px 0 0}.onboardingStrip button{white-space:nowrap}
-.survivalGrid{gap:20px}.survivalCard{border-radius:15px;padding:24px;box-shadow:0 4px 24px #0001}.survivalCardHeading h2{font-size:21px}.survivalCardHeading>div>span{font-size:10px}
-.guideDataCard{position:relative;border-left:3px solid var(--theme-accent-2)}.guideDataCard>p{max-width:750px;font-size:14px}.guideDataCard .survivalInputs{max-width:850px}.survivalDatasetStatus{font-size:13px;border-style:solid;background:var(--theme-panel-2);line-height:1.7}
-.survivalInputs label,.survivalSurfaceLabel,.survivalInlineControls label{font-size:13px}.survivalTag{font-size:9px;padding:5px 8px;max-width:210px}
-.weatherMetrics small,.soilMetrics small{font-size:10px}.weatherMetrics strong{font-size:24px}.weatherLegend{font-size:11px;line-height:1.6}
-.survivalWorkspace .survivalNote{font-size:13px;line-height:1.7}.survivalAssumptions p,.survivalAssumptions li{font-size:13px}.survivalAssumptions>summary{font-size:14px;padding:10px 0}
-.resourceReadout small{font-size:12px;line-height:1.6}.survivalAlert{font-size:14px;border-left:3px solid var(--theme-line-strong);padding:16px 18px}.survivalAlert>span{font-size:10px}.survivalChecklist label{font-size:14px}.survivalChecklist input,.guideConfirm input{accent-color:var(--theme-accent-2);width:17px;height:17px}
-.chartEmpty{display:grid;place-items:center;text-align:center;min-height:170px;color:var(--theme-muted);font-size:14px;border-radius:10px;background:repeating-linear-gradient(0deg,transparent 0 39px,color-mix(in srgb,var(--theme-line) 20%,transparent) 40px);padding:22px}
-.guideSupport{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px;margin:24px 0 0;border:1px solid var(--theme-line);border-radius:12px;background:var(--theme-panel)}.guideSupport h3{font-size:16px;margin:0 0 5px}.guideSupport p{font-size:13px;color:var(--theme-muted);margin:0}
-body.jezero-ui .sidebar,body.jezero-ui .details{box-shadow:0 16px 48px #0004!important}
-body.jezero-ui .uiPanelHeader{background:linear-gradient(90deg,var(--theme-panel-2),var(--theme-panel));height:58px}
-body.jezero-ui .panelScroll{padding:20px}
-body.jezero-ui .uiPlanSteps{border-radius:10px}
-body.jezero-ui button:focus-visible,body.jezero-ui a:focus-visible,body.jezero-ui summary:focus-visible{outline:2px solid var(--theme-accent-2);outline-offset:3px}
-.tutorialTarget{outline:2px solid var(--theme-accent-2)!important;outline-offset:5px;border-radius:8px}
-.jezeroDialog{color:var(--theme-text);background:var(--theme-panel);border:1px solid var(--theme-line-strong);border-radius:18px;padding:0;width:min(1020px,calc(100vw - 40px));max-height:calc(100dvh - 40px);box-shadow:0 24px 100px #0008;font:14px/1.65 'Segoe UI',sans-serif;overflow:hidden}
-.jezeroDialog[open]{display:flex;flex-direction:column}.jezeroDialog::backdrop{background:#020814c7;backdrop-filter:blur(6px)}
-.dialogHeader{display:flex;justify-content:space-between;align-items:center;padding:22px 26px;border-bottom:1px solid var(--theme-line);gap:18px;flex-shrink:0;background:var(--theme-panel-2)}
-.dialogHeader span{font:600 10px Consolas,monospace;letter-spacing:1.5px;color:var(--theme-accent-2)}.dialogHeader h2{font-size:24px;line-height:1.25;margin:7px 0 0;letter-spacing:-.6px}
-.jezeroDialog button{border:1px solid var(--theme-line);border-radius:9px;background:var(--theme-panel-2);color:var(--theme-text);padding:10px 14px;font:600 13px/1.5 'Segoe UI',sans-serif;cursor:pointer;min-height:42px}.jezeroDialog button:hover{border-color:var(--theme-accent-2)}.jezeroDialog button:disabled{opacity:.4;cursor:default}.dialogHeader button{font-size:24px;padding:0;width:38px;height:38px;min-height:38px;flex-shrink:0}
-.helpSearch{padding:18px 26px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--theme-line);flex-shrink:0}.helpSearch label{font-size:12px;color:var(--theme-muted)}.helpSearch input{background:var(--theme-bg);border:1px solid var(--theme-line);border-radius:9px;color:var(--theme-text);padding:12px 14px;flex:1;min-width:0;font:14px 'Segoe UI',sans-serif}.helpSearch a{font-size:12px;color:var(--theme-accent-2);white-space:nowrap;text-decoration:none}
-.helpLayout{display:grid;grid-template-columns:245px minmax(0,1fr);min-height:0;height:min(490px,55dvh)}
-#helpTopics{padding:16px;border-right:1px solid var(--theme-line);overflow:auto;display:flex;flex-direction:column;gap:6px}#helpTopics button{text-align:left;background:transparent;border-color:transparent;font-weight:500;line-height:1.5}#helpTopics button[aria-current=true]{background:color-mix(in srgb,var(--theme-primary-2) 18%,var(--theme-panel));border-color:var(--theme-line);color:var(--theme-accent-2)}
-#helpContent{overflow:auto;padding:24px 30px;min-width:0;overscroll-behavior:contain}#helpContent article+article{border-top:1px solid var(--theme-line);margin-top:24px;padding-top:24px}#helpContent h3{font-size:22px;letter-spacing:-.5px;margin:8px 0 16px}#helpContent p,#helpContent li{font-size:14px;line-height:1.85;color:var(--theme-muted)}#helpContent b{color:var(--theme-text)}#helpContent pre{white-space:pre-wrap;overflow-wrap:anywhere;padding:14px;background:var(--theme-bg);border:1px solid var(--theme-line);border-radius:8px;color:var(--theme-accent-2);font-size:12px}#helpContent summary{cursor:pointer;font-size:15px;font-weight:600;padding:12px 0}#helpContent details{border-bottom:1px solid var(--theme-line)}#helpContent dt{font-weight:600;margin-top:14px}#helpContent dd{color:var(--theme-muted);margin:5px 0 0;line-height:1.8}.helpTag{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--theme-accent-2)}
-.dialogFooter{border-top:1px solid var(--theme-line);padding:16px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-shrink:0}.dialogFooter span{font-size:11px;color:var(--theme-muted)}
-.tutorialDialog{width:min(590px,calc(100vw - 32px))}.tutorialBody{padding:24px 26px;overflow:auto}.tutorialTrack{display:flex;gap:7px;margin-bottom:20px}.tutorialTrack i{height:4px;border-radius:5px;flex:1;background:var(--theme-line)}.tutorialTrack i.is-done{background:var(--theme-accent-2)}#tutorialCounter{font:600 10px Consolas,monospace;letter-spacing:1px;color:var(--theme-accent-2)}#tutorialText{font-size:16px;line-height:1.8;margin:14px 0 20px}.tutorialHint{font-size:12px;color:var(--theme-muted);padding:14px;border:1px solid var(--theme-line);border-radius:9px;margin-bottom:20px}.jezeroDialog .helpPrimary{background:var(--theme-primary-2);border-color:var(--theme-primary-2);color:#fff;width:100%}
-.tutorialDock{position:fixed;right:24px;bottom:24px;z-index:60;display:flex;align-items:center;gap:18px;max-width:min(540px,calc(100vw - 32px));border:1px solid var(--theme-line-strong);border-radius:13px;background:var(--theme-panel);padding:15px 18px;box-shadow:0 10px 36px #0006}.tutorialDock[hidden]{display:none}.tutorialDock span{display:block;color:var(--theme-accent-2);font:600 9px Consolas,monospace;letter-spacing:1px;margin-bottom:5px}.tutorialDock b{font-size:13px}.tutorialDock button{border:1px solid var(--theme-line);border-radius:8px;padding:10px;background:var(--theme-panel-2);color:var(--theme-text);cursor:pointer;flex-shrink:0}
-@media(max-width:1200px){body.jezero-ui .missionHeaderStrip>div{padding:0 10px!important;min-width:75px!important}.survivalHero{grid-template-columns:1fr 1fr}.survivalHero h1{font-size:38px}}
-@media(max-width:1050px){.survivalHero{grid-template-columns:1fr}.survivalDecision>strong{max-width:none}.missionReadiness{float:right;border-bottom:0;padding:0;margin:0 0 14px 16px}.workspaceHeading{margin-bottom:20px}.guideSteps button{min-height:120px}.helpLayout{grid-template-columns:210px minmax(0,1fr)}}
-@media(max-width:760px){body.jezero-ui .topbar{grid-template-columns:minmax(0,1fr) auto!important;padding:0 14px!important}.topMeta .liveDot,.topMeta #statusText{display:none!important}body.jezero-ui .topbarHelp{padding:9px 12px;font-size:12px}.survivalScroll{padding:20px}.workspaceHeading{padding-bottom:16px;gap:8px}.workspaceHeading h2{font-size:16px}.workspaceHeading .workspaceLabel{font-size:9px;padding:6px 8px}.survivalHero h1{font-size:34px}.survivalHero p{font-size:14px}.survivalHeroActions button{font-size:12px!important}.survivalDecision{padding:20px}.missionReadiness{float:none;border-bottom:1px solid var(--theme-line);padding-bottom:16px;margin:16px 0}.guideSteps{grid-template-columns:1fr}.guideSteps button{min-height:90px;padding:16px}.guideView #survivalQuickExport{margin-left:0}.onboardingStrip{align-items:flex-start;flex-direction:column;gap:12px;padding:16px}.survivalCard{padding:20px}.guideSupport{align-items:flex-start;flex-direction:column}.jezeroDialog{width:calc(100vw - 20px);max-height:calc(100dvh - 24px);border-radius:13px}.dialogHeader{padding:16px 18px}.dialogHeader h2{font-size:21px}.helpSearch{padding:14px 18px;flex-wrap:wrap;gap:9px}.helpSearch label{width:100%}.helpSearch input{flex-basis:55%}.helpSearch a{font-size:11px}.helpLayout{display:flex;flex-direction:column;height:52dvh}#helpTopics{flex-direction:row;padding:10px 12px;border-right:0;border-bottom:1px solid var(--theme-line);flex-shrink:0;overflow-x:auto;max-height:65px}#helpTopics button{white-space:nowrap;font-size:12px;min-height:40px}#helpContent{padding:20px}.dialogFooter{padding:14px 18px;gap:8px}.dialogFooter span{font-size:10px}.dialogFooter button{font-size:12px}.tutorialBody{padding:20px}#tutorialText{font-size:15px}.tutorialDock{right:16px;bottom:100px;padding:13px;gap:9px}.tutorialDock b{font-size:12px}.tutorialDock button{font-size:12px}.tutorialDock span{font-size:8px}}
-@media(prefers-reduced-motion:reduce){.survivalWorkspace button,.resourceTrack i{transition:none}*{scroll-behavior:auto!important}}
+/* ==========================================================================
+   PROFESSIONAL WORKSPACES & DIALOGS (Linear / Vercel Aesthetic)
+   ========================================================================== */
 
-.workspaceActions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}.workspaceActions button{font-size:12px;min-height:38px;padding:8px 12px}.workspaceActions button:disabled{opacity:.4;cursor:default}.missionReadiness{border-bottom:0;padding-bottom:0}
-@media(max-width:760px){.workspaceHeading{align-items:flex-start;flex-direction:column}.workspaceActions{justify-content:flex-start}.workspaceActions .workspaceLabel{display:none}.workspaceActions button{font-size:11px}.missionReadiness{padding-bottom:0;border-bottom:0}}
-@media(max-width:760px){body.jezero-ui .topMeta{display:flex!important;max-width:none!important;grid-column:2!important}}
-body.jezero-ui .topMeta{display:flex!important}
+/* Dialog Backdrop & Base Modal */
+.jezeroDialog {
+  color: var(--text-primary);
+  background: var(--surface-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  padding: 0;
+  width: min(980px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  box-shadow: var(--shadow-lg);
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.6;
+  overflow: hidden;
+}
+
+.jezeroDialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.jezeroDialog::backdrop {
+  background: rgba(4, 7, 13, 0.75);
+  backdrop-filter: blur(12px);
+}
+
+.dialogHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-panel);
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.dialogHeader span {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  color: var(--color-accent-alt);
+  display: block;
+}
+
+.dialogHeader h2 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  margin: 2px 0 0;
+  color: var(--text-primary);
+}
+
+.dialogHeader button {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+}
+
+.dialogHeader button:hover {
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+.dialogFooter {
+  border-top: 1px solid var(--border-subtle);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+  background: var(--surface-panel);
+}
+
+.dialogFooter span {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+
+/* Help Dialog Search & Layout */
+.helpSearch {
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  flex-shrink: 0;
+}
+
+.helpSearch label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.helpSearch input {
+  flex: 1;
+  min-width: 0;
+}
+
+.helpSearch a {
+  font-size: 12px;
+  color: var(--color-accent-alt);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.helpSearch a:hover {
+  text-decoration: underline;
+}
+
+.helpLayout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 0;
+  height: min(480px, 55dvh);
+}
+
+#helpTopics {
+  padding: 14px 10px;
+  border-right: 1px solid var(--border-subtle);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--surface-panel);
+}
+
+#helpTopics button {
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  transition: all 0.15s ease;
+}
+
+#helpTopics button:hover {
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+#helpTopics button[aria-current="true"] {
+  background: color-mix(in srgb, var(--color-primary-bright) 16%, var(--surface-panel));
+  border-color: var(--border-strong);
+  color: var(--color-accent-alt);
+  font-weight: 600;
+}
+
+#helpContent {
+  overflow-y: auto;
+  padding: 24px 30px;
+  min-width: 0;
+  overscroll-behavior: contain;
+}
+
+#helpContent article + article {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 24px;
+  padding-top: 24px;
+}
+
+#helpContent h3 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  margin: 6px 0 14px;
+  color: var(--text-primary);
+}
+
+#helpContent p, #helpContent li {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+#helpContent pre {
+  padding: 12px 14px;
+  background: var(--surface-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  color: var(--color-accent-alt);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.helpTag {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  color: var(--color-accent-alt);
+  text-transform: uppercase;
+}
+
+/* Tutorial Dialog & Dock */
+.tutorialDialog {
+  width: min(560px, calc(100vw - 32px));
+}
+
+.tutorialBody {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.tutorialTrack {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.tutorialTrack i {
+  height: 4px;
+  border-radius: var(--radius-full);
+  flex: 1;
+  background: var(--border-subtle);
+}
+
+.tutorialTrack i.is-done {
+  background: var(--color-accent-alt);
+}
+
+#tutorialCounter {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-accent-alt);
+}
+
+#tutorialText {
+  font-size: 14.5px;
+  line-height: 1.65;
+  margin: 10px 0 18px;
+  color: var(--text-primary);
+}
+
+.tutorialHint {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  padding: 12px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  margin-bottom: 18px;
+}
+
+.tutorialDock {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: min(520px, calc(100vw - 32px));
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface-panel) 94%, transparent);
+  backdrop-filter: blur(16px);
+  padding: 12px 16px;
+  box-shadow: var(--shadow-lg);
+}
+
+.tutorialDock[hidden] {
+  display: none !important;
+}
+
+.tutorialDock span {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  color: var(--color-accent-alt);
+}
+
+.tutorialDock b {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+/* Library Dialog */
+.libraryDialog {
+  max-width: 680px;
+}
+
+.libraryBody {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+#libraryList article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+#libraryList article:last-child {
+  border-bottom: 0;
+}
+
+#libraryList article b {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+#libraryList article small {
+  display: block;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 3px;
+}
+
+/* ==========================================================================
+   FORECAST WORKSPACE (#forecastWorkspace)
+   ========================================================================== */
+.forecastWorkspace {
+  display: none;
+  position: absolute;
+  left: calc(var(--ui-rail) + 24px);
+  right: 20px;
+  top: 16px;
+  bottom: 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 22;
+  border-radius: var(--radius-xl);
+  padding: 28px 32px;
+  background: var(--surface-canvas);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-top-highlight), var(--shadow-lg);
+}
+
+body[data-module="weather"] .forecastWorkspace {
+  display: block;
+}
+
+body[data-module="weather"] :is(.sidebar, .details, .missionHud, .uiCanvasWelcome, .mapToolbar, .imageryDetailStatus, .routeSequenceStrip) {
+  display: none !important;
+}
+
+.forecastSummary {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+  padding: 22px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  margin: 18px 0;
+}
+
+.forecastSummary strong {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  display: block;
+  margin: 6px 0;
+  color: var(--text-primary);
+}
+
+.forecastSummary small {
+  font-size: 16px;
+  color: var(--color-accent-alt);
+}
+
+.forecastFacts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.forecastFacts article {
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+}
+
+.forecastFacts b {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
+.forecastFacts strong {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 8px;
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   ANALYTICS WORKSPACE (#analyticsWorkspace)
+   ========================================================================== */
+.analyticsWorkspace {
+  position: absolute;
+  left: calc(var(--ui-rail) + 24px) !important;
+  right: 20px !important;
+  top: 16px !important;
+  bottom: 20px !important;
+  border-radius: var(--radius-xl) !important;
+  background: var(--surface-canvas) !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: var(--shadow-top-highlight), var(--shadow-lg) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  z-index: 22 !important;
+}
+
+body:not([data-module="analysis"]) .analyticsWorkspace {
+  display: none !important;
+}
+
+body[data-module="analysis"] :is(.sidebar, .details, .missionHud, .uiCanvasWelcome, .mapToolbar, .imageryDetailStatus) {
+  display: none !important;
+}
+
+.analyticsHeader {
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface-panel);
+  flex-shrink: 0;
+}
+
+.analyticsHeader span {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  color: var(--color-accent-alt);
+}
+
+.analyticsHeader h2 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  margin: 3px 0 0;
+  color: var(--text-primary);
+}
+
+.analyticsHeader p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 4px 0 0;
+}
+
+.analyticsToolbar {
+  padding: 10px 28px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.analyticsToolbar label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.analyticsToolbar select {
+  min-height: 32px;
+  padding: 4px 10px;
+  font-size: 12.5px;
+}
+
+.analyticsSelectionReadout {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.analyticsScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px 28px;
+  scrollbar-width: thin;
+}
+
+.analyticsCard {
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-top-highlight), var(--shadow-sm);
+}
+
+.analyticsCardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.analyticsCardHead h3 {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  margin: 2px 0 0;
+  color: var(--text-primary);
+}
+
+.analyticsCardHead span {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-accent-alt);
+}
+
+.analyticsCardHead small {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+
+.analyticsGrid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.analyticsCardWide {
+  margin-top: 14px;
+}
+
+.chartEmpty {
+  display: grid;
+  place-items: center;
+  min-height: 160px;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+/* Analytics Table Wrap */
+.analyticsTableWrap {
+  overflow: auto;
+  max-height: 320px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.v36SegmentTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.v36SegmentTable th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-panel);
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.v36SegmentTable td {
+  padding: 10px 12px;
+  font-size: 12.5px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.v36SegmentTable tbody tr:hover {
+  background: var(--surface-card-hover);
+}
+
+/* Responsive */
+@media (max-width: 1050px) {
+  .analyticsGrid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .forecastWorkspace, .analyticsWorkspace {
+    left: 12px !important;
+    right: 12px !important;
+    top: 12px !important;
+    bottom: 84px !important;
+    padding: 16px !important;
+    border-radius: var(--radius-lg) !important;
+  }
+
+  .forecastSummary, .forecastFacts {
+    grid-template-columns: 1fr;
+  }
+
+  .jezeroDialog {
+    width: calc(100vw - 20px);
+    max-height: calc(100dvh - 24px);
+    border-radius: var(--radius-lg);
+  }
+
+  .helpLayout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #helpTopics {
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 8px 12px;
+  }
+
+  #helpTopics button {
+    white-space: nowrap;
+  }
+}
