@@ -271,17 +271,17 @@ body.jezero-ui .survivalTabs button.is-active:not(#survivalExport)::after {
 }
 
 /* Tarjetas de navegación (pasos y comprobaciones): fila que se ilumina al apuntar. */
-body.jezero-ui :is(.controlSteps button, .opsChecks button, .guideSteps button) {
+body.jezero-ui :is(.opsChecks button, .guideSteps button) {
   position: relative;
   transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.08s ease;
 }
 
-body.jezero-ui :is(.controlSteps button, .opsChecks button, .guideSteps button):hover {
+body.jezero-ui :is(.opsChecks button, .guideSteps button):hover {
   border-color: var(--key-border-hover);
   background: var(--surface-card-hover);
 }
 
-body.jezero-ui :is(.controlSteps button, .opsChecks button, .guideSteps button):active {
+body.jezero-ui :is(.opsChecks button, .guideSteps button):active {
   transform: translateY(1px);
 }
 
@@ -1164,4 +1164,115 @@ body.jezero-ui .historyActions button:first-child {
   .v36BarRow em {
     display: none;
   }
+}
+
+/* --------------------------------------------------------------------------
+   12. Inicio: lista de comprobación antes de salir
+   Una sola lista con línea de progreso; cada marcador dice si el paso está
+   listo, es el siguiente o queda pendiente. Sin tarjetas dentro de la tarjeta.
+   -------------------------------------------------------------------------- */
+body.jezero-ui .controlSteps {
+  gap: 0;
+}
+
+body.jezero-ui .controlSteps button {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  margin: 0 -12px;
+  padding: 12px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+  transform: none;
+}
+
+/* Línea que une los marcadores; empieza en el primero y termina en el último. */
+body.jezero-ui .controlSteps button::before {
+  content: "";
+  position: absolute;
+  left: 25.5px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border-strong);
+}
+
+body.jezero-ui .controlSteps button:first-child::before { top: 50%; }
+body.jezero-ui .controlSteps button:last-child::before { bottom: 50%; }
+body.jezero-ui .controlSteps button[data-state="done"]::before { background: var(--color-success); }
+
+body.jezero-ui .controlSteps button:hover {
+  background: color-mix(in srgb, var(--surface-card-hover) 70%, transparent);
+}
+
+body.jezero-ui .controlSteps .stepMarker {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface-card);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+}
+
+body.jezero-ui .controlSteps .stepCopy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+body.jezero-ui .controlSteps .stepCopy b {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+body.jezero-ui .controlSteps .stepCopy small {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-tertiary);
+}
+
+body.jezero-ui .controlSteps .stepState {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+body.jezero-ui .controlSteps button[data-state="done"] .stepMarker {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  color: var(--surface-canvas);
+}
+
+body.jezero-ui .controlSteps button[data-state="done"] .stepState {
+  color: var(--color-success);
+}
+
+body.jezero-ui .controlSteps button[data-state="current"] .stepMarker {
+  border-color: var(--lit);
+  color: var(--lit);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--lit) 16%, transparent);
+}
+
+body.jezero-ui .controlSteps button[data-state="current"] .stepCopy b {
+  color: var(--text-primary);
+}
+
+body.jezero-ui .controlSteps button[data-state="current"] .stepState {
+  padding: 3px 10px;
+  border: 1px solid color-mix(in srgb, var(--lit) 55%, transparent);
+  border-radius: 999px;
+  color: var(--lit);
 }
