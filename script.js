@@ -1199,7 +1199,7 @@ function loadHistory(id){
   const radio=document.querySelector(`input[name="mode"][value="${item.mode}"]`);if(radio)radio.checked=true;
   invalidateMission();selecting=false;drawPointMarkers();renderMissionList();updatePlanningUI();centerGlobal();showToast('Misión cargada con sus parámetros originales. Pulsa “Calcular misión” o “Recalcular” para obtener el nuevo resultado.');
 }
-function deleteHistory(id){setHistory(getHistory().filter(x=>x.id!==id));renderHistory();}
+function deleteHistory(id){if(!window.confirm(ui('¿Borrar esta misión del historial local?','Delete this mission from the local history?')))return;setHistory(getHistory().filter(x=>x.id!==id));renderHistory();}
 
 
 
