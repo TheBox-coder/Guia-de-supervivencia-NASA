@@ -12,7 +12,7 @@ const PORT = Number(process.env.PORT || 8000);
 const NOMENCLATURE_ENDPOINT = 'https://planetarynames.wr.usgs.gov/nomenclature/SearchResults';
 const nomenclatureCache = new Map();
 const PUBLIC_FILES = new Set([
-  '/control.css','/modules/assurance.cjs','/modules/mission-control-engine.cjs','/modules/mission-control.js',
+  '/control.css','/modules/assurance.cjs','/modules/mission-control-engine.cjs','/modules/mission-control.js','/modules/command-palette.js',
   '/operations.css','/modules/operations-engine.cjs','/modules/operations-map.js','/modules/operations.js',
   '/modules/forecast.js',
   '/polish.css','/modules/map-detail.js','/modules/workspace.js','/modules/locale.js','/modules/help-english.js','/MANUAL-HELP-EN.md',

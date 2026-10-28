@@ -16,13 +16,11 @@
     <div class="controlScroll" id="controlContent" tabindex="-1"><section class="controlHero"><div><span class="controlEyebrow" id="controlMode"></span><h2 id="controlMission"></h2><p id="controlIntro"></p><div class="controlMeta" id="controlMeta"></div></div><button class="controlPrimary" type="button" id="controlPlan"></button></section>
     <div id="controlWarning" class="controlNotice" role="status" hidden></div><section class="controlGrid" id="controlMetrics" aria-label="Recursos"></section>
     <div class="controlSplit"><section class="controlBox"><h2 id="controlStepsTitle"></h2><div class="controlSteps" id="controlSteps"></div></section><section class="controlBox controlWeather"><h2 id="controlDataTitle"></h2><strong id="controlDataSource"></strong><p id="controlDataDescription"></p><button type="button" id="controlWeather"></button><button type="button" id="controlEmergency"></button><p id="controlOffline"></p></section></div>
-    <section class="controlAssurance" id="controlAssurance"><h2>Scientific Assurance &amp; Validation</h2><p id="controlAssuranceIntro"></p><div id="controlModels"></div><div id="controlReferences"></div></section><p class="controlFoot" id="controlFoot"></p></div>`;
-  const mobile=document.createElement('nav');mobile.className='mobileModuleBar';mobile.setAttribute('aria-label','JEZERO');
-  mobile.innerHTML='<label><span id="controlNavLabel"></span><select id="controlModuleSelect"></select></label><button type="button" id="controlMobileToggle">×</button>';
+    <section class="controlAssurance" id="controlAssurance"><h2 id="controlAssuranceTitle"></h2><p id="controlAssuranceIntro"></p><div id="controlModels"></div><div id="controlReferences"></div></section><p class="controlFoot" id="controlFoot"></p></div>`;
+  // Barra inferior móvil: clones del riel que delegan en el botón original (misma lógica de abrir/cerrar y resaltado).
+  const mobile=document.createElement('nav');mobile.className='mobileModuleBar';mobile.setAttribute('aria-label',ui('Áreas principales','Main areas'));
+  for(const original of document.querySelectorAll('.moduleRail [data-module-target]')){const clone=original.cloneNode(true);clone.type='button';clone.addEventListener('click',()=>original.click());mobile.append(clone);}
   document.querySelector('.appShell').append(mobile);
-  for(const key of Object.keys(copy)){const option=document.createElement('option');option.value=key;$('controlModuleSelect').append(option);}
-  $('controlModuleSelect').addEventListener('change',e=>window.JEZERO_MODULES.activate(e.target.value));
-  $('controlMobileToggle').addEventListener('click',()=>document.body.dataset.interfaceOpen==='false'?window.JEZERO_MODULES.activate($('controlModuleSelect').value):window.JEZERO_MODULES.close());
   $('controlClose').addEventListener('click',()=>window.JEZERO_MODULES.close());
   $('controlPlan').addEventListener('click',()=>window.JEZERO_MODULES.activate('planner'));
   $('controlHelp').addEventListener('click',()=>document.querySelector('.topbarHelp').click());
@@ -34,12 +32,10 @@
   function render(){
     pending=false;let input;
     try{input=context();current=window.JEZERO_CONTROL_ENGINE.overview(input);}catch{current=null;}
-    text('controlNavLabel',ui('ÁREA','AREA'));
-    for(const option of $('controlModuleSelect').options)option.textContent=ui(...copy[option.value]);
-    $('controlModuleSelect').value=document.body.dataset.module;
-    const opened=document.body.dataset.interfaceOpen!=='false';text('controlMobileToggle',opened?'×':'↑');$('controlMobileToggle').setAttribute('aria-label',opened?ui('Cerrar interfaz','Close interface'):ui('Abrir interfaz','Open interface'));
-    document.querySelector('[data-module-target="home"] small').textContent=ui(...copy.home);
-    document.querySelector('[data-module-target="home"]').title=ui('Inicio · Mission Control','Home · Mission Control');
+    document.querySelectorAll('.moduleRail [data-module-target]').forEach(original=>{const clone=mobile.querySelector(`[data-module-target="${original.dataset.moduleTarget}"]`);if(clone){const small=clone.querySelector('small');if(small.textContent!==original.querySelector('small').textContent)small.textContent=original.querySelector('small').textContent;clone.title=original.title;}});
+    document.querySelectorAll('[data-module-target="home"] small').forEach(e=>{e.textContent=ui(...copy.home);});
+    document.querySelectorAll('[data-module-target="home"]').forEach(e=>{e.title=ui('Inicio · Centro de misión','Home · Mission Control');});
+    text('controlTitle',ui('Centro de misión','Mission Control'));text('controlAssuranceTitle',ui('Garantía científica y validación','Scientific assurance & validation'));
     document.querySelector('.brandText small').textContent='SURVIVAL INTELLIGENCE';
     text('controlExport',ui('Exportar evidencia ↓','Export evidence ↓'));text('controlHelp',ui('Ayuda','Help'));$('controlClose').setAttribute('aria-label',ui('Cerrar inicio','Close home'));
     text('controlMode',ui('PLANIFICACIÓN / SIMULACIÓN EDUCATIVA','PLANNING / EDUCATIONAL SIMULATION'));
@@ -50,6 +46,9 @@
     $('controlMeta').replaceChildren();
     for(const [label,value] of [[ui('TRIPULACIÓN SIMULADA','SIMULATED CREW'),current.crew??'—'],[ui('PUNTOS','WAYPOINTS'),current.waypoints],[ui('RECURSOS PENDIENTES','PENDING RESOURCES'),current.missing.filter(x=>x!=='duration').length]]){const span=node('span',label+' ');span.append(node('strong',value));$('controlMeta').append(span);}
     $('controlWarning').hidden=false;
+    const serious=current.errors.length>0||current.assessment?.status==='criterion-exceeded'||current.evaluation?.status==='critical';
+    const empty=!serious&&current.indicators.every(metric=>metric.value===null);
+    $('controlContent').dataset.empty=String(empty);$('controlMetrics').dataset.empty=String(empty);$('controlWarning').classList.toggle('is-compact',!serious);
     text('controlWarning',current.errors.length?ui('Hay entradas que requieren corrección. Los resultados afectados permanecen pendientes.','Some inputs need correction. Affected results remain pending.'):current.assessment?.status==='criterion-exceeded'||current.evaluation?.status==='critical'?ui('Hay criterios o reservas excedidos. Revisa las causas en Supervivencia y Soporte; este resumen no autoriza una salida.','Criteria or reserves are exceeded. Review causes in Life Support and Support; this summary does not authorize departure.'):ui('Cálculos educativos bajo supuestos. Completar datos no certifica seguridad ni autoriza una salida.','Educational calculations under assumptions. Completing inputs does not certify safety or authorize departure.'));
     $('controlMetrics').replaceChildren();$('controlMetrics').setAttribute('aria-label',ui('Recursos y duración','Resources and duration'));
     for(const metric of current.indicators){const unit=metric.unit.replace('/person',ui('/persona','/person'));const model=window.JEZERO_ASSURANCE.models.find(m=>m.id===metric.model);const card=node('article',undefined,'controlMetric');card.dataset.metric=metric.id;card.dataset.deficit=String(metric.value!==null&&metric.value<(metric.reserve??0));card.append(node('span',ui(...origins[metric.kind]),'controlOrigin'),node('h3',ui(...labels[metric.id])),node('strong',metric.value===null?'—':`${metric.value.toFixed(2)} ${unit}`));

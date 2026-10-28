@@ -16,7 +16,7 @@
   <script src="modules/theme.js?v=4p0"></script>
 </head>
 <body class="jezero-ui" data-module="planner" data-mission-state="empty">
-<a class="controlSkip" href="#appContent">Mission Control</a>
+<a class="controlSkip" href="#appContent">Ir al contenido</a>
 <header class="topbar">
   <div class="brand">
     <img class="brandLogo" src="assets/jezero-mark.svg" alt="JEZERO">
@@ -32,11 +32,13 @@
     <div><span>RUTA</span><b data-mirror="distance">—</b></div>
     <div><span>EVA / RUTA</span><b data-mirror="duration">—</b></div>
     <div><span>MARGEN / RUTA</span><b data-mirror="missionMargin">—</b></div>
+    <ol class="headerSteps" aria-label="Progreso de la misión"><li id="headerStepBase"><b>1</b><span>Base</span></li><li id="headerStepTargets"><b>2</b><span>Objetivos</span></li><li id="headerStepRoute"><b>3</b><span>Ruta</span></li></ol>
   </div>
-  <div class="topMeta"><span class="liveDot"></span><span id="statusText">CARTOGRAFÍA NASA / USGS</span><button class="topbarHelp" type="button" data-open-help="start" title="Abrir manual (tecla ?)">? Ayuda</button></div>
+  <div class="topMeta"><span class="liveDot"></span><span id="statusText">CARTOGRAFÍA NASA / USGS</span><button class="topbarCommand" type="button" id="openCommands" title="Paleta de comandos (Ctrl+K)" aria-keyshortcuts="Control+K Meta+K"><span>Buscar</span><kbd>Ctrl K</kbd></button><button class="topbarHelp" type="button" data-open-help="start" title="Abrir manual (tecla ?)">? Ayuda</button></div>
 </header>
 
 <main class="appShell" id="appContent" tabindex="-1">
+  <div class="dropHint" aria-hidden="true"><b id="dropHintTitle">Suelta tu misión JSON</b><span id="dropHintCopy">Se valida antes de cargarla</span></div>
   <button class="panelEdgeToggle panelEdgeToggleLeft" id="toggleLeftPanel" type="button" aria-label="Ocultar panel izquierdo" title="Ocultar panel izquierdo">‹</button>
   <button class="panelEdgeToggle panelEdgeToggleRight" id="toggleRightPanel" type="button" aria-label="Ocultar panel derecho" title="Ocultar panel derecho">›</button>
   <section id="homeWorkspace" class="homeWorkspace" aria-labelledby="controlTitle"></section>
@@ -608,6 +610,7 @@
 <script src="modules/assurance.cjs?v=4p0"></script>
 <script src="modules/mission-control-engine.cjs?v=4p0"></script>
 <script src="modules/mission-control.js?v=4p0"></script>
+<script src="modules/command-palette.js?v=4p0"></script>
 <script src="modules/offline.js?v=4p0"></script>
 </body>
 </html>

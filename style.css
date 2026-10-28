@@ -259,8 +259,8 @@ button:disabled {
   z-index: 25;
   box-shadow: var(--shadow-md);
   box-shadow: var(--shadow-top-highlight), var(--shadow-md);
-  overflow-y: auto;
-  scrollbar-width: none;
+  /* Los botones se encogen para caber: un riel con scroll cambiaba de posición al enfocar. */
+  overflow: hidden;
 }
 
 .moduleRail::-webkit-scrollbar {
@@ -269,7 +269,8 @@ button:disabled {
 
 .moduleNav {
   width: 58px;
-  min-height: 54px;
+  flex: 0 1 54px;
+  min-height: 38px;
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   background: transparent;
@@ -300,9 +301,9 @@ button:disabled {
 }
 
 .moduleNav small {
-  font-size: 9.5px;
+  font-size: 10.5px;
   font-weight: 600;
-  letter-spacing: 0.3px;
+  letter-spacing: 0;
   line-height: 1;
   text-transform: uppercase;
 }

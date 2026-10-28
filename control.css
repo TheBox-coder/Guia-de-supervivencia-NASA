@@ -426,6 +426,159 @@ body[data-module="home"][data-interface-open="true"] .mapPanel {
   display: none;
 }
 
+/* Una sola llamada a la acción: con el panel de misión abierto, la tarjeta del mapa repite "Elegir una base". */
+body[data-module="planner"]:not(.left-panel-hidden) .uiCanvasWelcome,
+body:has(.sidebar.mobile-open) .uiCanvasWelcome {
+  display: none;
+}
+
+/* Cabecera adaptable: pasos mientras no hay ruta; métricas de ruta solo cuando existen. */
+.missionHeaderStrip {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.missionHeaderStrip span,
+.missionHeaderStrip b {
+  white-space: nowrap;
+}
+
+#headerMissionCode {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.headerSteps {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0 0 0 10px;
+  list-style: none;
+}
+
+.headerSteps li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+.headerSteps li b {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  font-size: 11px;
+}
+
+.headerSteps li.is-current {
+  color: var(--text-primary);
+  background: var(--surface-card);
+}
+
+.headerSteps li.is-current b {
+  background: var(--color-primary-bright);
+  border-color: var(--color-primary-bright);
+  color: #ffffff;
+}
+
+.headerSteps li.is-done b {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+body:not([data-mission-state="ready"]) .missionHeaderStrip > div:nth-of-type(n+3),
+body[data-mission-state="ready"] .headerSteps {
+  display: none;
+}
+
+/* Inicio orientado a la acción: tarjetas sin datos compactas, sin repetir explicaciones. */
+.controlGrid[data-empty="true"] .controlMetric {
+  padding: 12px 16px;
+}
+
+.controlGrid[data-empty="true"] .controlMetric > strong {
+  font-size: 18px;
+  margin: 4px 0 0;
+}
+
+.controlGrid[data-empty="true"] .controlMetric small {
+  display: none;
+}
+
+.controlScroll[data-empty="true"] {
+  display: flex;
+  flex-direction: column;
+}
+
+.controlScroll[data-empty="true"] > .controlSplit {
+  order: 1;
+  margin-top: 0;
+}
+
+.controlScroll[data-empty="true"] > .controlNotice {
+  order: 2;
+}
+
+.controlScroll[data-empty="true"] > .controlGrid {
+  order: 3;
+}
+
+.controlScroll[data-empty="true"] > :is(.controlAssurance, .controlFoot) {
+  order: 4;
+}
+
+.controlNotice.is-compact {
+  padding: 8px 12px;
+  font-size: 12px;
+  margin: 24px 0 14px;
+}
+
+/* Cabecera en pantallas medianas: priorizar estado de misión, Buscar y Ayuda sobre el texto de cartografía. */
+@media (max-width: 1280px) {
+  .topMeta .liveDot,
+  #statusText {
+    display: none;
+  }
+
+  .missionHeaderStrip > div {
+    min-width: 0;
+    padding: 4px 10px;
+  }
+}
+
+@media (max-width: 1000px) and (min-width: 761px) {
+  .topbar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+
+  .headerSteps li span,
+  .topbarCommand kbd {
+    display: none;
+  }
+
+  .headerSteps li {
+    padding: 4px;
+  }
+}
+
+/* Riel en pantallas bajas: iconos sin etiqueta antes que cortar botones. */
+@media (max-height: 560px) and (min-width: 761px) {
+  .moduleNav small {
+    display: none;
+  }
+}
+
 /* Responsive */
 @media (max-width: 1050px) {
   .controlGrid {
@@ -476,43 +629,38 @@ body[data-module="home"][data-interface-open="true"] .mapPanel {
     position: absolute;
     inset: auto 12px 12px;
     z-index: 26;
-    align-items: center;
-    gap: 8px;
+    align-items: stretch;
+    gap: 2px;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: 8px 12px;
+    padding: 4px;
     background: var(--surface-panel);
-    min-height: 52px;
     box-shadow: var(--shadow-lg);
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
   }
 
-  .mobileModuleBar label {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-tertiary);
+  .mobileModuleBar .moduleNav {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 62px;
+    min-height: 52px;
+    padding: 6px 4px;
+    box-shadow: none;
+    scroll-snap-align: start;
   }
 
-  .mobileModuleBar select {
-    flex: 1;
-    min-width: 0;
-    height: 38px;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    background: var(--surface-card);
-    color: var(--text-primary);
-    font-size: 13px;
-    font-weight: 500;
+  .mobileModuleBar .moduleNav:not(.is-active) {
+    background: transparent;
+    border-color: transparent;
   }
 
-  .mobileModuleBar button {
-    flex-shrink: 0;
-    min-width: 38px;
-    padding: 8px;
+  /* Cabecera móvil: solo marca y Ayuda; el estado de cartografía se solapaba con el nombre. */
+  .brandText small,
+  .topMeta .liveDot,
+  #statusText {
+    display: none;
   }
 }
 
@@ -522,5 +670,189 @@ body[data-module="home"][data-interface-open="true"] .mapPanel {
   }
   .controlActions {
     width: 100%;
+  }
+}
+
+/* ==========================================================================
+   PALETA DE COMANDOS, SOLTAR ARCHIVOS Y MINIATURAS DE CAPAS
+   ========================================================================== */
+.topbarCommand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px 5px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-input);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.topbarCommand:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+:is(.topbarCommand, .commandPalette) kbd {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 10.5px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  color: var(--text-tertiary);
+}
+
+.commandPalette {
+  width: min(560px, calc(100vw - 32px));
+  margin: 12vh auto auto;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  background: var(--surface-panel);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.commandPalette::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.commandPalette input {
+  width: 100%;
+  padding: 16px 18px;
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 15px;
+  outline: none;
+}
+
+.commandPalette ul {
+  max-height: min(52vh, 420px);
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+}
+
+.commandPalette li {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.commandPalette li small {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.commandPalette li[aria-selected="true"] {
+  background: var(--surface-card-hover);
+  box-shadow: inset 2px 0 0 var(--color-primary-bright);
+}
+
+.commandPalette .commandEmpty {
+  display: block;
+  color: var(--text-tertiary);
+  cursor: default;
+}
+
+.commandHint {
+  margin: 0;
+  padding: 8px 18px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.dropHint {
+  display: none;
+  position: absolute;
+  inset: 16px;
+  z-index: 60;
+  place-content: center;
+  text-align: center;
+  gap: 6px;
+  border: 2px dashed var(--color-primary-bright);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--surface-canvas) 82%, transparent);
+  pointer-events: none;
+}
+
+.dropHint b {
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.dropHint span {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+body.is-file-dragging .dropHint {
+  display: grid;
+}
+
+.layerRow .check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.layerRow .layerCopy {
+  display: block;
+  min-width: 0;
+}
+
+.layerRow:has(input[data-base-map]) .layerCopy {
+  position: relative;
+  padding-left: 46px;
+  min-height: 36px;
+}
+
+.layerRow:has(input[data-base-map]) .layerCopy::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 36px;
+  height: 36px;
+  transform: translateY(-50%);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.layerRow:has(input[data-base-map="viking"]) .layerCopy::before {
+  background: radial-gradient(circle at 30% 35%, #c98a5a 0 18%, transparent 19%), radial-gradient(circle at 70% 65%, #6e4a35 0 22%, transparent 23%), linear-gradient(135deg, #a8643f, #7b4a2e 55%, #b57a52);
+}
+
+.layerRow:has(input[data-base-map="mola"]) .layerCopy::before {
+  background: linear-gradient(160deg, #2b3a8c, #2f8fbf 25%, #3fb36b 45%, #e3d24a 65%, #d9542f 82%, #f4f1ea);
+}
+
+.layerRow:has(input[data-base-map="hybrid"]) .layerCopy::before {
+  background: linear-gradient(160deg, rgba(47, 143, 191, 0.55), rgba(63, 179, 107, 0.45) 45%, rgba(217, 84, 47, 0.55)), linear-gradient(135deg, #a8643f, #7b4a2e 55%, #b57a52);
+}
+
+@media (max-width: 760px) {
+  .topbarCommand {
+    padding: 6px 10px;
+  }
+
+  .topbarCommand kbd {
+    display: none;
+  }
+
+  .commandPalette {
+    margin-top: 8vh;
   }
 }

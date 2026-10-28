@@ -51,9 +51,11 @@
     const labels={explorer:copy('Mapa y capas','Map and layers'),planner:copy('Tu misión','Your mission'),eva:copy('Recorrido EVA','EVA traverse'),analysis:copy('Resultados','Results'),settings:copy('Configuración','Settings')};
     text('uiPanelTitle',labels[document.body.dataset.module]||labels.planner);
     text('uiCalcHint',count<2?copy('Añade una base y un objetivo para comenzar.','Add a base and a target to begin.'):hasResult?copy('Puedes comparar las alternativas en Resultados.','Compare the alternatives in Results.'):copy('Tu misión está lista para calcular.','Your mission is ready to calculate.'));
+    text('dropHintTitle',copy('Suelta tu misión JSON','Drop your mission JSON'));text('dropHintCopy',copy('Se valida antes de cargarla','It is validated before loading'));
     text('uiPointEntryLabel',count?copy('Añadir otro punto','Add another point'):copy('Ubicación de la base','Base location'));
     const step=count===0?0:count===1?1:2;
-    ['uiStepBase','uiStepTargets','uiStepRoute'].forEach((id,i)=>{const el=byId(id);el?.classList.toggle('is-current',i===step);el?.classList.toggle('is-done',i<step);});
+    [['uiStepBase','headerStepBase'],['uiStepTargets','headerStepTargets'],['uiStepRoute','headerStepRoute']].forEach((ids,i)=>ids.forEach(id=>{const el=byId(id);el?.classList.toggle('is-current',i===step);el?.classList.toggle('is-done',i<step);}));
+    [['headerStepBase','Base','Base'],['headerStepTargets','Objetivos','Targets'],['headerStepRoute','Ruta','Route']].forEach(([id,es,en])=>{const el=byId(id)?.querySelector('span');if(el&&el.textContent!==copy(es,en))el.textContent=copy(es,en);});
     const welcome=byId('uiCanvasWelcome');if(welcome)welcome.hidden=count>=2;
     text('uiWelcomeTitle',count?copy('Ahora, elige un objetivo','Now choose a target'):copy('Tu misión empieza aquí','Your mission starts here'));
     text('uiWelcomeCopy',count?copy('Tu base está definida. Añade al menos un punto de interés para comparar recorridos.','Your base is set. Add at least one point of interest to compare routes.'):copy('Convierte tus objetivos científicos en una travesía. Define el punto de partida o prueba un recorrido de ejemplo en Jezero.','Turn your scientific goals into a traverse. Define a starting point or try a sample route in Jezero.'));
@@ -81,6 +83,22 @@
     update();
   });
   window.addEventListener('jezero:languagechange',update);
+  // Soltar un JSON de misión sobre la app: pasa por el mismo input de importación (límite de 5 MB y validación).
+  const hasFiles=event=>[...(event.dataTransfer?.types||[])].includes('Files');
+  let dragDepth=0;
+  document.addEventListener('dragenter',event=>{if(!hasFiles(event))return;event.preventDefault();dragDepth++;document.body.classList.add('is-file-dragging');});
+  document.addEventListener('dragover',event=>{if(hasFiles(event))event.preventDefault();});
+  document.addEventListener('dragleave',event=>{if(!hasFiles(event))return;dragDepth=Math.max(0,dragDepth-1);if(!dragDepth)document.body.classList.remove('is-file-dragging');});
+  document.addEventListener('drop',event=>{
+    if(!hasFiles(event))return;
+    event.preventDefault();dragDepth=0;document.body.classList.remove('is-file-dragging');
+    const file=event.dataTransfer.files[0],input=byId('importMissionFile');
+    if(!file||!input)return;
+    if(!/\.json$/i.test(file.name)&&file.type!=='application/json'){window.showToast?.(copy('Suelta un archivo de misión .json.','Drop a .json mission file.'));return;}
+    if((Number(byId('pointCount')?.textContent)||0)>0&&!window.confirm(copy('¿Reemplazar el plan actual por la misión del archivo?','Replace the current plan with the mission in this file?')))return;
+    const transfer=new DataTransfer();transfer.items.add(file);input.files=transfer.files;
+    input.dispatchEvent(new Event('change'));
+  });
   if(!mobile()){
     const state=window.JEZERO_PANELS?.get();window.JEZERO_PANELS?.set(['home','survival','weather','operations'].includes(document.body.dataset.module)?false:state?.left!==false,false);
   }
