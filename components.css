@@ -1276,3 +1276,138 @@ body.jezero-ui .controlSteps button[data-state="current"] .stepState {
   border-radius: 999px;
   color: var(--lit);
 }
+
+/* --------------------------------------------------------------------------
+   13. Inicio: lecturas de recursos
+   Un panel de instrumento con una fila por recurso en vez de seis tarjetas
+   iguales. El origen del dato es un punto de color y una palabra.
+   -------------------------------------------------------------------------- */
+body.jezero-ui #controlMetrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+  padding: 18px 24px 6px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-top-highlight), var(--shadow-sm);
+}
+
+body.jezero-ui #controlMetrics .metricsHead {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+body.jezero-ui #controlMetrics .metricsHead h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+body.jezero-ui #controlMetrics .metricsHead p {
+  max-width: 52ch;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+}
+
+body.jezero-ui #controlMetrics .controlMetric {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 13px 0;
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.jezero-ui #controlMetrics .controlMetric:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+body.jezero-ui #controlMetrics .metricName {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+body.jezero-ui #controlMetrics .metricName h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+body.jezero-ui #controlMetrics .metricKind {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+
+body.jezero-ui #controlMetrics .metricKind::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-tertiary);
+}
+
+body.jezero-ui #controlMetrics [data-kind="calculated"] .metricKind::before {
+  border-color: var(--color-success);
+  background: var(--color-success);
+}
+
+body.jezero-ui #controlMetrics [data-kind="inferred"] .metricKind::before {
+  border-color: var(--color-warning);
+  background: var(--color-warning);
+}
+
+body.jezero-ui #controlMetrics .controlMetric > strong {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-primary);
+}
+
+body.jezero-ui #controlMetrics [data-kind="unknown"] > strong {
+  color: var(--text-tertiary);
+}
+
+body.jezero-ui #controlMetrics .controlMetric[data-deficit="true"] > strong {
+  color: color-mix(in srgb, var(--color-danger) 70%, #ffffff);
+}
+
+body.jezero-ui #controlMetrics .controlMetric > small {
+  grid-column: 1 / -1;
+  display: block;
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--text-tertiary);
+}
+
+@media (max-width: 760px) {
+  body.jezero-ui #controlMetrics {
+    grid-template-columns: 1fr;
+    padding: 14px 16px 4px;
+  }
+
+  body.jezero-ui #controlMetrics .controlMetric:nth-last-child(2) {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+}
