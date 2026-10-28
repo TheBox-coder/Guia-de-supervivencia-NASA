@@ -4,7 +4,7 @@
   const enabled=id=>Boolean($(id))&&!$(id).disabled;
   const area=name=>document.querySelector(`.moduleRail [data-module-target="${name}"]`);
   const goTo=name=>window.JEZERO_MODULES.activate(name);
-  const areas=[['home','Inicio','Home','H'],['survival','Guía de supervivencia','Survival guide'],['operations','Soporte','Support'],['weather','Clima','Weather'],['explorer','Mapa y capas','Map and layers','M'],['planner','Misión','Mission'],['eva','Recorrido EVA','EVA traverse'],['analysis','Resultados','Results','R'],['settings','Configuración','Settings']];
+  const areas=[['home','Inicio','Home','H'],['survival','Guía de supervivencia','Survival guide'],['operations','Soporte','Support'],['weather','Clima','Weather'],['explorer','Mapa y capas','Map and layers','M'],['planner','Misión','Mission'],['eva','Recorrido EVA','EVA traverse'],['analysis','Resultados','Results','R'],['settings','Ajustes','Settings']];
   const commands=()=>[
     ...areas.map(([name,es,en,key])=>({group:ui('Ir a','Go to'),label:ui(es,en),key,run:()=>goTo(name),available:()=>Boolean(area(name))})),
     {group:ui('Misión','Mission'),label:ui('Nueva misión','New mission'),key:'N',run:()=>$('planMode').click(),available:()=>enabled('planMode')},

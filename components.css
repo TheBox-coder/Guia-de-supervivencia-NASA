@@ -1,0 +1,1159 @@
+/* ==========================================================================
+   JEZERO — COMPONENTES DE CONSOLA
+   Botones como teclas de un panel de vuelo: cara con borde superior iluminado y
+   labio inferior que se hunde al pulsar. La selección se marca con un indicador
+   encendido. Todo deriva de los tokens de tema (style.css), así funciona en los 6 temas.
+   También reconstruye componentes cuyas reglas se perdieron en la reescritura de CSS.
+   ========================================================================== */
+
+body.jezero-ui {
+  --key-face: var(--surface-card);
+  --key-face-hi: color-mix(in srgb, var(--surface-card) 84%, #ffffff);
+  --key-border: color-mix(in srgb, var(--border-strong) 85%, transparent);
+  --key-border-hover: color-mix(in srgb, var(--border-strong) 70%, #ffffff);
+  --key-lip: color-mix(in srgb, var(--surface-canvas) 45%, #000000);
+  --key-edge: rgba(255, 255, 255, 0.09);
+  --key-primary-hi: color-mix(in srgb, var(--color-primary-bright) 78%, #ffffff);
+  --key-primary-lip: color-mix(in srgb, var(--color-primary) 50%, #000000);
+  --lit: var(--color-accent-alt);
+  --lit-glow: color-mix(in srgb, var(--color-accent-alt) 55%, transparent);
+  --mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Consolas, monospace;
+}
+
+/* --------------------------------------------------------------------------
+   1. Tecla secundaria
+   -------------------------------------------------------------------------- */
+body.jezero-ui :is(
+  .action, .referenceAction, .returnHomeAction, .topbarHelp, .topbarCommand,
+  .controlActions button:not(#controlClose), .controlWeather button, .referenceSecondary,
+  .operationsActions button:not(#opsClose), .workspaceActions button, #draftRecovery button,
+  .survivalHeroActions button, .survivalDataActions button, #forecastResults > button,
+  .historyActions button:first-child, .libraryBody > button, .dialogFooter button,
+  #tutorialDock button:first-child, .survivalTabs #survivalExport, .survivalCard > button
+) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 16px;
+  border: 1px solid var(--key-border);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--key-face-hi), var(--key-face) 62%);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.3;
+  text-decoration: none;
+  box-shadow: inset 0 1px 0 var(--key-edge), 0 2px 0 var(--key-lip), 0 6px 14px -8px rgba(0, 0, 0, 0.7);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.15s ease, filter 0.15s ease;
+}
+
+body.jezero-ui :is(
+  .action, .referenceAction, .returnHomeAction, .topbarHelp, .topbarCommand,
+  .controlActions button:not(#controlClose), .controlWeather button, .referenceSecondary,
+  .operationsActions button:not(#opsClose), .workspaceActions button, #draftRecovery button,
+  .survivalHeroActions button, .survivalDataActions button, #forecastResults > button,
+  .historyActions button:first-child, .libraryBody > button, .dialogFooter button,
+  #tutorialDock button:first-child, .survivalTabs #survivalExport, .survivalCard > button
+):hover:not(:disabled) {
+  border-color: var(--key-border-hover);
+  filter: brightness(1.08);
+}
+
+/* --------------------------------------------------------------------------
+   2. Tecla primaria: una por pantalla, la acción que hace avanzar la misión
+   -------------------------------------------------------------------------- */
+body.jezero-ui :is(
+  .action.primaryAction, .primary, .coordinateInlineSubmit, .homeWorkspace .controlPrimary,
+  .survivalPrimary, .operationsWorkspace .opsPrimary, .referencePrimary, .helpPrimary,
+  .uiWelcomeActions button, #forecastEmpty button
+) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 18px;
+  border: 1px solid color-mix(in srgb, var(--color-primary-bright) 70%, #ffffff);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--key-primary-hi), var(--color-primary-bright) 52%, var(--color-primary));
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1.3;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 0 var(--key-primary-lip), 0 8px 18px -8px color-mix(in srgb, var(--color-primary-bright) 75%, transparent);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+}
+
+body.jezero-ui :is(
+  .action.primaryAction, .primary, .coordinateInlineSubmit, .homeWorkspace .controlPrimary,
+  .survivalPrimary, .operationsWorkspace .opsPrimary, .referencePrimary, .helpPrimary,
+  .uiWelcomeActions button, #forecastEmpty button
+):hover:not(:disabled) {
+  background: linear-gradient(180deg, var(--key-primary-hi), var(--color-primary-bright) 52%, var(--color-primary));
+  border-color: color-mix(in srgb, var(--color-primary-bright) 55%, #ffffff);
+  filter: brightness(1.1);
+}
+
+/* --------------------------------------------------------------------------
+   3. Variantes de intención
+   -------------------------------------------------------------------------- */
+body.jezero-ui .action.dangerAction {
+  color: color-mix(in srgb, var(--color-danger) 65%, #ffffff);
+  border-color: color-mix(in srgb, var(--color-danger) 50%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-danger) 10%, var(--key-face-hi)), color-mix(in srgb, var(--color-danger) 6%, var(--key-face)) 62%);
+}
+
+body.jezero-ui .action.dangerAction:hover:not(:disabled) {
+  border-color: var(--color-danger);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-danger) 22%, var(--key-face-hi)), color-mix(in srgb, var(--color-danger) 14%, var(--key-face)) 62%);
+}
+
+body.jezero-ui .action.saveAction {
+  color: #ffffff;
+  border-color: color-mix(in srgb, var(--color-success) 55%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-success) 26%, var(--key-face-hi)), color-mix(in srgb, var(--color-success) 16%, var(--key-face)) 62%);
+}
+
+/* Acciones de texto: sin cara de tecla, para enlaces de apoyo junto a otras teclas. */
+body.jezero-ui :is(.action.ghost, .guideView button, .guideSupport button, .onboardingStrip button, #analyticsClearSelection) {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 550;
+  text-shadow: none;
+  box-shadow: none;
+  filter: none;
+}
+
+body.jezero-ui :is(.action.ghost, .guideView button, .guideSupport button, .onboardingStrip button, #analyticsClearSelection):hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--surface-card);
+  border-color: var(--border-subtle);
+  filter: none;
+}
+
+/* Cerrar y acciones de icono: tecla cuadrada discreta hasta que se apunta. */
+body.jezero-ui :is(
+  #uiClosePanel, #controlClose, #opsClose, [data-close-interface], .dialogHeader button,
+  .mapLayerDrawerHeader button, .mapInfoClose, #tutorialDock button:last-child, .wpActions button,
+  .historyActions button:last-child, .mapLegendHeader button
+) {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 16px;
+  line-height: 1;
+  box-shadow: none;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+}
+
+body.jezero-ui :is(
+  #uiClosePanel, #controlClose, #opsClose, [data-close-interface], .dialogHeader button,
+  .mapLayerDrawerHeader button, .mapInfoClose, #tutorialDock button:last-child, .wpActions button,
+  .historyActions button:last-child, .mapLegendHeader button
+):hover {
+  color: var(--text-primary);
+  background: var(--surface-card);
+  border-color: var(--border-strong);
+}
+
+/* --------------------------------------------------------------------------
+   4. Estados compartidos: pulsar, foco, deshabilitado
+   -------------------------------------------------------------------------- */
+body.jezero-ui :is(
+  .action, .referenceAction, .returnHomeAction, .topbarHelp, .topbarCommand, .primary, .coordinateInlineSubmit,
+  .homeWorkspace button, .survivalPrimary, .operationsWorkspace .opsPrimary, .referencePrimary, .helpPrimary,
+  .uiWelcomeActions button, #forecastEmpty button, .referenceSecondary, .operationsActions button,
+  .workspaceActions button, #draftRecovery button, .survivalHeroActions button, .survivalDataActions button,
+  #forecastResults > button, .historyActions button, .libraryBody > button, .dialogFooter button, #tutorialDock button,
+  .survivalTabs #survivalExport, .survivalCard > button
+):active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 0 var(--key-edge), 0 0 0 transparent, 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+body.jezero-ui :is(button, [role="button"], summary, a, select, input):focus-visible {
+  outline: 2px solid var(--lit);
+  outline-offset: 2px;
+}
+
+body.jezero-ui button:disabled {
+  transform: none;
+  filter: grayscale(0.4);
+  box-shadow: none;
+  text-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.jezero-ui button,
+  body.jezero-ui button:active {
+    transition: none;
+    transform: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. Canales: pestañas y listas de selección con indicador encendido
+   -------------------------------------------------------------------------- */
+body.jezero-ui :is(#opsTabs button, #helpTopics button) {
+  position: relative;
+  padding-left: 18px;
+  border-radius: var(--radius-md);
+}
+
+body.jezero-ui :is(#opsTabs button, #helpTopics button)::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 25%;
+  bottom: 25%;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--border-strong);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.jezero-ui :is(#opsTabs button[aria-pressed="true"], #helpTopics button:is(.is-active, [aria-current="true"], [aria-selected="true"])) {
+  color: var(--text-primary);
+  background: var(--surface-card);
+  border-color: var(--border-subtle);
+}
+
+body.jezero-ui :is(#opsTabs button[aria-pressed="true"], #helpTopics button:is(.is-active, [aria-current="true"], [aria-selected="true"]))::before {
+  background: var(--lit);
+  box-shadow: 0 0 8px var(--lit-glow);
+}
+
+body.jezero-ui .survivalTabs button:not(#survivalExport) {
+  position: relative;
+}
+
+body.jezero-ui .survivalTabs button.is-active:not(#survivalExport) {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--surface-card);
+}
+
+body.jezero-ui .survivalTabs button.is-active:not(#survivalExport)::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--lit);
+  box-shadow: 0 0 8px var(--lit-glow);
+}
+
+/* Tarjetas de navegación (pasos y comprobaciones): fila que se ilumina al apuntar. */
+body.jezero-ui :is(.controlSteps button, .opsChecks button, .guideSteps button) {
+  position: relative;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.08s ease;
+}
+
+body.jezero-ui :is(.controlSteps button, .opsChecks button, .guideSteps button):hover {
+  border-color: var(--key-border-hover);
+  background: var(--surface-card-hover);
+}
+
+body.jezero-ui :is(.controlSteps button, .opsChecks button, .guideSteps button):active {
+  transform: translateY(1px);
+}
+
+/* Estado de cada comprobación de Soporte: indicador apagado (pendiente) o encendido (listo). */
+body.jezero-ui .opsChecks button {
+  padding-left: 34px;
+  text-align: left;
+}
+
+body.jezero-ui .opsChecks button::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 17px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-warning);
+  background: transparent;
+}
+
+body.jezero-ui .opsChecks button[data-state="ready"]::before {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-success) 60%, transparent);
+}
+
+body.jezero-ui .opsChecks button[data-state="pending"] span {
+  color: color-mix(in srgb, var(--color-warning) 70%, var(--text-secondary));
+}
+
+/* --------------------------------------------------------------------------
+   6. Ajustes: tema, idioma y animación
+   -------------------------------------------------------------------------- */
+.settingsGroup {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.settingsField {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 6px;
+}
+
+.settingsField > span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.settingsField :is(select, input) {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-input);
+  color: var(--text-primary);
+}
+
+:is(.settingsHelp, .settingsStatus, .sideNote) {
+  margin: 4px 0 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+}
+
+.motionSetting {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 14px;
+  margin: 12px 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  cursor: pointer;
+}
+
+.motionSettingCopy b {
+  display: block;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.motionSettingCopy small {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.motionSetting input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.motionSetting > i {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-input);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.motionSetting > i::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.motionSetting input:checked + i {
+  border-color: var(--lit);
+  background: color-mix(in srgb, var(--lit) 22%, var(--surface-input));
+}
+
+.motionSetting input:checked + i::after {
+  transform: translateX(20px);
+  background: var(--lit);
+  box-shadow: 0 0 8px var(--lit-glow);
+}
+
+.motionSetting input:focus-visible + i {
+  outline: 2px solid var(--lit);
+  outline-offset: 2px;
+}
+
+.motionSetting.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.themeSettingHeader {
+  display: grid;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.themeSettingHeader > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.themeSettingHeader b {
+  font-size: 12.5px;
+  color: var(--lit);
+}
+
+.themeSettingHeader small {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+}
+
+.themeGrid {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.themeChoice {
+  position: relative;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 22px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.themeChoice:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-card-hover);
+}
+
+.themeChoice.is-selected {
+  border-color: var(--lit);
+  box-shadow: inset 3px 0 0 var(--lit);
+}
+
+.themeChoice:focus-within {
+  outline: 2px solid var(--lit);
+  outline-offset: 2px;
+}
+
+.themeChoice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.themeSwatches {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  width: 52px;
+  height: 36px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-sm);
+}
+
+.themeSwatches i:nth-child(1) { background: var(--sw1); }
+.themeSwatches i:nth-child(2) { background: var(--sw2); }
+.themeSwatches i:nth-child(3) { background: var(--sw3); }
+.themeSwatches i:nth-child(4) { background: var(--sw4); }
+
+.themeCopy {
+  min-width: 0;
+}
+
+.themeCopy b {
+  display: block;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.themeCopy small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.themeCheck {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  color: transparent;
+  font-size: 12px;
+}
+
+.themeChoice.is-selected .themeCheck {
+  border-color: var(--lit);
+  background: var(--lit);
+  color: var(--surface-canvas);
+}
+
+/* --------------------------------------------------------------------------
+   7. EVA y paneles de detalle: filas etiqueta / valor
+   -------------------------------------------------------------------------- */
+.evaStatusLine {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.evaStatusLine:last-child {
+  border-bottom: 0;
+}
+
+/* Recursos EVA: etiqueta, guía punteada y valor, como una lectura de instrumento. */
+.resourcePlaceholder {
+  display: grid;
+  grid-template-columns: auto minmax(12px, 1fr) auto;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 0;
+}
+
+.resourcePlaceholder span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.resourcePlaceholder i {
+  border-bottom: 1px dotted var(--border-strong);
+  transform: translateY(-3px);
+}
+
+.resourcePlaceholder b {
+  font: 700 11px var(--mono);
+  color: var(--color-warning);
+}
+
+.evaStatusLine span {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.evaStatusLine b {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-primary);
+}
+
+.reference {
+  display: grid;
+  gap: 2px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.reference:last-child {
+  border-bottom: 0;
+}
+
+.reference b {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.reference span {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--lit);
+}
+
+.reference small {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.flowSteps {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 12px 10px;
+  align-items: start;
+}
+
+.flowSteps > span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--lit);
+}
+
+.flowSteps p {
+  margin: 0;
+}
+
+.flowSteps p b {
+  display: block;
+  font-size: 13px;
+}
+
+.flowSteps p small {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   8. Clima: estado vacío que invita a importar
+   -------------------------------------------------------------------------- */
+.forecastEmpty {
+  max-width: 520px;
+  margin: 48px auto;
+  padding: 36px 32px 32px;
+  text-align: center;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--surface-card) 45%, transparent);
+}
+
+.forecastEmpty::before {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 16px;
+  background: var(--lit);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 14.76V4a2 2 0 1 0-4 0v10.76a4 4 0 1 0 4 0z'/%3E%3Cpath d='M12 9v7'/%3E%3Cpath d='M18 5h3M18 9h2'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 14.76V4a2 2 0 1 0-4 0v10.76a4 4 0 1 0 4 0z'/%3E%3Cpath d='M12 9v7'/%3E%3Cpath d='M18 5h3M18 9h2'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.forecastEmpty h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.forecastEmpty p {
+  margin: 0 auto 20px;
+  max-width: 42ch;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   9. Resultados: cabecera, gráficos SVG y comparativas
+   -------------------------------------------------------------------------- */
+.analyticsHeaderMeta {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  text-align: right;
+}
+
+.analyticsHeaderMeta b {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.analyticsHeaderMeta span {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+
+.analyticsChart {
+  position: relative;
+  min-height: 170px;
+}
+
+.analyticsProfileChart {
+  min-height: 300px;
+}
+
+.analyticsChart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* El rectángulo de captura no tenía relleno y se pintaba negro sobre el gráfico. */
+:is(.analyticsChart, .terrainProfileMini) .chartHit {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+:is(.analyticsChart, .terrainProfileMini) :is(.chartGrid, .profileAxis) {
+  stroke: var(--border-subtle);
+  stroke-width: 1;
+}
+
+:is(.analyticsChart, .terrainProfileMini) .chartAxis {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+:is(.analyticsChart, .terrainProfileMini) .chartLabel {
+  fill: var(--text-tertiary);
+  font: 600 10.5px var(--mono);
+}
+
+:is(.analyticsChart, .terrainProfileMini) .chartLabelStrong {
+  fill: var(--text-primary);
+  font: 700 10.5px var(--mono);
+}
+
+:is(.analyticsChart, .terrainProfileMini) .chartValue {
+  fill: var(--text-primary);
+  font: 700 11px var(--mono);
+}
+
+:is(.analyticsChart, .terrainProfileMini) .chartTitle {
+  fill: var(--text-tertiary);
+  font: 700 10px var(--mono);
+}
+
+:is(.analyticsChart, .terrainProfileMini) :is(.chartCursor, .analyticsSyncCursor) {
+  stroke: var(--color-warning);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+
+:is(.analyticsChart, .terrainProfileMini) .chartTarget {
+  fill: var(--color-accent);
+  stroke: var(--surface-canvas);
+  stroke-width: 1.5;
+}
+
+.v36Bars,
+.v35Health {
+  display: grid;
+  gap: 8px;
+}
+
+:is(.v36BarRow, .v35HealthItem) {
+  display: grid;
+  grid-template-columns: minmax(80px, 0.9fr) minmax(0, 2fr) 44px;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.v36BarRow {
+  grid-template-columns: minmax(80px, 0.9fr) minmax(0, 2fr) 40px 64px;
+}
+
+:is(.v36BarRow, .v35HealthItem) :is(strong, b) {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-primary);
+}
+
+.v36BarRow em {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 11.5px;
+  text-align: right;
+  color: var(--text-tertiary);
+}
+
+:is(.v36BarTrack, .v35HealthTrack) {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-input);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+:is(.v36BarFill, .v35HealthFill) {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-primary), var(--lit));
+}
+
+.v35EvaBudget {
+  display: flex;
+  height: 26px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.evaBudgetPart {
+  display: grid;
+  place-items: center;
+  min-width: 2px;
+  font: 700 10.5px var(--mono);
+  color: #ffffff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.v35EvaLegend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 6px 14px;
+  margin-top: 10px;
+}
+
+.v35EvaLegend div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.v35EvaLegend b {
+  font-family: var(--mono);
+  color: var(--text-primary);
+}
+
+.v36RouteCompare {
+  display: grid;
+  grid-template-columns: minmax(110px, 1.2fr) repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  font-size: 12px;
+}
+
+.v36RouteCompare :is(.head, .metric) {
+  padding: 8px 10px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+}
+
+.v36RouteCompare .strategyPick {
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--surface-input);
+  color: var(--text-primary);
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.v36RouteCompare .head.strategyPick {
+  font-family: inherit;
+  font-weight: 650;
+}
+
+.v36RouteCompare .strategyPick:hover {
+  border-color: var(--border-strong);
+}
+
+.v36RouteCompare .strategyPick.selected {
+  border-color: var(--lit);
+  background: color-mix(in srgb, var(--lit) 12%, var(--surface-input));
+}
+
+/* --------------------------------------------------------------------------
+   10. Secuencia de la ruta (mapa) y línea de tiempo
+   -------------------------------------------------------------------------- */
+.routeSequenceStrip {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  z-index: 14;
+  max-width: min(640px, calc(100% - 420px));
+  transform: translateX(-50%);
+  padding: 6px 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface-panel) 92%, transparent);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-md);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.routeSequenceStrip:not(:has(b)) {
+  display: none;
+}
+
+.routeSequenceFlow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.routeSequenceFlow b {
+  padding: 3px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font: 700 11px var(--mono);
+  color: var(--text-primary);
+}
+
+.routeSequenceFlow b:is(.base, .home) {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.routeSequenceFlow i {
+  font-style: normal;
+  color: var(--text-tertiary);
+}
+
+body:is([data-module="home"], [data-module="operations"], [data-module="analysis"]) .routeSequenceStrip {
+  display: none;
+}
+
+.missionTimeline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+  scrollbar-width: thin;
+}
+
+.timelineNode {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 2px;
+  min-width: 96px;
+  max-width: 160px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.timelineNode span {
+  font: 700 10.5px var(--mono);
+  color: var(--lit);
+}
+
+.timelineNode.base span {
+  color: var(--color-success);
+}
+
+.timelineNode b {
+  overflow: hidden;
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text-primary);
+}
+
+.timelineLink {
+  flex: 0 0 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--border-strong);
+}
+
+:is(.timelineEmpty, .historyEmpty, .helpEmpty) {
+  padding: 16px;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 12.5px;
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+/* --------------------------------------------------------------------------
+   11. Historial y leyenda del mapa
+   -------------------------------------------------------------------------- */
+.historyList {
+  display: grid;
+  gap: 6px;
+}
+
+.historyItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.historyActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+body.jezero-ui .historyActions button:first-child {
+  width: auto;
+  min-height: 32px;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.mapLegend {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface-panel) 94%, transparent);
+  overflow: hidden;
+}
+
+.mapLegendHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mapLegendHeader strong {
+  display: block;
+  font-size: 12.5px;
+}
+
+.mapLegendHeader small {
+  display: block;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.mapLegendBody {
+  max-height: 46vh;
+  overflow: auto;
+  padding: 8px 12px 12px;
+}
+
+.mapLegend.is-collapsed .mapLegendBody {
+  display: none;
+}
+
+.mapLegendGroupTitle {
+  margin: 10px 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+}
+
+.legendItem {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+}
+
+.legendItem b {
+  display: block;
+  font-size: 12px;
+}
+
+.legendItem small {
+  display: block;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.legendSymbol {
+  justify-self: center;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font: 800 8px var(--mono);
+}
+
+.legendSymbol.landing { background: var(--color-accent); border: 2px solid #ffffff; }
+.legendSymbol.known { width: 12px; height: 12px; border-radius: 2px; transform: rotate(45deg); background: var(--lit); border: 2px solid #ffffff; }
+.legendSymbol.base { background: var(--surface-canvas); border: 2px solid var(--color-success); color: var(--color-success); }
+.legendSymbol.required { background: var(--color-accent); border: 2px solid #ffffff; }
+.legendSymbol.optional { background: var(--color-warning); border: 2px solid #ffffff; }
+
+.legendLine {
+  justify-self: center;
+  width: 26px;
+  height: 0;
+  border-top: 3px solid var(--text-secondary);
+}
+
+.legendLine.selected { border-top-width: 4px; border-color: var(--color-accent); }
+.legendLine.direct { border-top-style: dashed; border-color: var(--text-primary); }
+.legendLine.balanced { border-top-style: dashed; border-color: var(--color-warning); }
+.legendLine.risk { border-top-style: dashed; border-color: var(--color-success); }
+
+@media (max-width: 760px) {
+  /* "Ayuda" ya está en la cabecera superior; repetirla parte las acciones en dos líneas. */
+  #controlHelp {
+    display: none;
+  }
+
+  .routeSequenceStrip {
+    max-width: calc(100% - 24px);
+    bottom: 84px;
+  }
+
+  .forecastEmpty {
+    margin: 24px 12px;
+    padding: 28px 20px 24px;
+  }
+
+  :is(.v36BarRow, .v35HealthItem) {
+    grid-template-columns: minmax(70px, 1fr) minmax(0, 1.4fr) 40px;
+  }
+
+  .v36BarRow em {
+    display: none;
+  }
+}

@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="polish.css?v=4p0">
   <link rel="stylesheet" href="operations.css?v=4p0">
   <link rel="stylesheet" href="control.css?v=4p0">
+  <link rel="stylesheet" href="components.css?v=4p0">
   <script src="modules/theme.js?v=4p0"></script>
 </head>
 <body class="jezero-ui" data-module="planner" data-mission-state="empty">
@@ -51,7 +52,7 @@
     <button class="moduleNav is-active" data-module-target="planner" title="Misión"><span>⌁</span><small>MISIÓN</small></button>
     <button class="moduleNav" data-module-target="eva" title="EVA"><span>▲</span><small>EVA</small></button>
     <button class="moduleNav" data-module-target="analysis" title="Resultados"><span>▤</span><small>RESULTADOS</small></button>
-    <button class="moduleNav" data-module-target="settings" title="Configuración"><span>⚙</span><small>CONFIG.</small></button>
+    <button class="moduleNav" data-module-target="settings" title="Ajustes"><span>⚙</span><small>AJUSTES</small></button>
   </nav>
 
   <aside class="sidebar contextualPanel" aria-label="Panel de planificación">
@@ -323,7 +324,7 @@
     <div id="demoModeBadge" class="demoModeBadge" hidden>DEMO · TERRENO SINTÉTICO, NO NASA</div>
 <section id="survivalWorkspace" class="survivalWorkspace" aria-label="Guía de supervivencia en Marte">
   <div class="survivalScroll">
-    <div class="workspaceHeading"><div><small>JEZERO / OPERACIONES</small><h2>Centro de misión</h2></div><div class="workspaceActions"><button id="missionLibraryOpen" type="button">Misiones</button><button type="button" data-mission-file-action="importMissionJson">Abrir misión ↑</button><button id="workspaceSaveMission" type="button" data-mission-file-action="exportMissionJson" disabled>Guardar misión ↓</button><span class="workspaceLabel">4.0 P0</span></div></div>
+    <div class="workspaceHeading"><div><small>JEZERO / GUÍA</small><h2>Guía de supervivencia</h2></div><div class="workspaceActions"><button id="missionLibraryOpen" type="button">Misiones</button><button type="button" data-mission-file-action="importMissionJson">Abrir misión ↑</button><button id="workspaceSaveMission" type="button" data-mission-file-action="exportMissionJson" disabled>Guardar misión ↓</button><span class="workspaceLabel">4.0 P0</span></div></div>
     <div id="draftRecovery" class="draftRecovery" hidden><div><b>Encontramos un borrador</b><p>Recupera tus puntos y parámetros guardados en este navegador.</p></div><div><button id="draftRecover" type="button">Recuperar</button><button id="draftDismiss" type="button">Descartar</button></div></div>
     <header class="survivalHero">
       <div><div class="survivalEyebrow">PLANIFICA · EVALÚA · REGRESA <span id="survivalDataBadge">PLANIFICACIÓN</span></div>

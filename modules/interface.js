@@ -48,7 +48,7 @@
     const result=byId('routeStatus')?.textContent||'';
     const hasResult=count>=2 && !['SIN RUTA','NO ROUTE',''].includes(result);
     document.body.dataset.missionState=hasResult?'ready':count?'building':'empty';
-    const labels={explorer:copy('Mapa y capas','Map and layers'),planner:copy('Tu misión','Your mission'),eva:copy('Recorrido EVA','EVA traverse'),analysis:copy('Resultados','Results'),settings:copy('Configuración','Settings')};
+    const labels={explorer:copy('Mapa y capas','Map and layers'),planner:copy('Tu misión','Your mission'),eva:copy('Recorrido EVA','EVA traverse'),analysis:copy('Resultados','Results'),settings:copy('Ajustes','Settings')};
     text('uiPanelTitle',labels[document.body.dataset.module]||labels.planner);
     text('uiCalcHint',count<2?copy('Añade una base y un objetivo para comenzar.','Add a base and a target to begin.'):hasResult?copy('Puedes comparar las alternativas en Resultados.','Compare the alternatives in Results.'):copy('Tu misión está lista para calcular.','Your mission is ready to calculate.'));
     text('dropHintTitle',copy('Suelta tu misión JSON','Drop your mission JSON'));text('dropHintCopy',copy('Se valida antes de cargarla','It is validated before loading'));

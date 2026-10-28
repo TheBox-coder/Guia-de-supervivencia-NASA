@@ -55,7 +55,7 @@
     'MÓDULO ACTIVO':'ACTIVE MODULE',
     'PLANIFICADOR DE MISIÓN':'MISSION PLANNER',
     'DATOS CARTOGRÁFICOS · NASA / USGS':'CARTOGRAPHIC DATA · NASA / USGS',
-    'EXPLORAR':'EXPLORE','PLANIFICAR':'PLAN','CIENCIA':'SCIENCE','TERRENO':'TERRAIN','NAVEGADOR EVA':'EVA NAVIGATOR','CONTROL':'CONTROL','RESULTADOS':'RESULTS','CONFIGURACIÓN':'SETTINGS',
+    'EXPLORAR':'EXPLORE','PLANIFICAR':'PLAN','CIENCIA':'SCIENCE','TERRENO':'TERRAIN','NAVEGADOR EVA':'EVA NAVIGATOR','CONTROL':'CONTROL','RESULTADOS':'RESULTS','CONFIGURACIÓN':'SETTINGS','AJUSTES':'SETTINGS','Guía de supervivencia':'Survival guide','JEZERO / GUÍA':'JEZERO / GUIDE',
     'EXPLORAR / COBERTURA':'EXPLORE / COVERAGE','MARTE GLOBAL':'GLOBAL MARS','Cobertura planetaria · NASA / USGS':'Planetary coverage · NASA / USGS',
     'Explora antes de planificar':'Explore before planning','Navega por Marte, consulta referencias y selecciona un sitio de aterrizaje como punto de partida.':'Navigate Mars, review references and select a landing site as your starting point.',
     'REFERENCIAS MARCIANAS':'MARTIAN REFERENCES','Usar un aterrizaje como base':'Use a landing site as base','Selecciona un sitio de aterrizaje…':'Select a landing site…','Usar como base':'Use as base',
@@ -100,7 +100,7 @@
   let mutating = false;
 
   const moduleLabels = {
-    es:{explorer:'MAPA',planner:'MISIÓN',eva:'EVA',analysis:'RESULTADOS',settings:'CONFIGURACIÓN'},
+    es:{explorer:'MAPA',planner:'MISIÓN',eva:'EVA',analysis:'RESULTADOS',settings:'AJUSTES'},
     en:{explorer:'MAP',planner:'MISSION',eva:'EVA',analysis:'RESULTS',settings:'SETTINGS'}
   };
 

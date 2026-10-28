@@ -2,7 +2,7 @@
 (() => {
   const $=id=>document.getElementById(id),ui=(es,en)=>window.JEZERO_I18N.ui(es,en);
   const workspace=$('homeWorkspace');let current=null,pending=false;
-  const copy={home:['INICIO','HOME'],survival:['SUPERVIVENCIA','LIFE SUPPORT'],operations:['SOPORTE','SUPPORT'],weather:['CLIMA','WEATHER'],explorer:['MAPAS','MAPS'],planner:['MISIONES','MISSIONS'],eva:['EVA','EVA'],analysis:['RESULTADOS','RESULTS'],settings:['CONFIGURACIÓN','SETTINGS']};
+  const copy={home:['INICIO','HOME'],survival:['SUPERVIVENCIA','LIFE SUPPORT'],operations:['SOPORTE','SUPPORT'],weather:['CLIMA','WEATHER'],explorer:['MAPAS','MAPS'],planner:['MISIONES','MISSIONS'],eva:['EVA','EVA'],analysis:['RESULTADOS','RESULTS'],settings:['AJUSTES','SETTINGS']};
   const labels={duration:['Duración estimada','Estimated duration'],oxygen:['Oxígeno al finalizar','Final oxygen'],battery:['Batería al finalizar','Final battery'],water:['Agua al finalizar','Final water'],co2:['Captura CO₂ restante','CO₂ removal remaining'],thermal:['Energía térmica restante','Thermal energy remaining']};
   const origins={calculated:['CALCULADO','CALCULATED'],inferred:['MODELO HIPOTÉTICO','HYPOTHETICAL MODEL'],unknown:['SIN DATOS SUFICIENTES','INSUFFICIENT DATA']};
   const descriptions={

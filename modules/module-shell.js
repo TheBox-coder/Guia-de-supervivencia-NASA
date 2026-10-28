@@ -9,7 +9,7 @@
     planner: 'MISIÓN',
     eva: 'EVA',
     analysis: 'RESULTADOS',
-    settings: 'CONFIGURACIÓN'
+    settings: 'AJUSTES'
   };
   const labelFor = name => name==='home'?(window.JEZERO_I18N?.ui('INICIO','HOME')):name==='operations'?(window.JEZERO_I18N?.ui('SOPORTE','SUPPORT')):name==='weather'?(window.JEZERO_I18N?.ui('CLIMA','WEATHER')):name==='survival'?(window.JEZERO_I18N?.ui('GUÍA','GUIDE')):window.JEZERO_I18N?.moduleLabel?.(name) || labels[name];
 
