@@ -20,6 +20,14 @@ body.jezero-ui {
   --mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Consolas, monospace;
 }
 
+/* Iconos de navegación: son de trazo; sin estas reglas el navegador los rellenaba de negro. */
+.moduleNav svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 /* --------------------------------------------------------------------------
    1. Tecla secundaria
    -------------------------------------------------------------------------- */
