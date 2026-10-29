@@ -113,9 +113,11 @@
     if(!mission||!Number.isFinite(mission.duration)||!mission.legs?.length)return {status:'no-mission',label:'Define una misión',environment,terrain:soil,alerts:[{level:'info',code:'route',text:'Carga la demo o calcula una ruta para evaluar recursos.'}],config:p,modelVersion:MODEL_VERSION};
     // El polvo solo actúa en el escenario "polvo denso": sus coeficientes no tienen fuente publicada.
     const dust=environment.dustIndex,dustEffect=p.scenario==='dust'?dust:0,delay=1+dustEffect*.25,duration=mission.duration*delay;
-    const capacityBattery=p.batteryKWh*(p.scenario==='power'?.45:1),metabolic=metabolism(mission,TERRAIN_FACTOR[p.surface]);
+    // El retraso del escenario de polvo alarga toda la misión, así que el gasto informado lo incluye.
+    const capacityBattery=p.batteryKWh*(p.scenario==='power'?.45:1),route=metabolism(mission,TERRAIN_FACTOR[p.surface]);
+    const metabolic={...route,kcal:route.kcal*delay,kcalLow:route.kcalLow*delay,kcalHigh:route.kcalHigh*delay,walkHours:route.walkHours*delay,stopHours:route.stopHours*delay};
     const declaredRate=Number.isFinite(p.oxygenRateKgH);
-    const oxygenFromKcal=kcal=>kcal*delay*O2_KG_PER_KCAL*(1+dustEffect*.1);
+    const oxygenFromKcal=kcal=>kcal*O2_KG_PER_KCAL*(1+dustEffect*.1);
     const oxygenUsed=declaredRate?p.oxygenRateKgH*duration:oxygenFromKcal(metabolic.kcal);
     const oxygenUsedRange=declaredRate?[oxygenUsed,oxygenUsed]:[oxygenFromKcal(metabolic.kcalLow),oxygenFromKcal(metabolic.kcalHigh)];
     let batteryUsed=0,minTemp=Infinity,maxTemp=-Infinity;const energyPrefix=[0];

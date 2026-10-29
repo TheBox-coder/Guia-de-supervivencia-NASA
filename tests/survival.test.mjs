@@ -57,6 +57,11 @@ test('dust only acts in the explicit dust scenario',async()=>{
  const m=await mission(),clean=engine.evaluate(m,{dustIndex:0}),dusty=engine.evaluate(m,{dustIndex:1});
  assert.equal(dusty.durationHours,clean.durationHours);assert.equal(dusty.oxygen.usedKg,clean.oxygen.usedKg);assert.equal(dusty.battery.usedKWh,clean.battery.usedKWh);
 });
+test('the reported metabolic cost includes the dust-scenario delay',async()=>{
+ const m=await mission(),nominal=engine.evaluate(m),dust=engine.evaluate(m,{scenario:'dust',dustIndex:.9});
+ assert.ok(Math.abs(dust.metabolic.kcal-nominal.metabolic.kcal*dust.delayFactor)<1e-9);
+ assert.ok(Math.abs(dust.oxygen.usedKg-dust.metabolic.kcal*engine.O2_KG_PER_KCAL*(1+.09))<1e-12);
+});
 test('meteorological location mismatch and missing return are visible',async()=>{
  const m=await mission();m.sequence=[base,target];const d=data();d.location={lat:0,lon:0};const r=engine.evaluate(m,{},d);assert.ok(r.alerts.some(a=>a.code==='location'));assert.ok(r.alerts.some(a=>a.code==='return'));assert.ok(r.alerts.some(a=>a.code==='radiation'));
 });
