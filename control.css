@@ -544,13 +544,16 @@ body[data-mission-state="ready"] .headerSteps {
   margin: 24px 0 14px;
 }
 
-/* Cabecera en pantallas medianas: priorizar estado de misión, Buscar y Ayuda sobre el texto de cartografía. */
-@media (max-width: 1280px) {
+/* Cabecera: el texto de cartografía solo cabe junto a Buscar y Ayuda en pantallas anchas;
+   por debajo de 1600 px desbordaba hacia la franja de misión y se pisaba con "Ruta". */
+@media (max-width: 1600px) {
   .topMeta .liveDot,
   #statusText {
     display: none;
   }
+}
 
+@media (max-width: 1280px) {
   .missionHeaderStrip > div {
     min-width: 0;
     padding: 4px 10px;

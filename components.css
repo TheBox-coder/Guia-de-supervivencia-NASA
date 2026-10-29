@@ -1411,3 +1411,18 @@ body.jezero-ui #controlMetrics .controlMetric > small {
     border-bottom: 1px solid var(--border-subtle);
   }
 }
+
+/* --------------------------------------------------------------------------
+   14. Mapa: mosaico regional integrado y textos de la barra
+   -------------------------------------------------------------------------- */
+/* CTX y HiRISE son pancromáticos (grises); un tono marciano suave evita el parche gris
+   sobre el mosaico Viking coloreado. Es solo visual: no altera ningún dato. */
+.jezero-detail-layer {
+  filter: sepia(0.7) saturate(1.7) hue-rotate(-22deg) brightness(0.72) contrast(1.12);
+}
+
+/* El texto "INICIO · MARTE GLOBAL · mapa persistente entre módulos" perdió sus estilos y
+   flotaba sobre el mapa; no aporta información al usuario. */
+.mapToolbar > div:first-child:not(.mapToolsRight) {
+  display: none;
+}
