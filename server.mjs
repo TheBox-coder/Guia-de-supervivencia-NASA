@@ -23,7 +23,8 @@ const PUBLIC_FILES = new Set([
   '/interface.css','/modules/interface.js','/examples/01-jezero-corto.json','/examples/02-jezero-varios-objetivos.json','/examples/03-presupuesto-ajustado.json','/index.html','/style.css','/script.js','/mars-elevation.js','/mars-data.json',
   '/modules/route-engine.cjs','/modules/theme.js','/modules/i18n.js','/modules/module-shell.js','/modules/validation.cjs',
   '/assets/favicon.ico','/assets/favicon-256.png','/assets/favicon-32.png',
-  '/assets/favicon-64.png','/assets/mars-2020-logo.png'
+  '/assets/favicon-64.png','/assets/mars-2020-logo.png',
+  '/manifest.webmanifest','/assets/apple-touch-icon.png','/assets/icon-192.png','/assets/icon-512.png','/assets/icon-maskable-512.png'
 ]);
 const pdfRequests = new Map();
 function allowPdfRequest(req) {
@@ -152,6 +153,7 @@ async function serveStatic(req, res, url) {
       '.png':'image/png',
       '.svg':'image/svg+xml; charset=utf-8',
       '.ico':'image/x-icon',
+      '.webmanifest':'application/manifest+json; charset=utf-8',
       '.md':'text/markdown; charset=utf-8'
     };
     const data = await fs.readFile(file);
