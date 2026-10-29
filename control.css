@@ -531,6 +531,7 @@ body[data-mission-state="ready"] .headerSteps {
 
 .controlScroll[data-empty="true"] > .controlGrid {
   order: 3;
+  margin-top: 20px;
 }
 
 .controlScroll[data-empty="true"] > :is(.controlAssurance, .controlFoot) {

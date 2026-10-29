@@ -11,10 +11,10 @@
     let assessment=null,plan=null;
     try{plan=operations.state(support);assessment=operations.assess(plan,{mission:validRoute?mission:null,survival:evaluation,crew:normalized?.crew},now);}catch{errors.push('support');}
     const duration=assessment?.durationHours??(validRoute?mission.duration:null);
-    const metric=(id,value,unit,kind,source,model,reserve=null)=>({id,value:Number.isFinite(value)?value:null,unit,kind:Number.isFinite(value)?kind:'unknown',source:Number.isFinite(value)?source:'missing',model,reserve:Number.isFinite(reserve)?reserve:null,uncertainty:model==='survival'?'uncalibrated-model':'input-uncertainty-not-quantified'});
+    const metric=(id,value,unit,kind,source,model,reserve=null,range=null)=>({id,value:Number.isFinite(value)?value:null,unit,kind:Number.isFinite(value)?kind:'unknown',source:Number.isFinite(value)?source:'missing',model,reserve:Number.isFinite(reserve)?reserve:null,range:Number.isFinite(value)&&Array.isArray(range)&&range.every(Number.isFinite)&&range[0]!==range[1]?range:null,uncertainty:model==='survival'?'apollo-observed-range':'input-uncertainty-not-quantified'});
     const indicators=[
       metric('duration',duration,'h','calculated',evaluation?'scenario':'route',evaluation?'survival':'route'),
-      metric('oxygen',evaluation?.oxygen?.remainingKg,'kg/person','inferred','declared-equipment-hypothetical-model','survival',evaluation?.oxygen?.reserveKg),
+      metric('oxygen',evaluation?.oxygen?.remainingKg,'kg/person','inferred',evaluation?.oxygen?.source==='declared'?'declared-rate':'apollo-pandolf-model','survival',evaluation?.oxygen?.reserveKg,evaluation?.oxygen?.remainingRangeKg),
       metric('battery',evaluation?.battery?.remainingKWh,'kWh/person','inferred','declared-equipment-hypothetical-model','survival',evaluation?.battery?.reserveKWh),
       metric('water',assessment?.water?.provenance?assessment.water.remaining:null,'L/person','calculated','operator-declaration','support'),
       metric('co2',assessment?.co2?.provenance?assessment.co2.remaining:null,'kg/person','calculated','operator-declaration','support'),

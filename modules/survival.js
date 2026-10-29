@@ -5,7 +5,8 @@
   const hours=value=>Number.isFinite(value)?`${Math.floor(Math.round(Math.abs(value)*60)/60)} h ${String(Math.round(Math.abs(value)*60)%60).padStart(2,'0')} min`:'—';
   const fields={crew:'survivalCrew',oxygenKg:'survivalOxygenCapacity',oxygenRateKgH:'survivalOxygenRate',batteryKWh:'survivalBatteryCapacity',powerKW:'survivalPower',reservePct:'survivalReserve',startHour:'survivalStartHour'};
   let settings={...engine.DEFAULTS},dataset=null,snapshot=null,comparison=null;
-  try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved)settings=engine.config(saved);}catch{}
+  // 0.12 kg/h era el valor por defecto sin fuente del modelo 1.0.0: se migra al modelo metabólico.
+  try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved){if(saved.oxygenRateKgH===.12)saved.oxygenRateKgH=null;settings=engine.config(saved);}}catch{}
   try{const stored=JSON.parse(localStorage.getItem(KEY+'-weather')||'null');if(stored){engine.weatherModel(stored);dataset=stored;}}catch{}
   for(const [key,id] of Object.entries(fields))$(id).value=settings[key];$('survivalDust').value=settings.dustIndex*100;$('survivalSurface').value=settings.surface;
   function save(){try{localStorage.setItem(KEY,JSON.stringify(settings));}catch{}}
