@@ -32,10 +32,21 @@
       const ctx=event.context,topLeft=lastMap?.getPixelFromCoordinate([extent[0],extent[3]]),bottomRight=lastMap?.getPixelFromCoordinate([extent[2],extent[1]]);
       if(!ctx||!topLeft||!bottomRight)return;
       const [x0,y0]=ol.render.getRenderPixel(event,topLeft),[x1,y1]=ol.render.getRenderPixel(event,bottomRight);
-      const width=x1-x0,height=y1-y0,edge=Math.min(width,height)*.12;
+      const width=x1-x0,height=y1-y0,edge=Math.min(width*.12,height*.12,24*(event.frameState?.pixelRatio||1));
       if(!(edge>2))return;
-      ctx.save();ctx.globalCompositeOperation='destination-in';ctx.filter=`blur(${edge/2}px)`;ctx.fillStyle='#000';
-      ctx.fillRect(x0+edge,y0+edge,width-2*edge,height-2*edge);ctx.restore();
+      // Máscaras de borde acotadas: un blur proporcional al mosaico se dispara al acercar.
+      ctx.save();ctx.globalCompositeOperation='destination-out';
+      for(const [sx,sy,ex,ey,x,y,w,h] of [
+        [x0,y0,x0+edge,y0,x0,y0,edge,height],
+        [x1,y0,x1-edge,y0,x1-edge,y0,edge,height],
+        [x0,y0,x0,y0+edge,x0,y0,width,edge],
+        [x0,y1,x0,y1-edge,x0,y1-edge,width,edge]
+      ]){
+        const gradient=ctx.createLinearGradient(sx,sy,ex,ey);
+        gradient.addColorStop(0,'rgba(0,0,0,1)');gradient.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=gradient;ctx.fillRect(x,y,w,h);
+      }
+      ctx.restore();
     });
   }
   function status(){
