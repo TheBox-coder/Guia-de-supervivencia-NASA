@@ -47,6 +47,15 @@
         success:'#10b981',warning:'#f59e0b',danger:'#ef4444',grid:'rgba(20,184,166,.04)',glow:'rgba(20,184,166,.06)',mapText:'#FFFFFF'
       }
     },
+    'golden-orbit': {
+      label:{es:'Órbita Dorada',en:'Golden Orbit'},
+      description:{es:'Azul noche, oro y marfil para una consola cálida.',en:'Midnight blue, gold and ivory for a warm console.'},
+      colors:{
+        bg:'#0b101a',bg2:'#111827',panel:'#182235',panel2:'#202e44',panel3:'#2a3b54',line:'#34445e',lineStrong:'#60718c',
+        text:'#fff8e7',muted:'#c4bda9',soft:'#979383',primary:'#a16207',primary2:'#eab308',accent:'#fbbf24',accent2:'#7dd3fc',
+        success:'#34d399',warning:'#fb923c',danger:'#f87171',grid:'rgba(251,191,36,.04)',glow:'rgba(251,191,36,.08)',mapText:'#FFFFFF'
+      }
+    },
     'eva-contrast': {
       label:{es:'EVA Alto Contraste',en:'EVA High Contrast'},
       description:{es:'Pizarra profunda, ámbar operacional y blanco nítido con lectura AAA.',en:'Deep slate, operational amber and crisp white with AAA readability.'},
