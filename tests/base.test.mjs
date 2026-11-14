@@ -104,3 +104,15 @@ test('Chariot can copy the mission base or unlock its coordinates for manual ent
  useBase.checked=false;ctx.copyMissionBase();assert.equal(fields.lat.readOnly,false);assert.equal(fields.lon.readOnly,false);
  points=[];useBase.checked=true;ctx.copyMissionBase();assert.equal(useBase.checked,false);assert.match(message,/Define primero/);assert.equal(fields.lat.value,18.4448);
 });
+
+test('Chariot accepts at most two whole occupants, including imported support files',()=>{
+ for(const crew of [0,1,2])assert.equal(engine.state({base:{crew}}).base.crew,crew);
+ for(const crew of [3,'3',100,2.5]){assert.throws(()=>engine.state({base:{crew}}));assert.throws(()=>engine.imported({format:'JEZERO-SUPPORT',version:1,state:{base:{crew}}}));}
+});
+
+test('previous Chariot crew counts above two require review without losing reserves',async()=>{
+ const fs=await import('node:fs'),vm=await import('node:vm'),s=fs.readFileSync(new URL('../modules/operations.js',import.meta.url),'utf8');
+ const ctx=vm.createContext({engine,localStorage:{getItem:()=>JSON.stringify({base:{crew:4,waterL:30,energyKWh:42}})}});
+ vm.runInContext("let state=engine.state({});const KEY='test';"+s.slice(s.indexOf(' let crewNeedsReview='),s.indexOf(' const domains='))+"result={state,crewNeedsReview};",ctx);
+ assert.equal(ctx.result.crewNeedsReview,true);assert.equal(ctx.result.state.base.crew,null);assert.equal(ctx.result.state.base.waterL,30);assert.equal(ctx.result.state.base.energyKWh,42);
+});

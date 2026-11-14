@@ -16,7 +16,7 @@
  function procedure(x){const steps=text(x.steps,6000);const count=steps.split('\n').map(x=>x.trim()).filter(Boolean).length;if(count>50)throw Error('Máximo 50 pasos / Maximum 50 steps');return {id:id(x.id),name:required(x.name),trigger:text(x.trigger,1000),responsible:text(x.responsible,160),source:text(x.source,500),steps,reviewed:flag(x.reviewed),shelterId:x.shelterId?id(x.shelterId):'',completed:Array.isArray(x.completed)?[...new Set(x.completed.map(v=>n(v,0,49)))].filter(v=>v!==null&&Number.isInteger(v)&&v<count):[]};}
  function resources(x={}){return {waterL:n(x.waterL),waterRateLH:n(x.waterRateLH,0,20),co2CapacityKg:n(x.co2CapacityKg),co2RateKgH:n(x.co2RateKgH,0,10),thermalKWh:n(x.thermalKWh),thermalKW:n(x.thermalKW,0,100),source:text(x.source,500)};}
  function base(x={}){
-  const crew=n(x.crew,0,100);if(crew!==null&&!Number.isInteger(crew))throw Error('Tripulación entera requerida / Whole crew count required');
+  const crew=n(x.crew,0,2);if(crew!==null&&!Number.isInteger(crew))throw Error('Tripulación entera requerida / Whole crew count required');
   const lat=n(x.lat,-90,90),lon=n(x.lon,-180,180);if((lat===null)!==(lon===null))throw Error('Latitud y longitud del Chariot requeridas juntas / Chariot latitude and longitude must be provided together');
   const energyKWh=n(x.energyKWh),batteryCapacityKWh=n(x.batteryCapacityKWh);if(energyKWh!==null&&batteryCapacityKWh!==null&&energyKWh>batteryCapacityKWh)throw Error('La carga supera la capacidad de batería / Charge exceeds battery capacity');
   return {lat,lon,mobility:choice(x.mobility,['unknown','parked','moving'],'unknown'),crew,hours:n(x.hours,0,10000),delayHours:n(x.delayHours,0,10000)??0,energyLossPct:n(x.energyLossPct,0,100)??0,
