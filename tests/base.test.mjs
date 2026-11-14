@@ -94,3 +94,13 @@ test('Chariot form displays sols and stores compatible hour values at the 14-sol
  ctx.fill('base',{hours:14*engine.SOL_HOURS});assert.equal(input.value,14);
  input.value='14';ctx.submit('base',form);assert.equal(ctx.saved.base.hours,14*engine.SOL_HOURS);assert.equal(engine.lifeSupportLimit(ctx.saved.base.hours).exceeded,false);
 });
+
+test('Chariot can copy the mission base or unlock its coordinates for manual entry',async()=>{
+ const fs=await import('node:fs'),vm=await import('node:vm'),source=fs.readFileSync(new URL('../modules/operations.js',import.meta.url),'utf8');
+ const fields={lat:{value:1},lon:{value:2}},useBase={checked:true};let points=[{type:'base',lat:18.4448,lon:77.4253}],message='';
+ const ctx=vm.createContext({useBase,$:id=>id==='opsForm-base'?{elements:fields}:{hidden:true},window:{JEZERO_UI_ACTIONS:{missionDraft:()=>({points})}},error:e=>{message=e.message;}});
+ vm.runInContext(source.slice(source.indexOf(' function copyMissionBase(){'),source.indexOf(" useBase.addEventListener('change'",source.indexOf(' function copyMissionBase(){'))),ctx);
+ ctx.copyMissionBase();assert.equal(fields.lat.value,18.4448);assert.equal(fields.lon.value,77.4253);assert.equal(fields.lat.readOnly,true);
+ useBase.checked=false;ctx.copyMissionBase();assert.equal(fields.lat.readOnly,false);assert.equal(fields.lon.readOnly,false);
+ points=[];useBase.checked=true;ctx.copyMissionBase();assert.equal(useBase.checked,false);assert.match(message,/Define primero/);assert.equal(fields.lat.value,18.4448);
+});
