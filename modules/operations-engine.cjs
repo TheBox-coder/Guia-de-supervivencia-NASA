@@ -14,10 +14,30 @@
  function equipment(x){return {id:id(x.id),name:required(x.name),type:choice(x.type,['suit','rover','habitat','radio','dosimeter','other'],'other'),status:choice(x.status,['unknown','checked','maintenance','fault'],'unknown'),critical:flag(x.critical),source:text(x.source,500),checkedAt:date(x.checkedAt),serviceDue:date(x.serviceDue,true),notes:text(x.notes,2000)};}
  function procedure(x){const steps=text(x.steps,6000);const count=steps.split('\n').map(x=>x.trim()).filter(Boolean).length;if(count>50)throw Error('Máximo 50 pasos / Maximum 50 steps');return {id:id(x.id),name:required(x.name),trigger:text(x.trigger,1000),responsible:text(x.responsible,160),source:text(x.source,500),steps,reviewed:flag(x.reviewed),shelterId:x.shelterId?id(x.shelterId):'',completed:Array.isArray(x.completed)?[...new Set(x.completed.map(v=>n(v,0,49)))].filter(v=>v!==null&&Number.isInteger(v)&&v<count):[]};}
  function resources(x={}){return {waterL:n(x.waterL),waterRateLH:n(x.waterRateLH,0,20),co2CapacityKg:n(x.co2CapacityKg),co2RateKgH:n(x.co2RateKgH,0,10),thermalKWh:n(x.thermalKWh),thermalKW:n(x.thermalKW,0,100),source:text(x.source,500)};}
+ function base(x={}){
+  const crew=n(x.crew,0,100);if(crew!==null&&!Number.isInteger(crew))throw Error('Tripulación entera requerida / Whole crew count required');
+  return {crew,hours:n(x.hours,0,10000),delayHours:n(x.delayHours,0,10000)??0,energyLossPct:n(x.energyLossPct,0,100)??0,
+   oxygenKg:n(x.oxygenKg),oxygenRateKgH:n(x.oxygenRateKgH,0,10),waterL:n(x.waterL),waterRateLH:n(x.waterRateLH,0,20),energyKWh:n(x.energyKWh),powerKW:n(x.powerKW,0,10000),co2CapacityKg:n(x.co2CapacityKg),co2RateKgH:n(x.co2RateKgH,0,10),source:text(x.source,500),updatedAt:date(x.updatedAt)};
+ }
+ function assessBase(raw={},context={},now=Date.now()){
+  if(!Number.isFinite(now))throw Error('Invalid evaluation time');
+  const s=state(raw),b=s.base,ageHours=b.updatedAt?(now-Date.parse(b.updatedAt))/36e5:null;
+  const usable=Boolean(b.source)&&ageHours!==null&&ageHours>=0&&(s.criteria.sensorAgeH===null||ageHours<=s.criteria.sensorAgeH);
+  const budgets=(hours,loss)=>[
+   ['oxygen',b.oxygenKg,b.crew===null||b.oxygenRateKgH===null?null:b.crew*b.oxygenRateKgH],
+   ['water',b.waterL,b.crew===null||b.waterRateLH===null?null:b.crew*b.waterRateLH],
+   ['energy',b.energyKWh===null?null:b.energyKWh*(1-loss/100),b.powerKW],
+   ['co2',b.co2CapacityKg,b.crew===null||b.co2RateKgH===null?null:b.crew*b.co2RateKgH]
+  ].map(([id,capacity,rate])=>({id,capacity,rate,remaining:usable&&capacity!==null&&rate!==null&&hours!==null?capacity-rate*hours:null,autonomyHours:usable&&capacity!==null&&rate!==null&&rate>0?capacity/rate:null}));
+  return {crew:b.crew,origin:context.draft?.points?.find(p=>p.type==='base')||context.draft?.points?.[0]||null,source:b.source,updatedAt:b.updatedAt,ageHours,usable,
+   hours:b.hours,scenarioHours:b.hours===null?null:b.hours+b.delayHours,delayHours:b.delayHours,energyLossPct:b.energyLossPct,
+   baseline:budgets(b.hours,0),scenario:budgets(b.hours===null?null:b.hours+b.delayHours,b.energyLossPct),
+   equipment:s.equipment.filter(x=>x.type==='habitat'),kind:'calculated-from-declared-inputs'};
+ }
  function radiation(x={}){return {rateUSvH:n(x.rateUSvH),accumulatedMSv:n(x.accumulatedMSv),source:text(x.source,500),measuredAt:date(x.measuredAt)};}
  function communications(x={}){return {status:choice(x.status,['unknown','verified','degraded','lost'],'unknown'),source:text(x.source,500),checkedAt:date(x.checkedAt),contact:text(x.contact,500)};}
  function criteria(x={}){return {maxDurationH:n(x.maxDurationH,0,10000),minWaterL:n(x.minWaterL),maxDoseMSv:n(x.maxDoseMSv),maxSlopeDeg:n(x.maxSlopeDeg,0,90),sensorAgeH:n(x.sensorAgeH,0,10000),requireReturn:flag(x.requireReturn),stopOnLinkLoss:flag(x.stopOnLinkLoss),stopOnEquipmentFault:flag(x.stopOnEquipmentFault),source:text(x.source,500)};}
- function state(raw={}){if(!raw||typeof raw!=='object'||Array.isArray(raw))throw Error('Plan inválido / Invalid plan');const s={resources:resources(raw.resources),radiation:radiation(raw.radiation),communications:communications(raw.communications),criteria:criteria(raw.criteria),shelters:list(raw.shelters,shelter),relays:list(raw.relays,relay),equipment:list(raw.equipment,equipment),procedures:list(raw.procedures,procedure),log:list(raw.log,logEntry,500)};for(const x of [...s.shelters,...s.relays])if(x.lat===null||x.lon===null)throw Error('Coordenadas requeridas / Coordinates required');for(const p of s.procedures)if(p.shelterId&&!s.shelters.some(x=>x.id===p.shelterId))throw Error('Refugio inexistente / Shelter missing');return s;}
+ function state(raw={}){if(!raw||typeof raw!=='object'||Array.isArray(raw))throw Error('Plan inválido / Invalid plan');const s={base:base(raw.base),resources:resources(raw.resources),radiation:radiation(raw.radiation),communications:communications(raw.communications),criteria:criteria(raw.criteria),shelters:list(raw.shelters,shelter),relays:list(raw.relays,relay),equipment:list(raw.equipment,equipment),procedures:list(raw.procedures,procedure),log:list(raw.log,logEntry,500)};for(const x of [...s.shelters,...s.relays])if(x.lat===null||x.lon===null)throw Error('Coordenadas requeridas / Coordinates required');for(const p of s.procedures)if(p.shelterId&&!s.shelters.some(x=>x.id===p.shelterId))throw Error('Refugio inexistente / Shelter missing');return s;}
  function logEntry(x){const at=date(x.at);if(!at)throw Error('Hora requerida en bitácora / Log timestamp required');return {id:id(x.id),at,kind:choice(x.kind,['note','decision','incident','change'],'note'),text:requiredLog(x.text)};}
  function requiredLog(v){const s=text(v,4000);if(!s)throw Error('Entrada vacía / Empty log entry');return s;}
  function imported(payload){if(payload?.format!=='JEZERO-SUPPORT'||payload.version!==VERSION)throw Error('Formato JEZERO-SUPPORT v1 requerido / JEZERO-SUPPORT v1 required');return state(payload.state);}
@@ -54,5 +74,5 @@
   const unknown=[];if(duration===null)unknown.push('route');if(!s.shelters.length)unknown.push('shelters');if(!water.provenance||water.remaining===null)unknown.push('water');if(!co2.provenance||co2.remaining===null)unknown.push('co2');if(!thermal.provenance||thermal.remaining===null)unknown.push('thermal');if(dose===null)unknown.push('radiation');if(!linkFresh||s.communications.status==='unknown')unknown.push('link');if(!s.equipment.length||equipmentUnknown.length)unknown.push('equipment');if(!s.procedures.some(p=>p.reviewed&&p.source&&p.steps))unknown.push('procedures');if(!rules.length||!s.criteria.source)unknown.push('criteria');
   return {durationHours:duration,durationSource:duration===null?'missing':scenarioMatches?'scenario':'route',crew,water,co2,thermal,radiation:{totalMSv:dose,ageHours:age,usable:measurementUsable},communications:{status:s.communications.status,recorded:linkFresh,declaredCoverageFraction:coverage},equipment:{faults,unknown:equipmentUnknown,maintenance},shelters,rules,unknown,status:rules.some(x=>x.status==='fail')?'criterion-exceeded':unknown.length||rules.some(x=>x.status==='unknown')?'incomplete':'reviewed-inputs'};
  }
- return Object.freeze({VERSION,state,imported,assess,distance,shelter,relay,equipment,procedure});
+ return Object.freeze({VERSION,state,imported,assess,assessBase,distance,shelter,relay,equipment,procedure});
 });

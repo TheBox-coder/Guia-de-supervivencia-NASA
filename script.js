@@ -661,7 +661,7 @@ async function calculateMission({saveHistory=true}={}){
     const errors=Object.entries(mission.errors).map(([mode,message])=>`${strategyLabel(mode)}: ${message}`);
     if($('missionWarnings')){$('missionWarnings').textContent=errors.join('\n');$('missionWarnings').hidden=!errors.length;}
     updateStrategyCards(mission);
-    if(!selectedMode){currentMission=null;throw new Error(ui('No se pudo calcular ninguna estrategia. Revisa los mensajes y los límites.','No strategy could be calculated. Review the messages and limits.'));}
+    if(!selectedMode){currentMission=null;throw new Error(errors[0]||ui('No se pudo calcular ninguna estrategia.','No strategy could be calculated.'));}
     lastCalculatedAt=new Date();
     const radio=document.querySelector(`input[name="mode"][value="${selectedMode}"]`);if(radio)radio.checked=true;
     renderMission(mission[selectedMode]);drawMissionRoutes(mission,selectedMode);updatePlanningUI();
@@ -674,6 +674,7 @@ async function calculateMission({saveHistory=true}={}){
     currentMission=null;lastCalculatedAt=null;routeLayer?.getSource()?.clear();
     resetMetrics();updatePlanningUI();
     if($('missionWarnings')){$('missionWarnings').textContent=[$('missionWarnings').textContent,err.message].filter(Boolean).join('\n');$('missionWarnings').hidden=false;}
+    $('missionWarnings')?.focus?.();
     setBusy(false,ui('CÁLCULO NO DISPONIBLE · revisa los mensajes','CALCULATION UNAVAILABLE · review the messages'));showToast(err.message);
   }finally{setBusy(false,$('statusText')?.textContent);updateStrategyCards(currentMission);}
 }

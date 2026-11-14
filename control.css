@@ -885,13 +885,6 @@ body[data-module="dashboard"] :is(.sidebar, .details, .panelEdgeToggle, .mapTool
   display: none !important;
 }
 
-.dashboardFrame {
-  width: 100%;
-  height: 100%;
-  border: none;
-  flex: 1;
-}
-
 .topbarDashboardBtn {
   display: inline-flex;
   align-items: center;

@@ -47,3 +47,9 @@ La evaluación aparece al completar esos pasos. Sin observaciones no se muestra 
 Las proyecciones siguen siendo estimaciones del modelo existente, no pronósticos operativos ni validaciones de soporte vital. Importar un archivo no verifica su autenticidad o vigencia. Aún no existe una conexión automática a NASA. Los datos reales que reciba el equipo necesitarán adaptadores para sus formatos, unidades y calidad. Si los servicios externos fallan, la app informa el fallo y no sustituye el DEM por datos sintéticos.
 
 `npm start` inicia el servidor; `npm test` ejecuta las pruebas. Para los contratos de observaciones, consulta DATOS-NASA.md. Los archivos históricos de demostración permanecen en el repositorio como material de desarrollo, pero no se cargan en la interfaz principal.
+
+## Base y control conectado
+
+BASE reutiliza los registros de soporte y añade reservas totales del hábitat, ocupación, horizonte y un escenario de retraso/pérdida de energía. Las tasas por persona se multiplican por quienes permanecen en la base; la potencia eléctrica es total. No se descuentan inventarios ni se modela generación. Se exige fuente y fecha para calcular reservas. El límite de antigüedad de mediciones, si se declara en Cancelación, también se aplica a BASE. Autonomía sin consumo positivo se muestra sin estimación finita.
+
+CONTROL muestra la misión seleccionada, presupuestos EVA, observaciones importadas, reservas de BASE y equipos de tipo hábitat. No usa señales aleatorias ni telemetría simulada. Los antiguos enlaces de la consola abren este resumen. Se mantienen los datos existentes de soporte y su exportación/importación.

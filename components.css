@@ -1512,3 +1512,32 @@ body.jezero-ui :is(.analyticsChart, #forecastResults, .survivalCard:has(.weather
   outline: 2px solid #e27b58;
   outline-offset: 3px;
 }
+/* Base y control usan los mismos datos declarados de soporte y de la misión. */
+body.jezero-ui .dashboardWorkspace { overflow: auto; }
+.dashboardContent { padding: clamp(14px, 3vw, 32px); color: #d0d6f9; font-family: var(--mono, monospace); }
+.dashboardContent section { margin: 24px 0; }
+.liveHeader { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; border-bottom: 1px solid #2b2f42; padding-bottom: 16px; }
+.liveHeader > div { flex: 1; min-width: 200px; }
+.liveHeader h1 { color: #f0f3ff; margin: 8px 0; }
+.liveHeader small, .dashboardContent h2 { color: #e27b58; letter-spacing: .08em; }
+.dashboardContent h2 { font-size: 14px; }
+.dashboardContent p, .dashboardContent small { font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.liveGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; }
+.liveMetric { padding: 16px; background: #151923; border: 1px solid #2b2f42; border-radius: 4px; min-width: 0; }
+.liveMetric h3 { margin: 0 0 14px; font-size: 12px; font-weight: normal; }
+.liveMetric strong { display: block; color: #59cbe8; font-size: 24px; margin-bottom: 10px; }
+.liveMetric small { display: block; color: #aeb6d0; }
+.liveMetric[data-deficit="true"] { border-color: #fc3d21; }
+.liveMetric[data-deficit="true"] strong { color: #ff8978; }
+.liveNotice { border-left: 3px solid #e27b58; padding: 10px 14px; background: #151923; }
+.dashboardContent button { border: 1px solid #e27b58; border-radius: 3px; background: #993d0033; color: #f0f3ff; padding: 9px 12px; font: inherit; font-size: 12px; cursor: pointer; }
+.dashboardContent button:focus-visible { outline: 2px solid #59cbe8; outline-offset: 3px; }
+.dashboardContent .liveChart { margin-top: 16px; }
+.baseBudgetTable { width: 100%; overflow-x: auto; }
+.baseBudgetTable table { width: 100%; border-collapse: collapse; }
+.baseBudgetTable :is(th, td) { text-align: left; padding: 12px; border-bottom: 1px solid var(--theme-line); white-space: nowrap; }
+.baseBudgetTable caption { text-align: left; padding: 12px; }
+.baseBudgetTable [data-deficit="true"] { color: var(--theme-danger); font-weight: bold; }
+body.jezero-ui #opsReadout-base { display: block; }
+body.jezero-ui #missionWarnings:not([hidden]) { display: block; white-space: pre-line; padding: 10px; max-height: 180px; overflow-y: auto; background: var(--surface-card); border: 1px solid var(--theme-danger); border-radius: 4px; color: var(--text-primary); font-size: 12px; }
+body.jezero-ui[data-module="dashboard"][data-interface-open="false"] .dashboardWorkspace { display: none; }

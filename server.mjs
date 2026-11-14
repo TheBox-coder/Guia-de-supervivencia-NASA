@@ -12,7 +12,7 @@ const PORT = Number(process.env.PORT || 8000);
 const NOMENCLATURE_ENDPOINT = 'https://planetarynames.wr.usgs.gov/nomenclature/SearchResults';
 const nomenclatureCache = new Map();
 const PUBLIC_FILES = new Set([
-  '/control.css','/components.css','/modules/assurance.cjs','/modules/mission-control-engine.cjs','/modules/mission-control.js','/modules/command-palette.js',
+  '/control.css','/components.css','/modules/assurance.cjs','/modules/mission-control-engine.cjs','/modules/mission-control.js','/modules/dashboard.js','/modules/command-palette.js',
   '/operations.css','/modules/operations-engine.cjs','/modules/operations-map.js','/modules/operations.js',
   '/modules/forecast.js',
   '/polish.css','/modules/map-detail.js','/modules/regional-mosaics.js','/modules/workspace.js','/modules/locale.js','/modules/help-english.js','/MANUAL-HELP-EN.md',
@@ -20,7 +20,7 @@ const PUBLIC_FILES = new Set([
   '/assets/jezero-mark.svg',
   '/service-worker.js','/modules/offline.js',
   '/survival.css','/modules/survival-engine.cjs','/modules/survival.js','/modules/demo.js','/examples/survival-demo.json','/assets/vendor/ol.js','/assets/vendor/ol.css',
-  '/interface.css','/modules/interface.js','/examples/01-jezero-corto.json','/examples/02-jezero-varios-objetivos.json','/examples/03-presupuesto-ajustado.json','/examples/04-eva-01-jezero.json','/index.html','/jezero_mission_control.html','/style.css','/script.js','/mars-elevation.js','/mars-data.json',
+  '/interface.css','/modules/interface.js','/examples/01-jezero-corto.json','/examples/02-jezero-varios-objetivos.json','/examples/03-presupuesto-ajustado.json','/examples/04-eva-01-jezero.json','/index.html','/style.css','/script.js','/mars-elevation.js','/mars-data.json',
   '/modules/route-engine.cjs','/modules/theme.js','/modules/i18n.js','/modules/module-shell.js','/modules/validation.cjs',
   '/assets/favicon.ico','/assets/favicon-256.png','/assets/favicon-32.png',
   '/assets/favicon-64.png','/assets/mars-2020-logo.png',
@@ -122,7 +122,7 @@ async function fetchMarsNomenclature({west,east,south,north,zoom}) {
 function cors(res) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://js.arcgis.com 'unsafe-eval'; style-src 'self' https://cdn.jsdelivr.net https://js.arcgis.com https://fonts.googleapis.com 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https:; font-src 'self' data: https:; worker-src 'self' blob: https://js.arcgis.com; frame-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://js.arcgis.com 'unsafe-eval'; style-src 'self' https://cdn.jsdelivr.net https://js.arcgis.com https://fonts.googleapis.com 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https:; font-src 'self' data: https:; worker-src 'self' blob: https://js.arcgis.com; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
 }
 function send(res, status, body, type='application/json; charset=utf-8') {
   cors(res);
@@ -157,9 +157,6 @@ async function serveStatic(req, res, url) {
       '.md':'text/markdown; charset=utf-8'
     };
     const data = await fs.readFile(file);
-    if (pathname === '/jezero_mission_control.html') {
-      res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://www.gstatic.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self'");
-    }
     res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream', 'Content-Length':data.length, 'Cache-Control':'no-cache' });
     res.end(req.method==='HEAD'?undefined:data);
   } catch {
@@ -195,8 +192,8 @@ const server = http.createServer(async (req, res) => {
   cors(res);
   try {
     const url = new URL(req.url, 'http://localhost');
-    if (url.pathname === '/control' || url.pathname === '/dashboard') {
-      url.pathname = '/jezero_mission_control.html';
+    if (url.pathname === '/control' || url.pathname === '/dashboard' || url.pathname === '/jezero_mission_control.html') {
+      url.pathname = '/index.html';
       return serveStatic(req, res, url);
     }
     if (url.pathname === '/api/mars-nomenclature' && req.method === 'GET') {

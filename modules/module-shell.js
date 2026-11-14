@@ -3,7 +3,7 @@
   const labels = {
     home:'INICIO',
     survival:'GUÍA',
-    operations:'SOPORTE',
+    operations:'BASE',
     weather:'CLIMA',
     dashboard:'CONTROL',
     explorer: 'MAPA',
@@ -12,7 +12,7 @@
     analysis: 'RESULTADOS',
     settings: 'AJUSTES'
   };
-  const labelFor = name => name==='home'?(window.JEZERO_I18N?.ui('INICIO','HOME')):name==='dashboard'?(window.JEZERO_I18N?.ui('CONTROL','CONTROL')):name==='operations'?(window.JEZERO_I18N?.ui('SOPORTE','SUPPORT')):name==='weather'?(window.JEZERO_I18N?.ui('CLIMA','WEATHER')):name==='survival'?(window.JEZERO_I18N?.ui('GUÍA','GUIDE')):window.JEZERO_I18N?.moduleLabel?.(name) || labels[name];
+  const labelFor = name => name==='home'?(window.JEZERO_I18N?.ui('INICIO','HOME')):name==='dashboard'?(window.JEZERO_I18N?.ui('CONTROL','CONTROL')):name==='operations'?(window.JEZERO_I18N?.ui('BASE','BASE')):name==='weather'?(window.JEZERO_I18N?.ui('CLIMA','WEATHER')):name==='survival'?(window.JEZERO_I18N?.ui('GUÍA','GUIDE')):window.JEZERO_I18N?.moduleLabel?.(name) || labels[name];
 
   const qsa = (sel, root=document) => [...root.querySelectorAll(sel)];
   const byId = id => document.getElementById(id);
@@ -87,7 +87,7 @@
   }
   qsa('[data-module-target]').forEach(btn=>btn.addEventListener('click',()=>{
     const name=btn.dataset.moduleTarget,same=document.body.dataset.module===name;
-    const overlay=['home','survival','analysis','weather','operations'].includes(name);
+    const overlay=['home','survival','analysis','weather','operations','dashboard'].includes(name);
     const visible=document.body.dataset.interfaceOpen!=='false'&&(overlay||(matchMedia('(max-width:760px)').matches?document.querySelector('.sidebar')?.classList.contains('mobile-open'):window.JEZERO_PANELS?.get()?.left!==false));
     if(same&&visible)closeModule();else activateModule(name);
   }));
@@ -131,7 +131,7 @@
   setupMirrors();
   const initialRaw = localStorage.getItem(MODULE_KEY) || localStorage.getItem('jezero-active-module-v35') || localStorage.getItem('jezero-active-module-v34') || localStorage.getItem('jezero-active-module-v33') || localStorage.getItem('jezero-active-module-v32') || localStorage.getItem('jezero-active-module-v31') || localStorage.getItem('jezero-active-module-v30') || localStorage.getItem('jezero-active-module-v29') || localStorage.getItem('jezero-active-module-v28');
   const migrated = initialRaw === 'science' ? 'planner' : initialRaw === 'reports' ? 'analysis' : initialRaw === 'terrain' ? 'explorer' : initialRaw === 'control' ? 'eva' : initialRaw;
-  const initial = localStorage.getItem(MODULE_KEY) || migrated || 'home';
+  const initial = ['/control','/dashboard','/jezero_mission_control.html'].includes(location.pathname)?'dashboard':localStorage.getItem(MODULE_KEY) || migrated || 'home';
   activateModule(validModule(initial) ? initial : 'home', {save:false, openMobile:false});
 
   window.addEventListener('jezero:languagechange',()=>activateModule(document.body.dataset.module||'planner',{save:false,openMobile:false,open:document.body.dataset.interfaceOpen!=='false'}));

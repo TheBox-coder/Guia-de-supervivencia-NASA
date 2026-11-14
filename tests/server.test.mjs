@@ -8,13 +8,13 @@ test('HTTP publication, input validation, PDF and rate limit',async t=>{
  t.after(()=>child.kill());
  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('server timeout')),7000);child.stdout.once('data',()=>{clearTimeout(timer);resolve();});child.once('error',reject);});
  const origin='http://127.0.0.1:18766';
- for(const file of ['/','/script.js','/modules/validation.cjs','/modules/route-engine.cjs','/modules/assurance.cjs','/modules/mission-control-engine.cjs','/modules/mission-control.js','/control.css','/mars-data.json','/assets/favicon.ico']){
+ for(const file of ['/','/script.js','/modules/validation.cjs','/modules/route-engine.cjs','/modules/assurance.cjs','/modules/mission-control-engine.cjs','/modules/mission-control.js','/modules/dashboard.js','/control.css','/mars-data.json','/assets/favicon.ico']){
   const response=await fetch(origin+file);assert.equal(response.status,200,file);assert.equal(response.headers.get('x-content-type-options'),'nosniff');assert.ok(response.headers.get('content-security-policy'));
  }
  for(const file of ['/jezero_mission_control.html','/control','/dashboard']){
   const response=await fetch(origin+file);assert.equal(response.status,200,file);
-  assert.match(response.headers.get('content-security-policy'),/frame-ancestors 'self'/);
-  assert.match(await response.text(),/SIMULACIÓN EDUCATIVA/);
+  assert.match(response.headers.get('content-security-policy'),/frame-ancestors 'none'/);
+  assert.match(await response.text(),/id="dashboardContent"/);
  }
  assert.doesNotMatch((await fetch(origin+'/')).headers.get('content-security-policy').split('script-src')[1].split(';')[0],/'unsafe-inline'/);
  for(const file of ['/server.mjs','/pdf-report.mjs','/package.json','/db-schema.sql','/docs/linea-base.json','/legacy-elevation.mjs','/.git/config','/README.md','/tests/server.test.mjs','/data/mars-data.json','/%2e%2e%5cserver.mjs'])assert.equal((await fetch(origin+file)).status,404,file);

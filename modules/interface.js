@@ -78,7 +78,7 @@
   window.addEventListener('jezero:modulechange',()=>{
     const module=document.body.dataset.module;
     if(document.body.dataset.interfaceOpen==='false'){window.JEZERO_PANELS?.set(false,false);update();return;}
-    if(!mobile())window.JEZERO_PANELS?.set(!['home','analysis','survival','weather','operations'].includes(module),module==='eva'||(module==='planner'&&previousResult));
+    if(!mobile())window.JEZERO_PANELS?.set(!['home','analysis','survival','weather','operations','dashboard'].includes(module),module==='eva'||(module==='planner'&&previousResult));
     document.querySelector('.sidebar .modulePanel.is-active .panelScroll')?.scrollTo(0,0);
     update();
   });

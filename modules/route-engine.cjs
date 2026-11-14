@@ -248,7 +248,11 @@ async function calculateLeg(a,b,mode,params,terrainCache=null){
   if(!Number.isFinite(aa.elevationM)||!Number.isFinite(bb.elevationM)) throw new Error('No se recibió elevación para uno de los puntos de la misión.');
   const s=nearestNode(grid,aa),g=nearestNode(grid,bb);
   const path0=aStar(grid,s,g,mode,params);
-  if(!path0) throw new Error(`No se encontró una trayectoria en el corredor que cumpla los límites duros entre ${a.name} y ${b.name}. Revisa pendiente máxima, transitabilidad mínima o calidad de muestreo.`);
+  if(!path0){
+    const reasons=new Set();
+    for(const node of grid.nodes)for(const next of neighbors(node,grid))for(const reason of analyzeEdge(node,next,params).reasons)reasons.add(reason);
+    throw new Error(`No se encontró una trayectoria entre ${a.name} y ${b.name}. Límites: pendiente ≤ ${params.maxSlopeLimit}°, transitabilidad ≥ ${params.minTransitability}, calidad ≥ ${params.minConfidence}%. Bloqueos detectados en el corredor: ${[...reasons].slice(0,6).join('; ')}. Cambia los puntos o revisa los parámetros; no se han relajado los límites.`);
+  }
   const startPoint={...aa,dataConfidence:s.dataConfidence,baseTransitability:s.baseTransitability,localRoughnessDeg:s.localRoughnessDeg,localRoughnessM:s.localRoughnessM};
   const endPoint={...bb,dataConfidence:g.dataConfidence,baseTransitability:g.baseTransitability,localRoughnessDeg:g.localRoughnessDeg,localRoughnessM:g.localRoughnessM};
   const path=forceEndpoints(path0,startPoint,endPoint);

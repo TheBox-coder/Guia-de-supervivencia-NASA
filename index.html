@@ -39,7 +39,7 @@
     <div><span>MARGEN / RUTA</span><b data-mirror="missionMargin">—</b></div>
     <ol class="headerSteps" aria-label="Progreso de la misión"><li id="headerStepBase"><b>1</b><span>Base</span></li><li id="headerStepTargets"><b>2</b><span>Objetivos</span></li><li id="headerStepRoute"><b>3</b><span>Ruta</span></li></ol>
   </div>
-  <div class="topMeta"><a href="/jezero_mission_control.html" class="topbarDashboardBtn" title="Abrir Consola de Control de Misión y Telemetría Jezero">🛰 CONSOLA DE MISIÓN</a><span class="liveDot"></span><span id="statusText">CARTOGRAFÍA NASA / USGS</span><button class="topbarCommand" type="button" id="openCommands" title="Paleta de comandos (Ctrl+K)" aria-keyshortcuts="Control+K Meta+K"><span>Buscar</span><kbd>Ctrl K</kbd></button><button class="topbarHelp" type="button" data-open-help="start" title="Abrir manual (tecla ?)">? Ayuda</button></div>
+  <div class="topMeta"><a href="/control" class="topbarDashboardBtn" id="openLiveControl" title="Abrir Consola de Control de Misión y Telemetría Jezero">🛰 CONSOLA DE MISIÓN</a><span class="liveDot"></span><span id="statusText">CARTOGRAFÍA NASA / USGS</span><button class="topbarCommand" type="button" id="openCommands" title="Paleta de comandos (Ctrl+K)" aria-keyshortcuts="Control+K Meta+K"><span>Buscar</span><kbd>Ctrl K</kbd></button><button class="topbarHelp" type="button" data-open-help="start" title="Abrir manual (tecla ?)">? Ayuda</button></div>
 </header>
 
 <main class="appShell" id="appContent" tabindex="-1">
@@ -48,13 +48,13 @@
   <button class="panelEdgeToggle panelEdgeToggleRight" id="toggleRightPanel" type="button" aria-label="Ocultar panel derecho" title="Ocultar panel derecho">›</button>
   <section id="homeWorkspace" class="homeWorkspace" aria-labelledby="controlTitle"></section>
   <section id="dashboardWorkspace" class="dashboardWorkspace" aria-label="Consola de Control de Misión Jezero">
-    <iframe src="/jezero_mission_control.html" title="Consola de Telemetría Jezero" class="dashboardFrame"></iframe>
+    <div id="dashboardContent" class="dashboardContent"></div>
   </section>
   <nav class="moduleRail" aria-label="Áreas principales de JEZERO">
     <button class="moduleNav" data-module-target="home" title="Inicio"><span>⌂</span><small>INICIO</small></button>
     <button class="moduleNav" data-module-target="dashboard" title="Control de Misión Jezero (Aeroespacial)"><span>🛰</span><small>CONTROL</small></button>
     <button class="moduleNav" data-module-target="survival" title="Supervivencia"><span>◇</span><small>GUÍA</small></button>
-    <button class="moduleNav" data-module-target="operations" title="Centro de supervivencia"><span>⊞</span><small>SOPORTE</small></button>
+    <button class="moduleNav" data-module-target="operations" title="Base y soporte"><span>⊞</span><small>BASE</small></button>
     <button class="moduleNav" data-module-target="weather" title="Predicción de clima"><span>☁</span><small>CLIMA</small></button>
     <button class="moduleNav" data-module-target="explorer" title="Mapa"><span>⌖</span><small>MAPA</small></button>
     <button class="moduleNav is-active" data-module-target="planner" title="Misión"><span>⌁</span><small>MISIÓN</small></button>
@@ -152,7 +152,7 @@
 
         <button class="action ghost" id="addBase"><span>⌂</span> Usar el primer punto como base</button>
 
-        <div id="missionWarnings" class="missionWarnings" role="status" aria-live="polite" hidden></div>
+
 
 
       </section>
@@ -190,7 +190,7 @@
         <div class="sectionTitle">Secuencia de la misión</div>
         <div id="missionTimeline" class="missionTimeline"><div class="timelineEmpty">BASE → PUNTOS → REGRESO</div></div>
       </section>
-    </div><div class="plannerFooter"><span id="uiCalcHint" class="uiCalcHint">Añade una base y un objetivo para comenzar.</span><button class="action primaryAction" id="calculate" disabled><span>⌁</span> Calcular misión</button><div class="plannerFooterTools"><div class="missionCounter"><span>Puntos</span><b id="pointCount">0</b></div><button class="action ghost" id="planMode"><span>＋</span> Nueva misión</button><button class="action ghost" id="clearRoute"><span>×</span> Limpiar misión</button></div></div></div>
+    </div><div class="plannerFooter"><div id="missionWarnings" class="missionWarnings" role="alert" tabindex="-1" hidden></div><span id="uiCalcHint" class="uiCalcHint">Añade una base y un objetivo para comenzar.</span><button class="action primaryAction" id="calculate" disabled><span>⌁</span> Calcular misión</button><div class="plannerFooterTools"><div class="missionCounter"><span>Puntos</span><b id="pointCount">0</b></div><button class="action ghost" id="planMode"><span>＋</span> Nueva misión</button><button class="action ghost" id="clearRoute"><span>×</span> Limpiar misión</button></div></div></div>
 
     <!-- EVA -->
     <div class="modulePanel" data-module-panel="eva"><div class="panelScroll">
@@ -323,8 +323,8 @@
   </aside>
 
   <section class="mapPanel">
-    <section id="operationsWorkspace" class="operationsWorkspace" aria-label="Centro de supervivencia">
- <header class="operationsHeader"><div><small data-ops-es="JEZERO / SOPORTE DE MISIÓN" data-ops-en="JEZERO / MISSION SUPPORT">JEZERO / SOPORTE DE MISIÓN</small><h2 data-ops-es="Centro de supervivencia" data-ops-en="Survival planning center">Centro de supervivencia</h2></div><div class="operationsActions"><button id="opsExport" type="button" data-ops-es="Guardar paquete ↓" data-ops-en="Save pack ↓">Guardar paquete ↓</button><button id="opsImport" type="button" data-ops-es="Abrir paquete ↑" data-ops-en="Open pack ↑">Abrir paquete ↑</button><button id="opsClose" type="button" aria-label="Cerrar soporte">×</button></div></header>
+    <section id="operationsWorkspace" class="operationsWorkspace" aria-label="Base y soporte">
+ <header class="operationsHeader"><div><small data-ops-es="JEZERO / BASE Y SOPORTE" data-ops-en="JEZERO / BASE AND SUPPORT">JEZERO / BASE Y SOPORTE</small><h2 data-ops-es="Base y soporte" data-ops-en="Base and support">Base y soporte</h2></div><div class="operationsActions"><button id="opsExport" type="button" data-ops-es="Guardar paquete ↓" data-ops-en="Save pack ↓">Guardar paquete ↓</button><button id="opsImport" type="button" data-ops-es="Abrir paquete ↑" data-ops-en="Open pack ↑">Abrir paquete ↑</button><button id="opsClose" type="button" aria-label="Cerrar soporte">×</button></div></header>
  <input id="opsFile" type="file" accept=".json,application/json" hidden>
  <div class="operationsLayout"><label class="opsSectionPicker"><span data-ops-es="Sección de soporte" data-ops-en="Support section">Sección de soporte</span><select id="opsSectionSelect" aria-controls="opsPanels"></select></label><nav id="opsTabs" aria-label="Módulos de supervivencia"></nav><div class="operationsContent"><div id="opsError" role="alert" hidden></div><div class="opsContext"><label><span data-ops-es="Origen para refugios" data-ops-en="Shelter reference location">Origen para refugios</span><select id="opsOrigin"></select></label><span><b data-ops-es="Duración estimada" data-ops-en="Estimated duration">Duración estimada</b> <span id="opsDuration">—</span></span><span><b data-ops-es="Tripulación del escenario" data-ops-en="Scenario crew">Tripulación del escenario</b> <span id="opsCrew"></span></span><b id="opsStatus" role="status"></b></div><div id="opsPanels"></div><p class="operationsFootnote" data-ops-es="Datos declarados y cálculos bajo supuestos. Sin inspección de hardware, protocolos certificados o telemetría automática. Guarda también tu misión JSON; importar este paquete no reemplaza su ruta." data-ops-en="Declared data and calculations under assumptions. No hardware inspection, certified protocols or automatic telemetry. Also save mission JSON; importing this pack does not replace its route.">Datos declarados y cálculos bajo supuestos. Sin inspección de hardware, protocolos certificados o telemetría automática. Guarda también tu misión JSON; importar este paquete no reemplaza su ruta.</p></div></div>
 </section>
@@ -626,6 +626,7 @@
 <script src="modules/assurance.cjs?v=4p0"></script>
 <script src="modules/mission-control-engine.cjs?v=4p0"></script>
 <script src="modules/mission-control.js?v=4p0"></script>
+<script src="modules/dashboard.js?v=4p0"></script>
 <script src="modules/command-palette.js?v=4p0"></script>
 <script src="modules/offline.js?v=4p0"></script>
 </body>

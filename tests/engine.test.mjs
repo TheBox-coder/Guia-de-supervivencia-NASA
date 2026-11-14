@@ -65,3 +65,18 @@ test('changing inputs during calculation discards the pending result',async()=>{
  vm.runInContext(section('function planningFingerprint(','function drawMissionRoutes('),ctx);
  await ctx.calculateMission();assert.equal(ctx.currentMission,null);assert.equal(ctx.lastCalculatedAt,null);assert.match(elements.missionWarnings.textContent,/cambió/);
 });
+
+test('blocked terrain reports the violated thresholds without relaxing them',async()=>{
+ const {ctx}=engine();
+ ctx.window.queryMarsElevations=async points=>points.map(p=>({...p,elevationM:100000*p.lon}));
+ await assert.rejects(ctx.calculateLeg(base,target,'balanced',params),/Límites: pendiente.*Bloqueos detectados.*pendiente/);
+ assert.equal(params.maxSlopeLimit,25);
+});
+
+test('total calculation failure surfaces the actual strategy error',async()=>{
+ const {ctx,elements}=engine();Object.assign(elements,{returnBase:{checked:true},missionWarnings:{textContent:'',hidden:true},statusText:{textContent:''}});
+ Object.assign(ctx,{missionPoints:[base,target],currentMission:null,busy:false,lastCalculatedAt:null,document:{querySelector:()=>({value:'balanced'})},routeLayer:{getSource:()=>({clear(){}})},analysisLayer:null,
+  ui:es=>es,strategyLabel:mode=>mode,resetMetrics(){},updatePlanningUI(){},updateStrategyCards(){},showToast(message){ctx.toast=message;},setBusy(b){ctx.busy=b;},chooseSequence:async()=>{throw Error('Elevation provider unavailable');}});
+ vm.runInContext(section('function planningFingerprint(','function drawMissionRoutes('),ctx);
+ await ctx.calculateMission();assert.equal(ctx.currentMission,null);assert.match(ctx.toast,/Elevation provider unavailable/);assert.equal(elements.missionWarnings.hidden,false);assert.equal(ctx.busy,false);
+});
