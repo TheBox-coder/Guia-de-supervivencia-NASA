@@ -36,15 +36,15 @@ Este proyecto se llama JEZERO. El usuario quiere que varios compañeros lo mejor
 1. Lee las instrucciones aplicables y revisa `git status`, la rama y el remoto antes de editar. No muestres credenciales.
 2. Conserva cualquier trabajo local pendiente. No descartes, borres ni sobrescribas cambios para sincronizar.
 3. Con el árbol limpio, actualiza `main` mediante `git pull --ff-only origin main`. Si hay commits locales, divergencia o cambios pendientes, analiza la situación antes de proceder.
-4. Crea una rama descriptiva para cada mejora.
+4. Trabaja en `main` por preferencia explícita del usuario; si una mejora ya está en otra rama, intégrala conservando los cambios del equipo.
 5. Implementa el cambio mínimo completo, revisa el código conectado y ejecuta las comprobaciones apropiadas.
 6. Si el equipo integra nuevos cambios mientras trabajas, incorpora `origin/main` a tu rama conservando el trabajo. Consulta los conflictos cuyo resultado funcional no sea claro.
 7. Revisa el diff y agrega únicamente los archivos pertinentes. No subas secretos, `.env` ni `node_modules`.
-8. Cuando el usuario solicite entregar/subir la mejora, haz commit y push de la rama y crea un pull request hacia `main` si dispones de una herramienta autenticada; de lo contrario proporciona el enlace y los pasos manuales.
-9. Deja la integración del pull request para revisión del equipo, salvo autorización explícita del usuario.
+8. Al terminar las correcciones solicitadas y verificar las pruebas pertinentes, haz commit y push directamente a `main`. El usuario autorizó este flujo de forma persistente el 14 de noviembre de 2026: «amigo siempre subilo a main».
+9. Antes del push, consulta el estado remoto e integra los cambios del equipo sin sobrescribirlos. Si hay conflictos de intención, consúltalos.
 10. No uses force push, `reset --hard` ni operaciones destructivas para resolver problemas.
 
-El push directo a `main` del commit 41088d4 fue autorizado expresamente para probar Render. Esa aprobación fue para ese cambio; no constituye permiso general para publicar cambios futuros directamente a producción.
+La autorización actual del usuario permite publicar las mejoras solicitadas directamente en `main`, incluida su publicación automática en Render si está configurada. No requiere pedir de nuevo permiso para cada push; conserva las comprobaciones y evita operaciones destructivas.
 
 ## Explicación acordada con el usuario
 
