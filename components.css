@@ -1541,3 +1541,6 @@ body.jezero-ui .dashboardWorkspace { overflow: auto; }
 body.jezero-ui #opsReadout-base { display: block; }
 body.jezero-ui #missionWarnings:not([hidden]) { display: block; white-space: pre-line; padding: 10px; max-height: 180px; overflow-y: auto; background: var(--surface-card); border: 1px solid var(--theme-danger); border-radius: 4px; color: var(--text-primary); font-size: 12px; }
 body.jezero-ui[data-module="dashboard"][data-interface-open="false"] .dashboardWorkspace { display: none; }
+.routeLimitsPanel { margin: 14px 0; border: 1px solid var(--border-subtle); border-radius: 4px; }
+.routeLimitsPanel > summary { cursor: pointer; padding: 12px; color: var(--text-primary); font-size: 12px; }
+.routeLimitsPanel > .card { border: 0; margin: 0; }
