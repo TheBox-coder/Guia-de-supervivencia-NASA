@@ -1440,6 +1440,7 @@ window.addEventListener('jezero:modulechange',e=>{if(e.detail?.module!=='analysi
 
 $('planMode').onclick=newMission;
 $('calculate').onclick=()=>calculateMission();
+$('reviewRouteLimits').onclick=()=>{window.JEZERO_PANELS?.set(true,true);$('maxSlopeLimit')?.focus();};
 $('clearRoute').onclick=clearMission;
 $('recalculate').onclick=()=>calculateMission({saveHistory:true});
 $('saveMission').onclick=async()=>{
