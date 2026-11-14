@@ -39,7 +39,7 @@
     <div><span>MARGEN / RUTA</span><b data-mirror="missionMargin">—</b></div>
     <ol class="headerSteps" aria-label="Progreso de la misión"><li id="headerStepBase"><b>1</b><span>Base</span></li><li id="headerStepTargets"><b>2</b><span>Objetivos</span></li><li id="headerStepRoute"><b>3</b><span>Ruta</span></li></ol>
   </div>
-  <div class="topMeta"><span class="liveDot"></span><span id="statusText">CARTOGRAFÍA NASA / USGS</span><button class="topbarCommand" type="button" id="openCommands" title="Paleta de comandos (Ctrl+K)" aria-keyshortcuts="Control+K Meta+K"><span>Buscar</span><kbd>Ctrl K</kbd></button><button class="topbarHelp" type="button" data-open-help="start" title="Abrir manual (tecla ?)">? Ayuda</button></div>
+  <div class="topMeta"><a href="/jezero_mission_control.html" class="topbarDashboardBtn" title="Abrir Consola de Control de Misión y Telemetría Jezero">🛰 CONSOLA DE MISIÓN</a><span class="liveDot"></span><span id="statusText">CARTOGRAFÍA NASA / USGS</span><button class="topbarCommand" type="button" id="openCommands" title="Paleta de comandos (Ctrl+K)" aria-keyshortcuts="Control+K Meta+K"><span>Buscar</span><kbd>Ctrl K</kbd></button><button class="topbarHelp" type="button" data-open-help="start" title="Abrir manual (tecla ?)">? Ayuda</button></div>
 </header>
 
 <main class="appShell" id="appContent" tabindex="-1">
@@ -47,8 +47,12 @@
   <button class="panelEdgeToggle panelEdgeToggleLeft" id="toggleLeftPanel" type="button" aria-label="Ocultar panel izquierdo" title="Ocultar panel izquierdo">‹</button>
   <button class="panelEdgeToggle panelEdgeToggleRight" id="toggleRightPanel" type="button" aria-label="Ocultar panel derecho" title="Ocultar panel derecho">›</button>
   <section id="homeWorkspace" class="homeWorkspace" aria-labelledby="controlTitle"></section>
+  <section id="dashboardWorkspace" class="dashboardWorkspace" aria-label="Consola de Control de Misión Jezero">
+    <iframe src="/jezero_mission_control.html" title="Consola de Telemetría Jezero" class="dashboardFrame"></iframe>
+  </section>
   <nav class="moduleRail" aria-label="Áreas principales de JEZERO">
     <button class="moduleNav" data-module-target="home" title="Inicio"><span>⌂</span><small>INICIO</small></button>
+    <button class="moduleNav" data-module-target="dashboard" title="Control de Misión Jezero (Aeroespacial)"><span>🛰</span><small>CONTROL</small></button>
     <button class="moduleNav" data-module-target="survival" title="Supervivencia"><span>◇</span><small>GUÍA</small></button>
     <button class="moduleNav" data-module-target="operations" title="Centro de supervivencia"><span>⊞</span><small>SOPORTE</small></button>
     <button class="moduleNav" data-module-target="weather" title="Predicción de clima"><span>☁</span><small>CLIMA</small></button>

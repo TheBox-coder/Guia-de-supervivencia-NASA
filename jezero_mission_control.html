@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JEZERO HAB-1 | NASA Mission Control & Survival Telemetry</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Custom scanline and grid utilities for authentic aerospace UI */
+    .crt-grid {
+      background-size: 24px 24px;
+      background-image: 
+        linear-gradient(to right, rgba(43, 47, 66, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(43, 47, 66, 0.35) 1px, transparent 1px);
+    }
+    .radar-grid {
+      background-size: 40px 40px;
+      background-image: 
+        radial-gradient(circle, rgba(226, 123, 88, 0.15) 1px, transparent 1px),
+        linear-gradient(to right, rgba(43, 47, 66, 0.4) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(43, 47, 66, 0.4) 1px, transparent 1px);
+    }
+    @keyframes pulse-fast {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+    .animate-alarm {
+      animation: pulse-fast 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B0D17;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2B2F42;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #E27B58;
+    }
+  </style>
+</head>
+<body class="bg-[#0B0D17] text-[#D0D6F9] font-sans antialiased select-none min-h-screen overflow-x-hidden flex flex-col crt-grid">
+
+  <p role="note" style="margin:0;padding:10px 16px;background:#993D00;color:white;text-align:center">SIMULACIÓN EDUCATIVA / EDUCATIONAL SIMULATION — Datos ficticios; sin telemetría NASA ni conexión con la misión del planificador. / Fictional data; no NASA telemetry or planner connection. <a href="/" style="color:white;text-decoration:underline">Volver a JEZERO / Back to JEZERO</a></p>
+
+  <!-- TOP AERONAUTICAL HUD / FLIGHT DECK HEADER -->
+  <header class="bg-[#151923] border-b border-[#2B2F42] px-4 py-2 sticky top-0 z-50">
+    <div class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Brand & Mission Designation -->
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 bg-[#993D00] border border-[#E27B58] flex items-center justify-center font-mono font-bold text-white text-xs tracking-tighter">
+          J-01
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs uppercase tracking-widest text-[#E27B58] font-bold">NASA / JPL SURFACE OPERATIONS</span>
+            <span class="bg-[#2B2F42] text-[10px] text-white px-1.5 py-0.2 uppercase font-mono tracking-widest border border-[#3b4259]">HAB-JEZERO-DELTA</span>
+            <span id="system-health-badge" class="px-2 py-0.5 text-[10px] font-mono font-bold uppercase bg-emerald-950/80 text-emerald-400 border border-emerald-600/50 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              SYS NOMINAL
+            </span>
+          </div>
+          <div class="text-sm font-semibold text-white tracking-wide flex items-center gap-2">
+            <span>SURVIVAL & MISSION CONTROL CONSOLE</span>
+            <span class="text-xs text-[#E27B58] font-mono">[COORD: 18.3842° N, 77.5819° E]</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-Time Mission Telemetry Bar -->
+      <div class="flex items-center gap-4 text-xs font-mono">
+        <div class="border-l border-[#2B2F42] pl-3">
+          <div class="text-[10px] uppercase text-[#D0D6F9]/60">MISSION SOL</div>
+          <div id="sol-display" class="text-white font-bold text-sm tracking-wider">SOL 482.39</div>
+        </div>
+
+        <div class="border-l border-[#2B2F42] pl-3">
+          <div class="text-[10px] uppercase text-[#D0D6F9]/60">MARS COORD TIME (MTC)</div>
+          <div id="mtc-display" class="text-[#E27B58] font-bold text-sm">14:28:43</div>
+        </div>
+
+        <div class="border-l border-[#2B2F42] pl-3 hidden md:block">
+          <div class="text-[10px] uppercase text-[#D0D6F9]/60">EARTH UTC</div>
+          <div id="utc-display" class="text-white font-semibold text-sm">15:52:47</div>
+        </div>
+
+        <div class="border-l border-[#2B2F42] pl-3 hidden lg:block">
+          <div class="text-[10px] uppercase text-[#D0D6F9]/60">DSN GOLDSTONE (70M)</div>
+          <div class="flex items-center gap-1.5 text-xs text-white">
+            <span class="text-emerald-400 font-bold">L-BAND LOCK</span>
+            <span class="text-[#D0D6F9]/60">14m 22s RTLT</span>
+          </div>
+        </div>
+
+        <!-- Master Warning / Emergency Trigger Controls -->
+        <div class="flex items-center gap-2 border-l border-[#2B2F42] pl-3">
+          <button id="master-alarm-btn" onclick="toggleEmergencySimulation()" class="px-2.5 py-1 text-xs font-mono font-bold tracking-wider uppercase border border-[#FC3D21] bg-[#FC3D21]/10 text-[#FC3D21] hover:bg-[#FC3D21] hover:text-white transition-colors duration-150 flex items-center gap-1.5 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-[#FC3D21]"></span>
+            <span id="alarm-btn-label">SIMULATE ALERT</span>
+          </button>
+          
+          <button id="audio-toggle-btn" onclick="toggleAudio()" title="Toggle Tactical Beeps" class="px-2 py-1 text-xs font-mono border border-[#2B2F42] bg-[#0B0D17] text-[#D0D6F9] hover:border-[#E27B58] hover:text-white transition-colors">
+            🔊 BEEP: ON
+          </button>
+          
+          <a href="/" target="_top" title="Volver a la vista de mapas y misión" class="px-2 py-1 text-xs font-mono border border-[#2B2F42] bg-[#0B0D17] text-[#D0D6F9] hover:border-[#E27B58] hover:text-white transition-colors text-center">
+            ← VOLVER
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Active Alarm Notification Banner (Hidden by default) -->
+    <div id="alarm-banner" class="hidden mt-2 p-1.5 bg-[#FC3D21]/20 border border-[#FC3D21] text-white flex items-center justify-between text-xs font-mono">
+      <div class="flex items-center gap-2">
+        <span class="animate-alarm px-2 py-0.5 bg-[#FC3D21] text-white font-black tracking-widest text-[11px]">CRITICAL WARNING</span>
+        <span class="text-white font-bold" id="alarm-text">ATMOSPHERIC BLOWOUT HAZARD DETECTED IN AIRLOCK-BRAVO / SOL 482 TAU RISING</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-[#FC3D21] underline cursor-pointer hover:text-white" onclick="acknowledgeAlarm()">[ACKNOWLEDGE & PURGE]</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVIGATION MODULE TABS -->
+  <nav class="bg-[#0e121b] border-b border-[#2B2F42] px-4">
+    <div class="max-w-[1920px] mx-auto flex items-center overflow-x-auto text-xs font-mono">
+      <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn px-4 py-2.5 font-bold uppercase border-b-2 border-[#E27B58] text-white bg-[#151923] flex items-center gap-2">
+        <span class="text-[#E27B58]">01</span> OVERVIEW / HAB STATUS
+      </button>
+      <button onclick="switchTab('eclss')" id="tab-eclss" class="tab-btn px-4 py-2.5 uppercase border-b-2 border-transparent text-[#D0D6F9]/70 hover:text-white hover:bg-[#151923]/50 flex items-center gap-2">
+        <span class="text-[#993D00]">02</span> ECLSS & LIFE SUPPORT
+      </button>
+      <button onclick="switchTab('surface')" id="tab-surface" class="tab-btn px-4 py-2.5 uppercase border-b-2 border-transparent text-[#D0D6F9]/70 hover:text-white hover:bg-[#151923]/50 flex items-center gap-2">
+        <span class="text-[#993D00]">03</span> JEZERO SURFACE RADAR & ASSETS
+      </button>
+      <button onclick="switchTab('power')" id="tab-power" class="tab-btn px-4 py-2.5 uppercase border-b-2 border-transparent text-[#D0D6F9]/70 hover:text-white hover:bg-[#151923]/50 flex items-center gap-2">
+        <span class="text-[#993D00]">04</span> POWER GRID & KILOPOWER
+      </button>
+      <button onclick="switchTab('vitals')" id="tab-vitals" class="tab-btn px-4 py-2.5 uppercase border-b-2 border-transparent text-[#D0D6F9]/70 hover:text-white hover:bg-[#151923]/50 flex items-center gap-2">
+        <span class="text-[#993D00]">05</span> CREW BIOMETRICS & EVA
+      </button>
+      <button onclick="switchTab('terminal')" id="tab-terminal" class="tab-btn px-4 py-2.5 uppercase border-b-2 border-transparent text-[#D0D6F9]/70 hover:text-white hover:bg-[#151923]/50 flex items-center gap-2">
+        <span class="text-[#993D00]">06</span> TELEMETRY LOGS & CONSOLE
+      </button>
+
+      <div class="ml-auto hidden xl:flex items-center gap-4 py-1 text-[11px] text-[#D0D6F9]/60">
+        <div class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 bg-[#E27B58] rounded-full"></span>
+          <span>HAB INNER VOL: <strong class="text-white font-mono">485 m³</strong></span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 bg-[#E27B58] rounded-full"></span>
+          <span>SURVIVAL MARGIN: <strong class="text-emerald-400 font-mono">184 SOLS</strong></span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN TELEMETRY CONTENT WRAPPER -->
+  <main class="flex-1 p-3 md:p-5 max-w-[1920px] mx-auto w-full">
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 01: OVERVIEW & SITUATION MATRIX                                    -->
+    <!-- ========================================================================= -->
+    <div id="module-overview" class="tab-content space-y-4">
+      
+      <!-- Top Primary Metrics Matrix (8 KPI blocks) -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+        
+        <div class="bg-[#151923] border border-[#2B2F42] p-2.5 flex flex-col justify-between">
+          <div class="text-[10px] text-[#D0D6F9]/70 uppercase tracking-wider">HAB PRESSURE</div>
+          <div class="my-1">
+            <span id="kpi-pressure" class="text-xl font-bold font-mono text-white">70.4</span>
+            <span class="text-xs font-mono text-[#E27B58]">kPa</span>
+          </div>
+          <div class="text-[10px] text-emerald-400 font-mono">NOMINAL (98.6%)</div>
+        </div>
+
+        <div class="bg-[#151923] border border-[#2B2F42] p-2.5 flex flex-col justify-between">
+          <div class="text-[10px] text-[#D0D6F9]/70 uppercase tracking-wider">OXYGEN MIX</div>
+          <div class="my-1">
+            <span id="kpi-o2" class="text-xl font-bold font-mono text-white">21.4</span>
+            <span class="text-xs font-mono text-[#E27B58]">%</span>
+          </div>
+          <div class="text-[10px] text-emerald-400 font-mono">N2: 78.1% | CO2: 0.05%</div>
+        </div>
+
+        <div class="bg-[#151923] border border-[#2B2F42] p-2.5 flex flex-col justify-between">
+          <div class="text-[10px] text-[#D0D6F9]/70 uppercase tracking-wider">EXT AMBIENT TEMP</div>
+          <div class="my-1">
+            <span id="kpi-temp" class="text-xl font-bold font-mono text-white">-61.8</span>
+            <span class="text-xs font-mono text-[#E27B58]">°C</span>
+          </div>
+          <div class="text-[10px] text-[#D0D6F9]/70 font-mono">HAB INT: +21.2°C</div>
+        </div>
+
+        <div class="bg-[#151923] border border-[#2B2F42] p-2.5 flex flex-col justify-between">
+          <div class="text-[10px] text-[#D0D6F9]/70 uppercase tracking-wider">ATMOSPHERIC TAU</div>
+          <div class="my-1">
+            <span id="kpi-tau" class="text-xl font-bold font-mono text-[#E27B58]">0.48</span>
+            <span class="text-xs font-mono text-[#D0D6F9]/60">OD</span>
+          </div>
+          <div class="text-[10px] text-amber-400 font-mono">DUST MILD ELEVATION</div>
+        </div>
+
+        <div class="bg-[#151923] border border-[#2B2F42] p-2.5 flex flex-col justify-between">
+          <div class="text-[10px] text-[#D0D6F9]/70 uppercase tracking-wider">KILOPOWER OUTPUT</div>
+          <div class="my-1">
+            <span id="kpi-power" class="text-xl font-bold font-mono text-white">9.64</span>
+            <span class="text-xs font-mono text-[#E27B58]">kWe</span>
+          </div>
+          <div class="text-[10px] text-emerald-400 font-mono">REACTOR AT 96.4%</div>
+        </div>
+
+        <div class="bg-[#151923] border border-[#2B2F42] p-2.5 flex flex-col justify-between">
+          <div class="text-[10px] text-[#D0D6F9]/70 uppercase tracking-wider">WATER RECYCLING</div>
+          <div class="my-1">
+            <span class="text-xl font-bold font-mono text-white">94.8</span>
+            <span class="text-xs font-mono text-[#E27B58]">%</span>
+          </div>
+          <div class="text-[10px] text-emerald-400 font-mono">RESERVE: 3,420 L</div>
+        </div>
+
+        <div class="bg-[#151923] border border-[#2B2F42] p-2.5 flex flex-col justify-between">
+          <div class="text-[10px] text-[#D0D6F9]/70 uppercase tracking-wider">RADIATION FLUX</div>
+          <div class="my-1">
+            <span class="text-xl font-bold font-mono text-white">238</span>
+            <span class="text-xs font-mono text-[#E27B58]">µSv/d</span>
+          </div>
+          <div class="text-[10px] text-emerald-400 font-mono">REGOLITH SHIELD ACTIVE</div>
+        </div>
+
+        <div class="bg-[#151923] border border-[#2B2F42] p-2.5 flex flex-col justify-between">
+          <div class="text-[10px] text-[#D0D6F9]/70 uppercase tracking-wider">EVA TEAM 01</div>
+          <div class="my-1">
+            <span class="text-xl font-bold font-mono text-emerald-400">DEPLOYED</span>
+          </div>
+          <div class="text-[10px] text-[#E27B58] font-mono">2 CREW / 1.4 KM DELTA</div>
+        </div>
+
+      </div>
+
+      <!-- Main Layout: 3-Column Cockpit View -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+        
+        <!-- Left: Hab Structural Schematic & Diagnostics (3 cols) -->
+        <div class="lg:col-span-4 bg-[#151923] border border-[#2B2F42] p-3 flex flex-col">
+          <div class="flex items-center justify-between border-b border-[#2B2F42] pb-2 mb-3">
+            <div class="text-xs font-mono uppercase font-bold text-white flex items-center gap-2">
+              <span class="w-2 h-2 bg-[#E27B58]"></span>
+              HABITAT STRUCTURAL INTEGRITY
+            </div>
+            <span class="text-[10px] font-mono text-[#E27B58] bg-[#993D00]/20 px-1.5 py-0.5 border border-[#993D00]/40">BAY 1-4</span>
+          </div>
+
+          <!-- SVG Hab Cutaway Wireframe -->
+          <div class="relative bg-[#0B0D17] border border-[#2B2F42] p-2 flex items-center justify-center">
+            <svg viewBox="0 0 400 240" class="w-full h-auto max-h-[220px]">
+              <!-- Grid background lines -->
+              <defs>
+                <pattern id="hab-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#2B2F42" stroke-width="0.5"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#hab-grid)"/>
+
+              <!-- Outer Regolith Berm / Shield dome -->
+              <path d="M 40,190 C 80,60 320,60 360,190" fill="none" stroke="#993D00" stroke-width="2.5" stroke-dasharray="6,3"/>
+              
+              <!-- Inner Pressurized Hab Shell -->
+              <path d="M 60,190 C 95,85 305,85 340,190 Z" fill="#151923" stroke="#E27B58" stroke-width="1.8"/>
+
+              <!-- Sub-levels floor division -->
+              <line x1="65" y1="150" x2="335" y2="150" stroke="#2B2F42" stroke-width="1.5"/>
+              <line x1="88" y1="115" x2="312" y2="115" stroke="#2B2F42" stroke-width="1"/>
+
+              <!-- Central Utility Trunk -->
+              <rect x="185" y="90" width="30" height="100" fill="#0B0D17" stroke="#E27B58" stroke-width="1"/>
+
+              <!-- Compartment Labels & Status Nodes -->
+              <!-- Airlock A -->
+              <rect x="330" y="155" width="45" height="35" fill="#0B0D17" stroke="#2B2F42" stroke-width="1.5"/>
+              <text x="335" y="175" fill="#D0D6F9" font-size="8" font-family="monospace">AIRLOCK-A</text>
+              <circle cx="365" cy="163" r="2.5" fill="#10B981"/>
+
+              <!-- Airlock B -->
+              <rect x="25" y="155" width="45" height="35" fill="#0B0D17" stroke="#2B2F42" stroke-width="1.5" id="airlock-b-box"/>
+              <text x="30" y="175" fill="#D0D6F9" font-size="8" font-family="monospace">AIRLOCK-B</text>
+              <circle cx="55" cy="163" r="2.5" fill="#10B981" id="airlock-b-indicator"/>
+
+              <!-- Biosphere & Hydroponics -->
+              <text x="100" y="135" fill="#D0D6F9" font-size="9" font-family="monospace">HYDROPONICS</text>
+              <circle cx="90" cy="132" r="2" fill="#10B981"/>
+
+              <!-- ECLSS / Moxie Core -->
+              <text x="225" y="175" fill="#E27B58" font-size="9" font-family="monospace">MOXIE-GEN-2</text>
+              <circle cx="285" cy="172" r="2" fill="#E27B58"/>
+
+              <!-- Crew Quarters & Medbay -->
+              <text x="225" y="135" fill="#D0D6F9" font-size="9" font-family="monospace">CREW SLEEP / MED</text>
+
+              <!-- Command Deck -->
+              <text x="145" y="105" fill="#FFFFFF" font-size="9" font-family="monospace" font-weight="bold">COMMAND APEX</text>
+
+              <!-- Pressure hull sensors readout overlay -->
+              <text x="75" y="50" fill="#E27B58" font-size="8" font-family="monospace">REGOLITH SHIELD: 1.8M DEPTH</text>
+              <line x1="120" y1="55" x2="150" y2="78" stroke="#E27B58" stroke-width="0.75"/>
+            </svg>
+
+            <!-- Coordinate overlay indicator in corner -->
+            <div class="absolute bottom-1 right-2 text-[9px] font-mono text-[#D0D6F9]/50">
+              SECTOR 4A // PYREX COMPOSITE
+            </div>
+          </div>
+
+          <!-- Quick Compartment Status Table -->
+          <div class="mt-3 space-y-1.5 font-mono text-xs">
+            <div class="flex items-center justify-between p-1.5 bg-[#0B0D17] border border-[#2B2F42]">
+              <span class="text-[#D0D6F9]">HAB HABITABLE ZONE (L1-L2)</span>
+              <span class="text-emerald-400 font-bold">70.4 kPa / 21°C</span>
+            </div>
+            <div class="flex items-center justify-between p-1.5 bg-[#0B0D17] border border-[#2B2F42]">
+              <span class="text-[#D0D6F9]">AIRLOCK-A (FORWARD EVA)</span>
+              <span class="text-emerald-400 font-bold">EQUALIZED (OUT)</span>
+            </div>
+            <div class="flex items-center justify-between p-1.5 bg-[#0B0D17] border border-[#2B2F42]" id="airlock-b-row">
+              <span class="text-[#D0D6F9]">AIRLOCK-B (EQUIPMENT BAY)</span>
+              <span class="text-white font-bold" id="airlock-b-status">SEALED (70.1 kPa)</span>
+            </div>
+            <div class="flex items-center justify-between p-1.5 bg-[#0B0D17] border border-[#2B2F42]">
+              <span class="text-[#D0D6F9]">SABATIER & WATER CONDENSER</span>
+              <span class="text-emerald-400 font-bold">FLOW: 1.8 L/HR</span>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="mt-3 pt-2 border-t border-[#2B2F42] grid grid-cols-2 gap-2">
+            <button onclick="triggerPurgeAirlock()" class="p-1.5 text-[11px] font-mono uppercase bg-[#2B2F42]/60 hover:bg-[#2B2F42] text-white border border-[#2B2F42] text-center">
+              CYCLE AIRLOCK A
+            </button>
+            <button onclick="emergencyIsolation()" class="p-1.5 text-[11px] font-mono uppercase bg-[#993D00]/30 hover:bg-[#993D00] text-[#E27B58] hover:text-white border border-[#993D00] text-center">
+              ISOLATE BAY 4
+            </button>
+          </div>
+        </div>
+
+        <!-- Center: Real-Time Telemetry Oscilloscope & Environmental Vectors (5 cols) -->
+        <div class="lg:col-span-5 bg-[#151923] border border-[#2B2F42] p-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between border-b border-[#2B2F42] pb-2 mb-3">
+              <div class="text-xs font-mono uppercase font-bold text-white flex items-center gap-2">
+                <span class="w-2 h-2 bg-[#E27B58]"></span>
+                ATMOSPHERIC OSCILLATION & GAS PRESSURE RUN-TIME
+              </div>
+              <div class="flex items-center gap-2 text-[10px] font-mono">
+                <span class="text-[#E27B58]">● O2 PARTIAL</span>
+                <span class="text-white">● TOTAL HAB</span>
+                <span class="text-[#993D00]">● MARS EXT (x100)</span>
+              </div>
+            </div>
+
+            <!-- Canvas-based Real-time Graph (Self-contained, no external libs) -->
+            <div class="relative bg-[#0B0D17] border border-[#2B2F42] h-48 w-full overflow-hidden">
+              <canvas id="telemetryCanvas" class="w-full h-full block"></canvas>
+              <div class="absolute top-2 left-2 text-[10px] font-mono text-[#D0D6F9]/50 pointer-events-none">
+                SAMPLING: 10 Hz // REAL-TIME SENSOR BUS 04
+              </div>
+              <div class="absolute bottom-2 right-2 text-[10px] font-mono text-[#E27B58] pointer-events-none">
+                BUFFER: 60 SECONDS
+              </div>
+            </div>
+
+            <!-- Weather Vectors & Sol Forecast -->
+            <div class="grid grid-cols-3 gap-2 mt-3 font-mono text-xs">
+              <div class="bg-[#0B0D17] border border-[#2B2F42] p-2">
+                <div class="text-[10px] text-[#D0D6F9]/60">SURFACE WIND</div>
+                <div class="text-white font-bold text-sm mt-0.5">14.2 m/s</div>
+                <div class="text-[10px] text-[#E27B58]">GUST: 22.8 m/s SSE</div>
+              </div>
+
+              <div class="bg-[#0B0D17] border border-[#2B2F42] p-2">
+                <div class="text-[10px] text-[#D0D6F9]/60">SURFACE PRESSURE</div>
+                <div class="text-white font-bold text-sm mt-0.5">708 Pa</div>
+                <div class="text-[10px] text-emerald-400">Δ -4 Pa / 3hr</div>
+              </div>
+
+              <div class="bg-[#0B0D17] border border-[#2B2F42] p-2">
+                <div class="text-[10px] text-[#D0D6F9]/60">UV FLUX INDEX</div>
+                <div class="text-white font-bold text-sm mt-0.5">8.4 UVI</div>
+                <div class="text-[10px] text-amber-400">HIGH EXPOSURE</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Life Consumables Remaining Progress Bars (Pure CSS/HTML) -->
+          <div class="mt-4 pt-3 border-t border-[#2B2F42] space-y-2.5 font-mono text-xs">
+            <div>
+              <div class="flex justify-between text-[11px] mb-1">
+                <span class="text-[#D0D6F9]">PRIMARY LIQUID OXYGEN (LOX) RESERVE</span>
+                <span class="text-white font-bold">89.2% (1,840 kg)</span>
+              </div>
+              <div class="w-full h-2 bg-[#0B0D17] border border-[#2B2F42]">
+                <div class="h-full bg-[#E27B58]" style="width: 89.2%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-[11px] mb-1">
+                <span class="text-[#D0D6F9]">POTABLE WATER EXTRACTION & PURITY</span>
+                <span class="text-white font-bold">94.8% (3,420 L)</span>
+              </div>
+              <div class="w-full h-2 bg-[#0B0D17] border border-[#2B2F42]">
+                <div class="h-full bg-emerald-500" style="width: 94.8%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-[11px] mb-1">
+                <span class="text-[#D0D6F9]">KILOPOWER STIRLING CORE LIFE</span>
+                <span class="text-white font-bold">99.1% (9.2 YRS)</span>
+              </div>
+              <div class="w-full h-2 bg-[#0B0D17] border border-[#2B2F42]">
+                <div class="h-full bg-[#993D00]" style="width: 99.1%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Jezero Tactical Overview & Live Comms (3 cols) -->
+        <div class="lg:col-span-3 bg-[#151923] border border-[#2B2F42] p-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between border-b border-[#2B2F42] pb-2 mb-3">
+              <div class="text-xs font-mono uppercase font-bold text-white flex items-center gap-2">
+                <span class="w-2 h-2 bg-[#E27B58]"></span>
+                JEZERO REGIONAL ASSETS
+              </div>
+              <span class="text-[10px] font-mono text-emerald-400">ACTIVE RADAR</span>
+            </div>
+
+            <!-- Mini Radar Sweep Display -->
+            <div class="relative bg-[#0B0D17] border border-[#2B2F42] h-44 radar-grid flex items-center justify-center overflow-hidden">
+              <svg viewBox="0 0 200 200" class="w-full h-full">
+                <!-- Concentric range rings -->
+                <circle cx="100" cy="100" r="30" fill="none" stroke="#2B2F42" stroke-width="1"/>
+                <circle cx="100" cy="100" r="60" fill="none" stroke="#2B2F42" stroke-width="1"/>
+                <circle cx="100" cy="100" r="90" fill="none" stroke="#2B2F42" stroke-width="1"/>
+                <!-- Crosshairs -->
+                <line x1="10" y1="100" x2="190" y2="100" stroke="#2B2F42" stroke-width="1"/>
+                <line x1="100" y1="10" x2="100" y2="190" stroke="#2B2F42" stroke-width="1"/>
+
+                <!-- Hab Base (Center) -->
+                <polygon points="100,94 105,103 95,103" fill="#FC3D21"/>
+                <text x="108" y="98" fill="#FFFFFF" font-size="7" font-family="monospace">HAB-01</text>
+
+                <!-- Rover Perseverance (Asset 02) -->
+                <circle cx="65" cy="70" r="3" fill="#E27B58"/>
+                <text x="70" y="68" fill="#E27B58" font-size="7" font-family="monospace">ROVER M-1</text>
+                
+                <!-- Ingenuity Mars Heli Hexacopter / Weather Scout -->
+                <circle cx="140" cy="55" r="2.5" fill="#10B981"/>
+                <text x="145" y="55" fill="#10B981" font-size="7" font-family="monospace">SCOUT-FLIGHT</text>
+
+                <!-- Science Depot Sample Cache -->
+                <rect x="125" y="140" width="4" height="4" fill="#D0D6F9"/>
+                <text x="132" y="145" fill="#D0D6F9" font-size="7" font-family="monospace">CACHE-03</text>
+
+                <!-- Rotating Radar Sweep Line -->
+                <g>
+                  <line x1="100" y1="100" x2="185" y2="60" stroke="#E27B58" stroke-width="1.5" opacity="0.8">
+                    <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="4s" repeatCount="indefinite"/>
+                  </line>
+                </g>
+              </svg>
+              <div class="absolute bottom-1 left-2 text-[9px] font-mono text-[#D0D6F9]/50">
+                RANGE: 5.0 KM RADIUS
+              </div>
+            </div>
+
+            <!-- Asset status list -->
+            <div class="mt-3 space-y-1.5 font-mono text-[11px]">
+              <div class="p-1.5 bg-[#0B0D17] border border-[#2B2F42] flex justify-between items-center">
+                <div>
+                  <span class="text-white font-bold">ROVER-ALPHA (PRESSURIZED)</span>
+                  <div class="text-[9px] text-[#D0D6F9]/60">DELTA FAN DIST: 1,420M NW</div>
+                </div>
+                <span class="text-emerald-400 font-bold">84% BATT</span>
+              </div>
+
+              <div class="p-1.5 bg-[#0B0D17] border border-[#2B2F42] flex justify-between items-center">
+                <div>
+                  <span class="text-white font-bold">SCOUT-DRONE (SURFACE-3)</span>
+                  <div class="text-[9px] text-[#D0D6F9]/60">SOLAR RECHARGE DOCK</div>
+                </div>
+                <span class="text-white font-bold">STANDBY</span>
+              </div>
+
+              <div class="p-1.5 bg-[#0B0D17] border border-[#2B2F42] flex justify-between items-center">
+                <div>
+                  <span class="text-white font-bold">ODYSSEY RELAY ORBITER</span>
+                  <div class="text-[9px] text-[#D0D6F9]/60">AOS IN 00:44:12</div>
+                </div>
+                <span class="text-[#E27B58] font-bold">LOS (O/H)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deep Space Network Uplink Metrics -->
+          <div class="mt-3 pt-2 border-t border-[#2B2F42] font-mono text-[11px]">
+            <div class="flex justify-between items-center text-[#D0D6F9]/70">
+              <span>DSN CARRIER SNR:</span>
+              <span class="text-emerald-400 font-bold">+18.4 dB</span>
+            </div>
+            <div class="flex justify-between items-center text-[#D0D6F9]/70 mt-0.5">
+              <span>UPLINK FREQ:</span>
+              <span class="text-white font-bold">7.165 GHz (X-BAND)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 02: ECLSS & HABITAT LIFE SUPPORT                                   -->
+    <!-- ========================================================================= -->
+    <div id="module-eclss" class="tab-content hidden space-y-4">
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <!-- MOXIE O2 Generation Plant -->
+        <div class="bg-[#151923] border border-[#2B2F42] p-4">
+          <div class="flex justify-between items-center border-b border-[#2B2F42] pb-2 mb-3">
+            <span class="text-xs font-mono font-bold text-white uppercase">MOXIE-02 SOLID OXIDE ELECTROLYSIS</span>
+            <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 border border-emerald-500/40">ONLINE</span>
+          </div>
+          <div class="space-y-3 font-mono text-xs">
+            <div class="flex justify-between">
+              <span class="text-[#D0D6F9]/70">CO2 INTAKE RATE:</span>
+              <span class="text-white font-bold">34.2 g/hr</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#D0D6F9]/70">O2 YIELD PURITY:</span>
+              <span class="text-emerald-400 font-bold">99.82%</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#D0D6F9]/70">CELL CORE OPERATING TEMP:</span>
+              <span class="text-[#E27B58] font-bold">798 °C</span>
+            </div>
+            <div>
+              <div class="flex justify-between text-[11px] mb-1">
+                <span class="text-[#D0D6F9]">ELECTROLYZER CELL EFFICIENCY</span>
+                <span class="text-white">92.4%</span>
+              </div>
+              <div class="w-full h-1.5 bg-[#0B0D17] border border-[#2B2F42]">
+                <div class="h-full bg-[#E27B58]" style="width: 92.4%"></div>
+              </div>
+            </div>
+            <div class="pt-2 flex gap-2">
+              <button onclick="adjustMoxie(5)" class="flex-1 py-1 bg-[#2B2F42] hover:bg-[#393e56] text-white text-[11px] border border-[#3b4259]">+5% FLOW</button>
+              <button onclick="adjustMoxie(-5)" class="flex-1 py-1 bg-[#2B2F42] hover:bg-[#393e56] text-white text-[11px] border border-[#3b4259]">-5% FLOW</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carbon Dioxide Scrubbers (LiOH + Sabatier) -->
+        <div class="bg-[#151923] border border-[#2B2F42] p-4">
+          <div class="flex justify-between items-center border-b border-[#2B2F42] pb-2 mb-3">
+            <span class="text-xs font-mono font-bold text-white uppercase">CO2 SCRUBBING / SABATIER LOOP</span>
+            <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 border border-emerald-500/40">LOOP-A ACTIVE</span>
+          </div>
+          <div class="space-y-3 font-mono text-xs">
+            <div class="flex justify-between">
+              <span class="text-[#D0D6F9]/70">CANISTER A (CDRA):</span>
+              <span class="text-emerald-400 font-bold">REGENERATING</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#D0D6F9]/70">CANISTER B (CDRA):</span>
+              <span class="text-white font-bold">ABSORBING (42%)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#D0D6F9]/70">HAB CO2 PP (PPO2):</span>
+              <span class="text-[#E27B58] font-bold">2.8 mmHg (SAFE)</span>
+            </div>
+            <div>
+              <div class="flex justify-between text-[11px] mb-1">
+                <span class="text-[#D0D6F9]">METHANATION REACTOR LOAD</span>
+                <span class="text-white">68.0%</span>
+              </div>
+              <div class="w-full h-1.5 bg-[#0B0D17] border border-[#2B2F42]">
+                <div class="h-full bg-emerald-500" style="width: 68%"></div>
+              </div>
+            </div>
+            <div class="pt-2">
+              <button onclick="cycleScrubbers()" class="w-full py-1 bg-[#0B0D17] hover:bg-[#2B2F42] text-[#E27B58] text-[11px] border border-[#E27B58]">SWAP BED ABSORPTION CYCLE</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nitrogen / Buffer Gas System -->
+        <div class="bg-[#151923] border border-[#2B2F42] p-4">
+          <div class="flex justify-between items-center border-b border-[#2B2F42] pb-2 mb-3">
+            <span class="text-xs font-mono font-bold text-white uppercase">ATMOSPHERE RECOMPOSITION (N2/AR)</span>
+            <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 border border-emerald-500/40">BALANCED</span>
+          </div>
+          <div class="space-y-3 font-mono text-xs">
+            <div class="flex justify-between">
+              <span class="text-[#D0D6F9]/70">NITROGEN GAS BANK:</span>
+              <span class="text-white font-bold">410 kg @ 300 BAR</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#D0D6F9]/70">ARGON TRACE MIX:</span>
+              <span class="text-white font-bold">1.4% BUFFER</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#D0D6F9]/70">HAB LEAK RATE:</span>
+              <span class="text-emerald-400 font-bold">0.012 kPa / SOL (TIGHT)</span>
+            </div>
+            <div>
+              <div class="flex justify-between text-[11px] mb-1">
+                <span class="text-[#D0D6F9]">N2 PRESSURE MATRIX</span>
+                <span class="text-white">97.8%</span>
+              </div>
+              <div class="w-full h-1.5 bg-[#0B0D17] border border-[#2B2F42]">
+                <div class="h-full bg-[#E27B58]" style="width: 97.8%"></div>
+              </div>
+            </div>
+            <div class="pt-2">
+              <button onclick="purgeN2Buffer()" class="w-full py-1 bg-[#0B0D17] hover:bg-[#2B2F42] text-white text-[11px] border border-[#2B2F42]">VENT TEST PULSE (500 ms)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ECLSS Interactive Flow Diagram (SVG) -->
+      <div class="bg-[#151923] border border-[#2B2F42] p-4">
+        <div class="flex justify-between items-center border-b border-[#2B2F42] pb-2 mb-3">
+          <span class="text-xs font-mono font-bold text-white uppercase">CLOSED-LOOP ECLSS GAS & HYDRAULIC SCHEMATIC</span>
+          <span class="text-[10px] font-mono text-[#E27B58]">INTERACTIVE PROCESS CONTROLLER</span>
+        </div>
+        <div class="w-full bg-[#0B0D17] border border-[#2B2F42] p-3 overflow-x-auto">
+          <svg viewBox="0 0 900 240" class="w-full min-w-[750px] h-auto">
+            <!-- Pipeline connecting nodes -->
+            <path d="M 120 70 L 260 70 L 260 120 L 400 120 L 540 120 L 540 70 L 680 70" fill="none" stroke="#2B2F42" stroke-width="4"/>
+            <path d="M 260 120 L 260 180 L 540 180 L 540 120" fill="none" stroke="#2B2F42" stroke-width="4"/>
+            <!-- Active flow animation -->
+            <path d="M 120 70 L 260 70 L 260 120 L 400 120 L 540 120 L 540 70 L 680 70" fill="none" stroke="#E27B58" stroke-width="2" stroke-dasharray="8,6">
+              <animate attributeName="stroke-dashoffset" values="50;0" dur="2s" repeatCount="indefinite"/>
+            </path>
+            <path d="M 260 120 L 260 180 L 540 180 L 540 120" fill="none" stroke="#10B981" stroke-width="2" stroke-dasharray="8,6">
+              <animate attributeName="stroke-dashoffset" values="50;0" dur="2.5s" repeatCount="indefinite"/>
+            </path>
+
+            <!-- Node 1: Mars External Intake -->
+            <g transform="translate(40, 45)">
+              <rect width="80" height="50" fill="#151923" stroke="#993D00" stroke-width="1.5"/>
+              <text x="10" y="22" fill="#E27B58" font-size="9" font-family="monospace" font-weight="bold">EXT CO2</text>
+              <text x="10" y="38" fill="#D0D6F9" font-size="8" font-family="monospace">0.7 kPa INTAKE</text>
+            </g>
+
+            <!-- Node 2: MOXIE Compression & Heating -->
+            <g transform="translate(200, 45)">
+              <rect width="120" height="50" fill="#151923" stroke="#E27B58" stroke-width="1.5"/>
+              <text x="10" y="20" fill="#FFFFFF" font-size="9" font-family="monospace" font-weight="bold">MOXIE CRACKER</text>
+              <text x="10" y="36" fill="#E27B58" font-size="8" font-family="monospace">2 CO2 → 2 CO + O2</text>
+            </g>
+
+            <!-- Node 3: Hab Habitat Atmosphere Mix -->
+            <g transform="translate(360, 95)">
+              <rect width="140" height="50" fill="#151923" stroke="#10B981" stroke-width="2"/>
+              <text x="12" y="22" fill="#10B981" font-size="10" font-family="monospace" font-weight="bold">HABITAT DOME-01</text>
+              <text x="12" y="38" fill="#FFFFFF" font-size="9" font-family="monospace">70.4 kPa (21.4% O2)</text>
+            </g>
+
+            <!-- Node 4: Sabatier Reactor (Water synthesis) -->
+            <g transform="translate(360, 155)">
+              <rect width="140" height="50" fill="#151923" stroke="#3B82F6" stroke-width="1.5"/>
+              <text x="12" y="22" fill="#3B82F6" font-size="9" font-family="monospace" font-weight="bold">SABATIER RECOVERY</text>
+              <text x="12" y="38" fill="#D0D6F9" font-size="8" font-family="monospace">CO2 + 4H2 → CH4 + 2H2O</text>
+            </g>
+
+            <!-- Node 5: Water Condenser & Filtration -->
+            <g transform="translate(580, 155)">
+              <rect width="120" height="50" fill="#151923" stroke="#3B82F6" stroke-width="1.5"/>
+              <text x="10" y="22" fill="#FFFFFF" font-size="9" font-family="monospace" font-weight="bold">WATER PURIFIER</text>
+              <text x="10" y="38" fill="#3B82F6" font-size="8" font-family="monospace">94.8% RECOVERY</text>
+            </g>
+
+            <!-- Node 6: LOX Cryo Reserves -->
+            <g transform="translate(680, 45)">
+              <rect width="120" height="50" fill="#151923" stroke="#E27B58" stroke-width="1.5"/>
+              <text x="10" y="22" fill="#FFFFFF" font-size="9" font-family="monospace" font-weight="bold">CRYO LOX TANK</text>
+              <text x="10" y="38" fill="#E27B58" font-size="8" font-family="monospace">1,840 kg RESERVE</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 03: JEZERO SURFACE RADAR & ASSETS                                  -->
+    <!-- ========================================================================= -->
+    <div id="module-surface" class="tab-content hidden space-y-4">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+        
+        <!-- Radar Map Screen (8 cols) -->
+        <div class="lg:col-span-8 bg-[#151923] border border-[#2B2F42] p-4 flex flex-col">
+          <div class="flex justify-between items-center border-b border-[#2B2F42] pb-2 mb-3">
+            <div>
+              <span class="text-xs font-mono font-bold text-white uppercase">JEZERO DELTA SECTOR TACTICAL GRID (CANVAS RADAR)</span>
+              <span class="block text-[10px] font-mono text-[#E27B58]">CLICK ANY WAYPOINT TO QUERY TELEMETRY</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs font-mono">
+              <button onclick="resetRadarView()" class="px-2 py-0.5 border border-[#2B2F42] bg-[#0B0D17] hover:border-[#E27B58] text-white text-[10px]">CENTER HAB</button>
+              <span class="text-[#D0D6F9]/60 text-[11px]">GRID SCALE: 1:25,000</span>
+            </div>
+          </div>
+
+          <!-- Interactive Jezero Map Canvas -->
+          <div class="relative w-full h-[450px] bg-[#0B0D17] border border-[#2B2F42] overflow-hidden">
+            <canvas id="jezeroMapCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+            <div class="absolute top-2 left-2 pointer-events-none font-mono text-[10px] text-[#D0D6F9]/60 bg-[#0B0D17]/80 p-1 border border-[#2B2F42]">
+              TARGET: <span id="radar-hover-coord" class="text-white">18.3842° N, 77.5819° E</span> | ELEV: -2,538m
+            </div>
+            <div class="absolute bottom-2 left-2 pointer-events-none font-mono text-[10px] text-emerald-400 bg-[#0B0D17]/80 p-1 border border-[#2B2F42]">
+              WAYPOINTS: 5 DETECTED | ALL TRANSPONDERS ACTIVE
+            </div>
+          </div>
+        </div>
+
+        <!-- Waypoint Details & Surface Log (4 cols) -->
+        <div class="lg:col-span-4 bg-[#151923] border border-[#2B2F42] p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center border-b border-[#2B2F42] pb-2 mb-3">
+              <span class="text-xs font-mono font-bold text-white uppercase">SELECTED ASSET / TARGET</span>
+              <span id="selected-asset-id" class="text-[10px] font-mono text-[#E27B58] bg-[#993D00]/20 px-1.5 py-0.5 border border-[#993D00]/40">HAB-01</span>
+            </div>
+
+            <!-- Dynamic Asset Details Card -->
+            <div id="asset-detail-card" class="space-y-3 font-mono text-xs">
+              <div class="p-2.5 bg-[#0B0D17] border border-[#2B2F42]">
+                <div class="text-[10px] text-[#D0D6F9]/60 uppercase">TARGET IDENTIFICATION</div>
+                <div id="target-name" class="text-white font-bold text-sm">JEZERO HAB-1 MAIN BASE</div>
+                <div id="target-type" class="text-[#E27B58] text-[11px]">Primary Pressurized Habitat Structure</div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="p-2 bg-[#0B0D17] border border-[#2B2F42]">
+                  <div class="text-[9px] text-[#D0D6F9]/60">COORDINATES</div>
+                  <div id="target-coords" class="text-white font-bold text-[11px]">18.384° N, 77.581° E</div>
+                </div>
+                <div class="p-2 bg-[#0B0D17] border border-[#2B2F42]">
+                  <div class="text-[9px] text-[#D0D6F9]/60">STATUS / SIGNAL</div>
+                  <div id="target-status" class="text-emerald-400 font-bold text-[11px]">100% HEALTH (BEACON)</div>
+                </div>
+              </div>
+
+              <div class="p-2.5 bg-[#0B0D17] border border-[#2B2F42]">
+                <div class="text-[10px] text-[#D0D6F9]/60 uppercase mb-1">LOCAL GEOLOGICAL CONTEXT</div>
+                <p id="target-notes" class="text-[11px] text-[#D0D6F9] leading-relaxed">
+                  Located in the Neretva Vallis delta deposit fan. Carbonate-rich lake sediments ideal for astrobiology core drilling. Regolith berm height: 2.1m.
+                </p>
+              </div>
+
+              <div class="p-2.5 bg-[#0B0D17] border border-[#2B2F42]">
+                <div class="text-[10px] text-[#D0D6F9]/60 uppercase mb-1">COMMUNICATION PING</div>
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-white">SURFACE UHF TRANSCEIVER:</span>
+                  <span class="text-emerald-400 font-bold">0.002 ms (LOCAL)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-[#2B2F42]">
+            <button onclick="pingSurfaceAsset()" class="w-full py-2 bg-[#E27B58] hover:bg-[#993D00] text-black font-bold font-mono text-xs uppercase transition-colors">
+              PING SURFACE ASSET TRANSPONDER
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 04: POWER GRID & KILOPOWER                                         -->
+    <!-- ========================================================================= -->
+    <div id="module-power" class="tab-content hidden space-y-4">
+      
+      <!-- Power generation vs consumption headline -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div class="bg-[#151923] border border-[#2B2F42] p-3">
+          <div class="text-[10px] font-mono text-[#D0D6F9]/70 uppercase">TOTAL POWER GENERATION</div>
+          <div class="text-2xl font-mono font-bold text-white mt-1">14.85 <span class="text-xs text-[#E27B58]">kWe</span></div>
+          <div class="text-[10px] font-mono text-emerald-400">SURPLUS: +3.20 kWe TO RESERVES</div>
+        </div>
+
+        <div class="bg-[#151923] border border-[#2B2F42] p-3">
+          <div class="text-[10px] font-mono text-[#D0D6F9]/70 uppercase">CURRENT TOTAL HAB LOAD</div>
+          <div class="text-2xl font-mono font-bold text-white mt-1">11.65 <span class="text-xs text-[#E27B58]">kWe</span></div>
+          <div class="text-[10px] font-mono text-white">ECLSS CONSUMING 5.2 kWe</div>
+        </div>
+
+        <div class="bg-[#151923] border border-[#2B2F42] p-3">
+          <div class="text-[10px] font-mono text-[#D0D6F9]/70 uppercase">BATTERY BANK RESERVE</div>
+          <div class="text-2xl font-mono font-bold text-emerald-400 mt-1">96.4 <span class="text-xs text-[#D0D6F9]">%</span></div>
+          <div class="text-[10px] font-mono text-[#D0D6F9]/60">120 kWh Li-S TANK (58.4 HRS HAB BACKUP)</div>
+        </div>
+
+        <div class="bg-[#151923] border border-[#2B2F42] p-3">
+          <div class="text-[10px] font-mono text-[#D0D6F9]/70 uppercase">SOLAR DEPOSITION (TAU EFFECT)</div>
+          <div class="text-2xl font-mono font-bold text-[#E27B58] mt-1">5.21 <span class="text-xs text-[#D0D6F9]">kWe</span></div>
+          <div class="text-[10px] font-mono text-amber-400">DUST EFFICIENCY: 82.4%</div>
+        </div>
+      </div>
+
+      <!-- Real-time Power Flow Matrix & Live Canvas Gauge -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+        
+        <div class="lg:col-span-7 bg-[#151923] border border-[#2B2F42] p-4">
+          <div class="flex justify-between items-center border-b border-[#2B2F42] pb-2 mb-3">
+            <span class="text-xs font-mono font-bold text-white uppercase">KILOPOWER KRUSTY REACTOR TELEMETRY</span>
+            <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 border border-emerald-500/40">CRITICALITY STEADY</span>
+          </div>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-xs">
+            <div class="p-2 bg-[#0B0D17] border border-[#2B2F42]">
+              <div class="text-[10px] text-[#D0D6F9]/60">U-235 CORE TEMP</div>
+              <div class="text-white font-bold text-base">652.4 °C</div>
+              <div class="text-[10px] text-emerald-400">MAX: 800 °C</div>
+            </div>
+            <div class="p-2 bg-[#0B0D17] border border-[#2B2F42]">
+              <div class="text-[10px] text-[#D0D6F9]/60">SODIUM HEAT PIPES</div>
+              <div class="text-white font-bold text-base">580.1 °C</div>
+              <div class="text-[10px] text-emerald-400">8 OF 8 CONDUCTIVE</div>
+            </div>
+            <div class="p-2 bg-[#0B0D17] border border-[#2B2F42]">
+              <div class="text-[10px] text-[#D0D6F9]/60">STIRLING ENGINES</div>
+              <div class="text-white font-bold text-base">102.2 Hz</div>
+              <div class="text-[10px] text-emerald-400">SYNCHRONIZED</div>
+            </div>
+          </div>
+
+          <!-- Power Distribution Breakers -->
+          <div class="mt-4 space-y-2 font-mono text-xs">
+            <div class="text-[11px] font-bold text-[#D0D6F9] uppercase">HABITAT ELECTRICAL SUB-CIRCUITS</div>
+            
+            <div class="flex items-center justify-between p-2 bg-[#0B0D17] border border-[#2B2F42]">
+              <div>
+                <span class="text-white font-bold">BUS-A: ECLSS & LIFE SUPPORT (PRIMARY)</span>
+                <span class="block text-[10px] text-[#D0D6F9]/60">5.20 kWe // NON-SHEDDABLE</span>
+              </div>
+              <span class="text-emerald-400 font-bold">ENABLED</span>
+            </div>
+
+            <div class="flex items-center justify-between p-2 bg-[#0B0D17] border border-[#2B2F42]">
+              <div>
+                <span class="text-white font-bold">BUS-B: THERMAL BLANKETS & HAB HEATING</span>
+                <span class="block text-[10px] text-[#D0D6F9]/60">3.80 kWe // PRIORITY 2</span>
+              </div>
+              <span class="text-emerald-400 font-bold">ENABLED</span>
+            </div>
+
+            <div class="flex items-center justify-between p-2 bg-[#0B0D17] border border-[#2B2F42]">
+              <div>
+                <span class="text-white font-bold">BUS-C: SCIENCE LAB & SAMPLE REFRIGERATION</span>
+                <span class="block text-[10px] text-[#D0D6F9]/60">1.45 kWe // PRIORITY 3</span>
+              </div>
+              <span class="text-emerald-400 font-bold">ENABLED</span>
+            </div>
+
+            <div class="flex items-center justify-between p-2 bg-[#0B0D17] border border-[#2B2F42]">
+              <div>
+                <span class="text-white font-bold">BUS-D: EXTERIOR ROVER RECHARGE DOCK</span>
+                <span class="block text-[10px] text-[#D0D6F9]/60">1.20 kWe // SHEDDABLE UNDER LOAD</span>
+              </div>
+              <button onclick="toggleRoverRecharge(this)" class="px-2 py-0.5 text-[10px] border border-emerald-500 text-emerald-400 bg-emerald-950/40">TOGGLE</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Solar Array Efficiency Canvas / Visualizer -->
+        <div class="lg:col-span-5 bg-[#151923] border border-[#2B2F42] p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center border-b border-[#2B2F42] pb-2 mb-3">
+              <span class="text-xs font-mono font-bold text-white uppercase">SOLAR TRACKER 1-4 DUST DEPOSITION</span>
+              <span class="text-[10px] font-mono text-[#E27B58]">DUST WIPERS READY</span>
+            </div>
+
+            <div class="space-y-3 font-mono text-xs">
+              <div>
+                <div class="flex justify-between text-[11px] mb-1">
+                  <span class="text-[#D0D6F9]">ARRAY-1 (ALPHA NORTH)</span>
+                  <span class="text-white font-bold">84% EFFICIENCY</span>
+                </div>
+                <div class="w-full h-2 bg-[#0B0D17] border border-[#2B2F42]">
+                  <div class="h-full bg-[#E27B58]" style="width: 84%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[11px] mb-1">
+                  <span class="text-[#D0D6F9]">ARRAY-2 (BETA EAST)</span>
+                  <span class="text-white font-bold">79% EFFICIENCY</span>
+                </div>
+                <div class="w-full h-2 bg-[#0B0D17] border border-[#2B2F42]">
+                  <div class="h-full bg-[#E27B58]" style="width: 79%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[11px] mb-1">
+                  <span class="text-[#D0D6F9]">ARRAY-3 (GAMMA SOUTH)</span>
+                  <span class="text-white font-bold">88% EFFICIENCY</span>
+                </div>
+                <div class="w-full h-2 bg-[#0B0D17] border border-[#2B2F42]">
+                  <div class="h-full bg-emerald-500" style="width: 88%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[11px] mb-1">
+                  <span class="text-[#D0D6F9]">ARRAY-4 (DELTA WEST)</span>
+                  <span class="text-white font-bold">81% EFFICIENCY</span>
+                </div>
+                <div class="w-full h-2 bg-[#0B0D17] border border-[#2B2F42]">
+                  <div class="h-full bg-[#E27B58]" style="width: 81%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-[#2B2F42]">
+            <button onclick="triggerElectrostaticClean()" class="w-full py-2 bg-[#0B0D17] hover:bg-[#2B2F42] border border-[#E27B58] text-[#E27B58] hover:text-white font-mono text-xs uppercase font-bold transition-colors">
+              PULSE ELECTROSTATIC DUST REMOVAL (300V)
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 05: CREW BIOMETRICS & EVA                                          -->
+    <!-- ========================================================================= -->
+    <div id="module-vitals" class="tab-content hidden space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        
+        <!-- Crew Member 1: Commander (EVA Active) -->
+        <div class="bg-[#151923] border border-[#2B2F42] p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start border-b border-[#2B2F42] pb-2 mb-3">
+              <div>
+                <span class="text-xs font-mono font-bold text-white block">CDR. M. AVALOS</span>
+                <span class="text-[10px] font-mono text-[#E27B58]">EXPEDITION COMMANDER</span>
+              </div>
+              <span class="text-[10px] font-mono font-bold bg-[#E27B58]/20 text-[#E27B58] px-2 py-0.5 border border-[#E27B58]">EVA-01 ACTIVE</span>
+            </div>
+
+            <div class="space-y-2.5 font-mono text-xs">
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">HEART RATE:</span>
+                <span class="text-white font-bold">84 BPM</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">SUIT PRESSURE:</span>
+                <span class="text-emerald-400 font-bold">29.6 kPa (100% O2)</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">CORE BODY TEMP:</span>
+                <span class="text-white font-bold">36.9 °C</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">O2 CONSUMPTION:</span>
+                <span class="text-emerald-400 font-bold">0.82 L/min</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">SUIT O2 REMAINING:</span>
+                <span class="text-white font-bold">04h 18m</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">DOSIMETER (EVA):</span>
+                <span class="text-[#E27B58] font-bold">42.1 µSv/hr</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-[#2B2F42]">
+            <button onclick="pingCrewAudio('CDR. AVALOS')" class="w-full py-1.5 bg-[#0B0D17] hover:bg-[#2B2F42] border border-[#2B2F42] text-white text-[11px] font-mono">
+              OPEN COMMS CHANNEL (VOICE)
+            </button>
+          </div>
+        </div>
+
+        <!-- Crew Member 2: Flight Engineer (EVA Active) -->
+        <div class="bg-[#151923] border border-[#2B2F42] p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start border-b border-[#2B2F42] pb-2 mb-3">
+              <div>
+                <span class="text-xs font-mono font-bold text-white block">ENG. S. CHEN</span>
+                <span class="text-[10px] font-mono text-[#E27B58]">SURFACE SYSTEMS LEAD</span>
+              </div>
+              <span class="text-[10px] font-mono font-bold bg-[#E27B58]/20 text-[#E27B58] px-2 py-0.5 border border-[#E27B58]">EVA-01 ACTIVE</span>
+            </div>
+
+            <div class="space-y-2.5 font-mono text-xs">
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">HEART RATE:</span>
+                <span class="text-white font-bold">92 BPM</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">SUIT PRESSURE:</span>
+                <span class="text-emerald-400 font-bold">29.4 kPa</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">CORE BODY TEMP:</span>
+                <span class="text-white font-bold">37.1 °C</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">O2 CONSUMPTION:</span>
+                <span class="text-emerald-400 font-bold">0.94 L/min</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">SUIT O2 REMAINING:</span>
+                <span class="text-white font-bold">03h 52m</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">DOSIMETER (EVA):</span>
+                <span class="text-[#E27B58] font-bold">44.0 µSv/hr</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-[#2B2F42]">
+            <button onclick="pingCrewAudio('ENG. CHEN')" class="w-full py-1.5 bg-[#0B0D17] hover:bg-[#2B2F42] border border-[#2B2F42] text-white text-[11px] font-mono">
+              OPEN COMMS CHANNEL (VOICE)
+            </button>
+          </div>
+        </div>
+
+        <!-- Crew Member 3: Astrobiologist (Inside Hab) -->
+        <div class="bg-[#151923] border border-[#2B2F42] p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start border-b border-[#2B2F42] pb-2 mb-3">
+              <div>
+                <span class="text-xs font-mono font-bold text-white block">DR. L. KOVACS</span>
+                <span class="text-[10px] font-mono text-[#D0D6F9]/70">SCIENCE OFFICER</span>
+              </div>
+              <span class="text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 px-2 py-0.5 border border-emerald-600/50">HAB LAB-2</span>
+            </div>
+
+            <div class="space-y-2.5 font-mono text-xs">
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">HEART RATE:</span>
+                <span class="text-white font-bold">66 BPM</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">BLOOD PRESSURE:</span>
+                <span class="text-emerald-400 font-bold">118/74 mmHg</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">CORE BODY TEMP:</span>
+                <span class="text-white font-bold">36.7 °C</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">CURRENT TASK:</span>
+                <span class="text-[#E27B58] font-bold">RAMAN SPECTROSCOPY</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">HAB DOSIMETER:</span>
+                <span class="text-emerald-400 font-bold">9.8 µSv/hr (SHIELDED)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-[#2B2F42]">
+            <button onclick="pingCrewAudio('DR. KOVACS')" class="w-full py-1.5 bg-[#0B0D17] hover:bg-[#2B2F42] border border-[#2B2F42] text-white text-[11px] font-mono">
+              INTERCOM CALL
+            </button>
+          </div>
+        </div>
+
+        <!-- Crew Member 4: Medical Officer / Life Support (Inside Hab) -->
+        <div class="bg-[#151923] border border-[#2B2F42] p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start border-b border-[#2B2F42] pb-2 mb-3">
+              <div>
+                <span class="text-xs font-mono font-bold text-white block">DR. T. AL-MANSOOR</span>
+                <span class="text-[10px] font-mono text-[#D0D6F9]/70">FLIGHT SURGEON</span>
+              </div>
+              <span class="text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 px-2 py-0.5 border border-emerald-600/50">HAB MEDICAL</span>
+            </div>
+
+            <div class="space-y-2.5 font-mono text-xs">
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">HEART RATE:</span>
+                <span class="text-white font-bold">70 BPM</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">BLOOD PRESSURE:</span>
+                <span class="text-emerald-400 font-bold">122/78 mmHg</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">CORE BODY TEMP:</span>
+                <span class="text-white font-bold">36.8 °C</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">CURRENT TASK:</span>
+                <span class="text-emerald-400 font-bold">ECLSS SUPERVISION</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#D0D6F9]/70">HAB DOSIMETER:</span>
+                <span class="text-emerald-400 font-bold">9.7 µSv/hr (SHIELDED)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-[#2B2F42]">
+            <button onclick="pingCrewAudio('DR. AL-MANSOOR')" class="w-full py-1.5 bg-[#0B0D17] hover:bg-[#2B2F42] border border-[#2B2F42] text-white text-[11px] font-mono">
+              INTERCOM CALL
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 06: TELEMETRY LOGS & FLIGHT CONSOLE                                -->
+    <!-- ========================================================================= -->
+    <div id="module-terminal" class="tab-content hidden space-y-3">
+      <div class="bg-[#151923] border border-[#2B2F42] p-4 flex flex-col h-[520px]">
+        <div class="flex items-center justify-between border-b border-[#2B2F42] pb-2 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 bg-[#E27B58]"></span>
+            <span class="text-xs font-mono font-bold text-white uppercase">JEZERO TELEMETRY BUS TERMINAL / EVENT STREAM</span>
+          </div>
+          <div class="flex items-center gap-2 text-xs font-mono">
+            <button onclick="clearTerminalLogs()" class="px-2 py-0.5 border border-[#2B2F42] bg-[#0B0D17] hover:text-white text-[#D0D6F9]/70 text-[10px]">CLEAR</button>
+            <span class="text-emerald-400 text-[10px]">BUS STATUS: ONLINE</span>
+          </div>
+        </div>
+
+        <!-- Scrollable Log Output -->
+        <div id="terminal-output" class="flex-1 bg-[#0B0D17] border border-[#2B2F42] p-3 font-mono text-xs overflow-y-auto space-y-1 text-[#D0D6F9]">
+          <div class="text-[#D0D6F9]/60">[SOL 482 14:10:02.102] INITIALIZING MISSION CONTROL CONSOLE // SYSTEM VER 2.8.4-JEZERO</div>
+          <div class="text-[#D0D6F9]/60">[SOL 482 14:15:33.489] DSN CARRIER LOCK ESTABLISHED // 70-METER GOLDSTONE ANTENNA</div>
+          <div class="text-emerald-400">[SOL 482 14:20:11.710] MOXIE RUN CONFIRMED // OXYGEN GENERATION +32.4 G/HR NOMINAL</div>
+          <div class="text-white">[SOL 482 14:22:45.012] EVA-01 EGRESS AIRLOCK-A DEPRESSURIZATION COMPLETE</div>
+          <div class="text-[#E27B58]">[SOL 482 14:25:01.332] WEATHER ADVISORY: REGIONAL TAU INCREASE DETECTED OVER SYRTIS MAJOR (+0.08 OD)</div>
+          <div class="text-emerald-400">[SOL 482 14:28:00.000] KILOPOWER CORE STABILITY VERIFIED AT 652°C</div>
+        </div>
+
+        <!-- Terminal Command Input Bar -->
+        <form onsubmit="handleCommandSubmit(event)" class="mt-3 flex gap-2">
+          <div class="relative flex-1">
+            <span class="absolute left-3 top-2 text-[#E27B58] font-mono text-xs">&gt;</span>
+            <input type="text" id="terminal-input" placeholder="Type command (e.g., 'help', 'status hab', 'alert dust', 'ping dsn', 'eclss purge')" class="w-full bg-[#0B0D17] border border-[#2B2F42] text-white font-mono text-xs pl-7 pr-3 py-2 focus:outline-none focus:border-[#E27B58]">
+          </div>
+          <button type="submit" class="px-4 py-2 bg-[#E27B58] hover:bg-[#993D00] text-black font-mono font-bold text-xs uppercase transition-colors">
+            EXEC
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- AERONAUTICAL BOTTOM STATUS BAR -->
+  <footer class="bg-[#151923] border-t border-[#2B2F42] px-4 py-1.5 text-[11px] font-mono text-[#D0D6F9]/60 mt-auto">
+    <div class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-3">
+        <span class="text-white font-bold">NASA-JPL // JEZERO COLONY OPS</span>
+        <span>LAT: 18.3842° N</span>
+        <span>LON: 77.5819° E</span>
+        <span>ALT: -2,538 M</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span>SECURITY ENCRYPTION: AES-256 GCM</span>
+        <span class="text-white">RADIO RELAY: MAVEN / TGO</span>
+        <span class="text-emerald-400">UPTIME: 482 SOLS 14H</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- TELEMETRY & INTERACTIVE SCRIPT LOGIC -->
+  <script>
+    // Audio synthesizer context for tactical aeronautical clicks & alarms (Pure Web Audio API)
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playTone(freq, type, duration, gainValue = 0.05) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainValue, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn('Audio note prevented:', e);
+      }
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('audio-toggle-btn');
+      btn.innerText = audioEnabled ? '🔊 BEEP: ON' : '🔇 BEEP: MUTED';
+      if (audioEnabled) playTone(880, 'sine', 0.1);
+    }
+
+    // Tab Switching Logic
+    function switchTab(tabId) {
+      playTone(1200, 'sine', 0.05, 0.03);
+      // Hide all contents
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      // Remove active states from buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-[#E27B58]', 'text-white', 'bg-[#151923]');
+        btn.classList.add('border-transparent', 'text-[#D0D6F9]/70');
+      });
+
+      // Show selected tab
+      const targetContent = document.getElementById(`module-${tabId}`);
+      if (targetContent) targetContent.classList.remove('hidden');
+
+      const targetBtn = document.getElementById(`tab-${tabId}`);
+      if (targetBtn) {
+        targetBtn.classList.remove('border-transparent', 'text-[#D0D6F9]/70');
+        targetBtn.classList.add('border-[#E27B58]', 'text-white', 'bg-[#151923]');
+      }
+
+      // Re-trigger radar redraw if surface tab selected
+      if (tabId === 'surface') {
+        setTimeout(drawJezeroRadar, 50);
+      }
+    }
+
+    // Mission Clock Telemetry
+    let solCounter = 482.39;
+    function updateMissionClocks() {
+      solCounter += 0.00002;
+      document.getElementById('sol-display').innerText = `SOL ${solCounter.toFixed(2)}`;
+
+      const now = new Date();
+      document.getElementById('utc-display').innerText = now.toUTCString().split(' ')[4];
+
+      // Simulated Mars Coordinated Time
+      const mtcSeconds = (now.getUTCSeconds() + now.getUTCMinutes() * 60 + now.getUTCHours() * 3600);
+      const marsHours = String(Math.floor((mtcSeconds / 3600 + 4) % 24)).padStart(2, '0');
+      const marsMins = String(Math.floor((mtcSeconds / 60) % 60)).padStart(2, '0');
+      const marsSecs = String(mtcSeconds % 60).padStart(2, '0');
+      document.getElementById('mtc-display').innerText = `${marsHours}:${marsMins}:${marsSecs}`;
+    }
+    setInterval(updateMissionClocks, 1000);
+
+    // =========================================================================
+    // OSCILLOSCOPE CANVAS (Pure JS Canvas Data Chart)
+    // =========================================================================
+    const oscCanvas = document.getElementById('telemetryCanvas');
+    const oscCtx = oscCanvas.getContext('2d');
+    let oscDataHab = [];
+    let oscDataO2 = [];
+    let oscDataMarsExt = [];
+    const maxPoints = 120;
+
+    // Seed initial values
+    for (let i = 0; i < maxPoints; i++) {
+      oscDataHab.push(70.4 + (Math.sin(i / 5) * 0.4) + (Math.random() * 0.1 - 0.05));
+      oscDataO2.push(21.4 + (Math.cos(i / 4) * 0.2) + (Math.random() * 0.08 - 0.04));
+      oscDataMarsExt.push(7.08 + (Math.sin(i / 10) * 0.1));
+    }
+
+    function resizeOscCanvas() {
+      const rect = oscCanvas.getBoundingClientRect();
+      oscCanvas.width = rect.width * window.devicePixelRatio;
+      oscCanvas.height = rect.height * window.devicePixelRatio;
+      oscCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    window.addEventListener('resize', resizeOscCanvas);
+    resizeOscCanvas();
+
+    function renderOscilloscope() {
+      const width = oscCanvas.getBoundingClientRect().width;
+      const height = oscCanvas.getBoundingClientRect().height;
+
+      oscCtx.fillStyle = '#0B0D17';
+      oscCtx.fillRect(0, 0, width, height);
+
+      // Draw subtle grid lines
+      oscCtx.strokeStyle = 'rgba(43, 47, 66, 0.4)';
+      oscCtx.lineWidth = 1;
+      for (let y = 20; y < height; y += 30) {
+        oscCtx.beginPath();
+        oscCtx.moveTo(0, y);
+        oscCtx.lineTo(width, y);
+        oscCtx.stroke();
+      }
+      for (let x = 20; x < width; x += 40) {
+        oscCtx.beginPath();
+        oscCtx.moveTo(x, 0);
+        oscCtx.lineTo(x, height);
+        oscCtx.stroke();
+      }
+
+      // Add new telemetry noise
+      if (isEmergencyActive) {
+        // Fluctuate wildly in emergency
+        oscDataHab.push(67.5 + Math.random() * 2.2);
+        oscDataO2.push(20.1 + Math.random() * 1.5);
+      } else {
+        const lastHab = oscDataHab[oscDataHab.length - 1];
+        const nextHab = Math.max(69.8, Math.min(71.0, lastHab + (Math.random() * 0.2 - 0.1)));
+        oscDataHab.push(nextHab);
+
+        const lastO2 = oscDataO2[oscDataO2.length - 1];
+        const nextO2 = Math.max(21.0, Math.min(21.8, lastO2 + (Math.random() * 0.08 - 0.04)));
+        oscDataO2.push(nextO2);
+      }
+      oscDataMarsExt.push(7.08 + (Math.sin(Date.now() / 2000) * 0.12));
+
+      if (oscDataHab.length > maxPoints) oscDataHab.shift();
+      if (oscDataO2.length > maxPoints) oscDataO2.shift();
+      if (oscDataMarsExt.length > maxPoints) oscDataMarsExt.shift();
+
+      // Draw Curve Helper
+      function drawCurve(data, color, minVal, maxVal, lineWidth = 1.5) {
+        oscCtx.strokeStyle = color;
+        oscCtx.lineWidth = lineWidth;
+        oscCtx.beginPath();
+        for (let i = 0; i < data.length; i++) {
+          const x = (i / (maxPoints - 1)) * width;
+          const normalized = (data[i] - minVal) / (maxVal - minVal);
+          const y = height - (normalized * (height - 20) + 10);
+          if (i === 0) oscCtx.moveTo(x, y);
+          else oscCtx.lineTo(x, y);
+        }
+        oscCtx.stroke();
+      }
+
+      // 1. External Mars Pressure line (Rust / #993D00)
+      drawCurve(oscDataMarsExt, '#993D00', 6.5, 7.5, 1.2);
+
+      // 2. O2 Concentration line (Terracotta / #E27B58)
+      drawCurve(oscDataO2, '#E27B58', 19.5, 23.0, 2);
+
+      // 3. Hab Total Pressure line (White / #FFFFFF)
+      drawCurve(oscDataHab, '#FFFFFF', 66.0, 72.0, 2);
+
+      // Live readout tags
+      oscCtx.fillStyle = '#FFFFFF';
+      oscCtx.font = '10px monospace';
+      oscCtx.fillText(`HAB P: ${oscDataHab[oscDataHab.length - 1].toFixed(2)} kPa`, 10, height - 12);
+
+      oscCtx.fillStyle = '#E27B58';
+      oscCtx.fillText(`O2: ${oscDataO2[oscDataO2.length - 1].toFixed(2)}%`, 140, height - 12);
+    }
+    setInterval(renderOscilloscope, 200);
+
+    // =========================================================================
+    // JEZERO SURFACE RADAR INTERACTIVE MAP (Canvas)
+    // =========================================================================
+    const radarCanvas = document.getElementById('jezeroMapCanvas');
+    const rCtx = radarCanvas.getContext('2d');
+    let radarAssets = [
+      { id: 'HAB-01', name: 'JEZERO HAB-1 MAIN BASE', type: 'Primary Pressurized Habitat Structure', x: 0.5, y: 0.5, color: '#FC3D21', shape: 'hex', coords: '18.384° N, 77.581° E', status: '100% HEALTH (BEACON)', notes: 'Command Hub, Life Support, Greenhouses and crew dormitories.' },
+      { id: 'ROVER-M1', name: 'PERSEVERANCE MSR ROVER', type: 'Nuclear Sample Retrieval Asset', x: 0.35, y: 0.32, color: '#E27B58', shape: 'circle', coords: '18.421° N, 77.512° E', status: 'ACTIVE TRAVERSAL (84% BATT)', notes: 'Collecting delta sediment core samples at Three Forks. 1.4 km distance.' },
+      { id: 'SCOUT-FLT', name: 'INGENUITY-7 SCOUT COPTER', type: 'Atmospheric Aerobot', x: 0.72, y: 0.28, color: '#10B981', shape: 'circle', coords: '18.448° N, 77.625° E', status: 'STANDBY (SOLAR DOCK)', notes: 'Aerial survey over Belva Crater rim. Dust detection sensors operational.' },
+      { id: 'CACHE-03', name: 'DEPOT SAMPLE CACHE 03', type: 'Sealed Sample Tube Container', x: 0.62, y: 0.75, color: '#D0D6F9', shape: 'square', coords: '18.339° N, 77.604° E', status: 'SURFACE DEPLOYED', notes: 'Contains 10 sealed Martian regolith cores for Earth return rocket.' },
+      { id: 'KILOPOWER', name: 'KILOPOWER KRUSTY FISSION PLANT', type: '10 kWe Nuclear Surface Power', x: 0.42, y: 0.58, color: '#993D00', shape: 'diamond', coords: '18.379° N, 77.575° E', status: 'GENERATING 9.64 kWe', notes: 'Positioned 450 meters downwind in regolith trench for radiation shielding.' }
+    ];
+
+    function resizeRadar() {
+      const rect = radarCanvas.getBoundingClientRect();
+      radarCanvas.width = rect.width * window.devicePixelRatio;
+      radarCanvas.height = rect.height * window.devicePixelRatio;
+      rCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    window.addEventListener('resize', resizeRadar);
+    resizeRadar();
+
+    function drawJezeroRadar() {
+      const w = radarCanvas.getBoundingClientRect().width;
+      const h = radarCanvas.getBoundingClientRect().height;
+
+      rCtx.fillStyle = '#0B0D17';
+      rCtx.fillRect(0, 0, w, h);
+
+      // Topographical contour lines (Simulating Jezero crater delta front)
+      rCtx.strokeStyle = 'rgba(153, 61, 0, 0.25)';
+      rCtx.lineWidth = 1;
+      for (let r = 50; r < Math.max(w, h); r += 45) {
+        rCtx.beginPath();
+        rCtx.arc(w * 0.5, h * 0.5, r, 0, Math.PI * 2);
+        rCtx.stroke();
+      }
+
+      // Delta ancient river fan vectors
+      rCtx.strokeStyle = 'rgba(226, 123, 88, 0.2)';
+      rCtx.lineWidth = 1.5;
+      rCtx.beginPath();
+      rCtx.moveTo(w * 0.1, h * 0.2);
+      rCtx.quadraticCurveTo(w * 0.4, h * 0.35, w * 0.5, h * 0.5);
+      rCtx.stroke();
+
+      rCtx.beginPath();
+      rCtx.moveTo(w * 0.2, h * 0.1);
+      rCtx.quadraticCurveTo(w * 0.35, h * 0.3, w * 0.5, h * 0.5);
+      rCtx.stroke();
+
+      // Crosshairs & Grid ticks
+      rCtx.strokeStyle = 'rgba(43, 47, 66, 0.6)';
+      rCtx.lineWidth = 1;
+      rCtx.beginPath();
+      rCtx.moveTo(0, h / 2); rCtx.lineTo(w, h / 2);
+      rCtx.moveTo(w / 2, 0); rCtx.lineTo(w / 2, h);
+      rCtx.stroke();
+
+      // Render Assets
+      radarAssets.forEach(asset => {
+        const px = asset.x * w;
+        const py = asset.y * h;
+
+        rCtx.fillStyle = asset.color;
+        rCtx.strokeStyle = '#FFFFFF';
+        rCtx.lineWidth = 1;
+
+        if (asset.shape === 'hex' || asset.shape === 'diamond') {
+          rCtx.beginPath();
+          rCtx.arc(px, py, 6, 0, Math.PI * 2);
+          rCtx.fill();
+          rCtx.stroke();
+        } else {
+          rCtx.beginPath();
+          rCtx.arc(px, py, 4.5, 0, Math.PI * 2);
+          rCtx.fill();
+        }
+
+        // Pulse ring around active assets
+        rCtx.strokeStyle = asset.color;
+        rCtx.beginPath();
+        rCtx.arc(px, py, 11, 0, Math.PI * 2);
+        rCtx.stroke();
+
+        // Label
+        rCtx.font = '10px monospace';
+        rCtx.fillStyle = '#FFFFFF';
+        rCtx.fillText(asset.id, px + 12, py + 3);
+      });
+    }
+
+    radarCanvas.addEventListener('click', (e) => {
+      const rect = radarCanvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+      const w = rect.width;
+      const h = rect.height;
+
+      // Find closest asset
+      let clicked = null;
+      let minDist = 30;
+      radarAssets.forEach(a => {
+        const ax = a.x * w;
+        const ay = a.y * h;
+        const dist = Math.hypot(clickX - ax, clickY - ay);
+        if (dist < minDist) {
+          minDist = dist;
+          clicked = a;
+        }
+      });
+
+      if (clicked) {
+        playTone(900, 'triangle', 0.08, 0.08);
+        document.getElementById('selected-asset-id').innerText = clicked.id;
+        document.getElementById('target-name').innerText = clicked.name;
+        document.getElementById('target-type').innerText = clicked.type;
+        document.getElementById('target-coords').innerText = clicked.coords;
+        document.getElementById('target-status').innerText = clicked.status;
+        document.getElementById('target-notes').innerText = clicked.notes;
+        logToTerminal(`RADAR TARGET LOCK: [${clicked.id}] ${clicked.name} // BEACON SNR +22dB`);
+      }
+    });
+
+    radarCanvas.addEventListener('mousemove', (e) => {
+      const rect = radarCanvas.getBoundingClientRect();
+      const xRatio = (e.clientX - rect.left) / rect.width;
+      const yRatio = (e.clientY - rect.top) / rect.height;
+      const lat = (18.35 + (1 - yRatio) * 0.1).toFixed(4);
+      const lon = (77.52 + xRatio * 0.12).toFixed(4);
+      document.getElementById('radar-hover-coord').innerText = `${lat}° N, ${lon}° E`;
+    });
+
+    function resetRadarView() {
+      playTone(1000, 'sine', 0.05);
+      drawJezeroRadar();
+      logToTerminal('RADAR SCANNER RE-CENTERED ON HAB-01 GRID REFERENCE.');
+    }
+
+    function pingSurfaceAsset() {
+      playTone(1400, 'sine', 0.15, 0.1);
+      const target = document.getElementById('target-name').innerText;
+      logToTerminal(`UHF TRANSPONDER PING BROADCAST TO [${target}]... ACK RECEIVED (0.002ms)`);
+    }
+
+    // =========================================================================
+    // EMERGENCY SIMULATION / NASA VECTOR RED ALERT
+    // =========================================================================
+    let isEmergencyActive = false;
+    let emergencyInterval = null;
+
+    function toggleEmergencySimulation() {
+      initAudio();
+      isEmergencyActive = !isEmergencyActive;
+      const btn = document.getElementById('master-alarm-btn');
+      const label = document.getElementById('alarm-btn-label');
+      const banner = document.getElementById('alarm-banner');
+      const healthBadge = document.getElementById('system-health-badge');
+
+      if (isEmergencyActive) {
+        label.innerText = 'DISENGAGE ALARM';
+        btn.classList.add('bg-[#FC3D21]', 'text-white');
+        banner.classList.remove('hidden');
+
+        healthBadge.className = 'px-2 py-0.5 text-[10px] font-mono font-bold uppercase bg-red-950/80 text-[#FC3D21] border border-[#FC3D21] flex items-center gap-1 animate-pulse';
+        healthBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-[#FC3D21]"></span> CRITICAL ALARM';
+
+        // Update Airlock B status
+        document.getElementById('airlock-b-status').innerText = 'PRESSURE DROP (48.2 kPa)';
+        document.getElementById('airlock-b-status').className = 'text-[#FC3D21] font-bold animate-pulse';
+        document.getElementById('kpi-pressure').innerText = '67.2';
+        document.getElementById('kpi-pressure').className = 'text-xl font-bold font-mono text-[#FC3D21]';
+
+        logToTerminal('*** MASTER CAUTION & WARNING: AIRLOCK-B MICRO-PUNCTURE / RAPID PURGE TRIGGERED ***');
+
+        // Play alarm sound pattern
+        emergencyInterval = setInterval(() => {
+          if (isEmergencyActive) {
+            playTone(950, 'sawtooth', 0.25, 0.06);
+            setTimeout(() => { if (isEmergencyActive) playTone(720, 'sawtooth', 0.25, 0.06); }, 280);
+          }
+        }, 800);
+
+      } else {
+        acknowledgeAlarm();
+      }
+    }
+
+    function acknowledgeAlarm() {
+      isEmergencyActive = false;
+      if (emergencyInterval) clearInterval(emergencyInterval);
+
+      const btn = document.getElementById('master-alarm-btn');
+      const label = document.getElementById('alarm-btn-label');
+      const banner = document.getElementById('alarm-banner');
+      const healthBadge = document.getElementById('system-health-badge');
+
+      label.innerText = 'SIMULATE ALERT';
+      btn.classList.remove('bg-[#FC3D21]', 'text-white');
+      banner.classList.add('hidden');
+
+      healthBadge.className = 'px-2 py-0.5 text-[10px] font-mono font-bold uppercase bg-emerald-950/80 text-emerald-400 border border-emerald-600/50 flex items-center gap-1';
+      healthBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> SYS NOMINAL';
+
+      document.getElementById('airlock-b-status').innerText = 'SEALED (70.1 kPa)';
+      document.getElementById('airlock-b-status').className = 'text-white font-bold';
+      document.getElementById('kpi-pressure').innerText = '70.4';
+      document.getElementById('kpi-pressure').className = 'text-xl font-bold font-mono text-white';
+
+      playTone(600, 'sine', 0.2, 0.04);
+      logToTerminal('ALARM ACKNOWLEDGED BY FLIGHT CONTROLLER. AIRLOCK-B SEAL RE-ENGAGED. PRESSURE RESTORED.');
+    }
+
+    // Interactive ECLSS and Station Controls
+    function triggerPurgeAirlock() {
+      playTone(1100, 'sine', 0.1);
+      logToTerminal('AIRLOCK-A CYCLE COMMENCED: DEPRESSURIZING TO 0.70 kPa FOR EVA SURFACE EGRESS...');
+    }
+
+    function emergencyIsolation() {
+      playTone(800, 'square', 0.15);
+      logToTerminal('HAB BAY 4 BLAST BULKHEAD ISOLATION DOORS ENGAGED.');
+    }
+
+    function adjustMoxie(delta) {
+      playTone(1050, 'sine', 0.08);
+      logToTerminal(`MOXIE COMPRESSOR MASS FLOW ADJUSTED BY ${delta > 0 ? '+' : ''}${delta}%. NEW CORE TEMP: 802°C.`);
+    }
+
+    function cycleScrubbers() {
+      playTone(950, 'sine', 0.08);
+      logToTerminal('CDRA CANISTER REVERSAL INITIATED: BED A → ABSORBING, BED B → THERMAL DESORPTION.');
+    }
+
+    function purgeN2Buffer() {
+      playTone(1300, 'sine', 0.06);
+      logToTerminal('VENT TEST: NITROGEN MANIFOLD 500ms PULSE OK. PRESSURE Δ: 0.003 BAR.');
+    }
+
+    function toggleRoverRecharge(btn) {
+      playTone(850, 'sine', 0.05);
+      if (btn.innerText === 'TOGGLE') {
+        btn.innerText = 'OFF';
+        btn.className = 'px-2 py-0.5 text-[10px] border border-[#2B2F42] text-[#D0D6F9]/50 bg-[#0B0D17]';
+        logToTerminal('BUS-D: EXTERIOR ROVER RECHARGE DOCK LOAD SHED (1.20 kWe SAVED).');
+      } else {
+        btn.innerText = 'TOGGLE';
+        btn.className = 'px-2 py-0.5 text-[10px] border border-emerald-500 text-emerald-400 bg-emerald-950/40';
+        logToTerminal('BUS-D: EXTERIOR ROVER RECHARGE DOCK ENERGIZED.');
+      }
+    }
+
+    function triggerElectrostaticClean() {
+      playTone(1600, 'sine', 0.2, 0.06);
+      logToTerminal('ELECTROSTATIC DUST REMOVAL PULSE TRIGGERED ACROSS SOLAR ARRAYS 1-4. EFFICIENCY ESTIMATE +8.5%.');
+    }
+
+    function pingCrewAudio(crewName) {
+      playTone(800, 'sine', 0.08);
+      setTimeout(() => playTone(1200, 'sine', 0.12), 100);
+      logToTerminal(`AUDIO LINK ENGAGED WITH [${crewName}] OVER HAB-COMM ULTRA-WIDEBAND.`);
+    }
+
+    // Terminal Commands
+    function logToTerminal(msg) {
+      const output = document.getElementById('terminal-output');
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0];
+      const div = document.createElement('div');
+      div.className = msg.includes('***') ? 'text-[#FC3D21] font-bold' : msg.includes('ALARM') ? 'text-amber-400' : 'text-[#D0D6F9]';
+      div.innerText = `[SOL 482 ${timeStr}] ${msg}`;
+      output.appendChild(div);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    function clearTerminalLogs() {
+      document.getElementById('terminal-output').innerHTML = '<div class="text-[#D0D6F9]/60">[TERMINAL LOG CLEARED BY USER]</div>';
+    }
+
+    function handleCommandSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('terminal-input');
+      const val = input.value.trim().toLowerCase();
+      if (!val) return;
+
+      playTone(1200, 'sine', 0.04);
+      logToTerminal(`> ${input.value}`);
+      input.value = '';
+
+      if (val === 'help') {
+        logToTerminal('AVAILABLE COMMANDS: "status hab", "alert dust", "clear", "ping dsn", "eclss purge", "moxie boost", "power status"');
+      } else if (val === 'status hab') {
+        logToTerminal('HAB STATUS: 70.4 kPa | 21.4% O2 | TEMP: +21.2°C | 4 CREW HEALTHY | SHIELDING 100%');
+      } else if (val === 'alert dust' || val === 'alert') {
+        toggleEmergencySimulation();
+      } else if (val === 'clear') {
+        clearTerminalLogs();
+      } else if (val === 'ping dsn') {
+        logToTerminal('DSN PING: GOLDSTONE 70M LINK VERIFIED. SIGNAL MARGIN +18.4 dB. ONE-WAY LIGHT: 14m 22s.');
+      } else if (val === 'eclss purge') {
+        triggerPurgeAirlock();
+      } else if (val === 'moxie boost') {
+        adjustMoxie(10);
+      } else if (val === 'power status') {
+        logToTerminal('POWER GRID: KILOPOWER 9.64 kWe + SOLAR 5.21 kWe = 14.85 kWe TOTAL. RESERVE: 96.4%.');
+      } else {
+        logToTerminal(`COMMAND NOT RECOGNIZED: "${val}". TYPE "help" FOR SYNTAX.`);
+      }
+    }
+
+    // Initial setup
+    window.addEventListener('load', () => {
+      drawJezeroRadar();
+    });
+  </script>
+</body>
+</html>

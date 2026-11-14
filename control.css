@@ -860,3 +860,63 @@ body.is-file-dragging .dropHint {
     margin-top: 8vh;
   }
 }
+
+/* ==========================================================================
+   AERONAUTICAL MISSION CONTROL DASHBOARD WORKSPACE
+   ========================================================================== */
+.dashboardWorkspace {
+  display: none;
+  position: absolute;
+  inset: 16px 20px 20px calc(var(--ui-rail) + 24px);
+  z-index: 23;
+  background: #0B0D17;
+  border: 1px solid #2B2F42;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+}
+
+body[data-module="dashboard"] .dashboardWorkspace {
+  display: flex;
+}
+
+body[data-module="dashboard"] :is(.sidebar, .details, .panelEdgeToggle, .mapToolbar, .missionHud, .uiCanvasWelcome, .imageryDetailStatus, .mapCoordChip, .mapScaleChip, .north) {
+  display: none !important;
+}
+
+.dashboardFrame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  flex: 1;
+}
+
+.topbarDashboardBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: bold;
+  background: rgba(153, 61, 0, 0.4);
+  color: #E27B58;
+  border: 1px solid #E27B58;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+.topbarDashboardBtn:hover {
+  background: #E27B58;
+  color: #0B0D17;
+  box-shadow: 0 0 10px rgba(226, 123, 88, 0.5);
+}
+
+@media (max-width: 760px) {
+  .dashboardWorkspace {
+    inset: 8px 8px 56px 8px;
+  }
+}
