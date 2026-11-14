@@ -3,7 +3,14 @@
   if(typeof module==='object'&&module.exports)module.exports=factory(require('./validation.cjs'));
   else root.JEZERO_ROUTING=factory(root.JEZERO_VALIDATION);
 })(typeof globalThis!=='undefined'?globalThis:this,function(validation){
-  function createEngine({getElevations,optimizeOrderEnabled=()=>true}){
+  // Criterios de movilidad a pie con traje: NASA EVA-EXP-0042 Rev. B (xEVA System Concept of Operations).
+// walkRadiusKm: radio de caminata desde el modulo, ~2 km radiales.
+// walkbackKm: caminata de regreso con rover no presurizado, ~10 km (unas 5 h a 2 km/h).
+// Criterios lunares (1/6 g). En Marte (0,38 g) caminar cuesta mas: limite superior optimista.
+const EVA_LIMITS=Object.freeze({walkRadiusKm:2,walkbackKm:10,speedKmH:2,maxSlopeDeg:20,
+  source:'NASA EVA-EXP-0042 Rev. B',
+  caveat:'Criterios de EVA lunar (1/6 g); en Marte (0,38 g) son un limite superior optimista.'});
+function createEngine({getElevations,optimizeOrderEnabled=()=>true}){
     if(typeof getElevations!=='function')throw new Error('Se requiere un proveedor de elevación.');
     const MARTIAN_RADIUS=3389.5,DEM_RESOLUTION_KM=.2;
     const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
@@ -423,7 +430,8 @@ async function chooseSequence(mode,basePoints,returnBase,params,legCache){
 }
 
 function aggregateMission(legs,mode,params,sequence){
-  const metrics={distanceKm:0,gainM:0,descentM:0,elevationChangeM:0,maxSlopeDeg:null,avgSlopeDeg:null,maxUphillSlopeDeg:null,maxDownhillSlopeDeg:null,avgUphillSlopeDeg:null,avgDownhillSlopeDeg:null,avgTransitability:null,minTransitability:null,avgConfidence:null,minConfidence:null,avgRoughnessDeg:null,uncertainDistanceKm:0,difficultDistanceKm:0,segments:0};
+  const metrics={distanceKm:0,gainM:0,descentM:0,elevationChangeM:0,maxSlopeDeg:null,avgSlopeDeg:null,maxUphillSlopeDeg:null,maxDownhillSlopeDeg:null,avgUphillSlopeDeg:null,avgDownhillSlopeDeg:null,avgTransitability:null,minTransitability:null,avgConfidence:null,minConfidence:null,avgRoughnessDeg:null,uncertainDistanceKm:0,difficultDistanceKm:0,segments:0,
+    maxRadialKm:null,walkRadiusLimitKm:null,walkbackLimitKm:null,radiusExceeded:false,walkbackExceeded:false};
   let weightedSlope=0,weightedDistance=0,weightedUp=0,weightedDown=0,weightedTransit=0,weightedConfidence=0,weightedRough=0;
   legs.forEach(leg=>{
     const lm=leg.metrics,dist=lm.distanceKm||0;
@@ -450,6 +458,15 @@ function aggregateMission(legs,mode,params,sequence){
   metrics.avgTransitability=weightedDistance?weightedTransit/weightedDistance:null;
   metrics.avgConfidence=weightedDistance?weightedConfidence/weightedDistance:null;
   metrics.avgRoughnessDeg=weightedDistance?weightedRough/weightedDistance:null;
+  // Radio maximo: distancia directa de la base a la parada mas lejana. No es la longitud recorrida,
+  // y se compara con los criterios de EVA-EXP-0042 (radio de caminata y walkback).
+  const originPoint=sequence.find(p=>p.type==='base')||sequence[0];
+  const radialDistances=originPoint?sequence.map(p=>haversine(originPoint,p)).filter(Number.isFinite):[];
+  metrics.maxRadialKm=radialDistances.length?Math.max(...radialDistances):null;
+  metrics.walkRadiusLimitKm=finiteValue(params.walkRadiusKm)?Number(params.walkRadiusKm):EVA_LIMITS.walkRadiusKm;
+  metrics.walkbackLimitKm=finiteValue(params.walkbackKm)?Number(params.walkbackKm):EVA_LIMITS.walkbackKm;
+  metrics.radiusExceeded=Number.isFinite(metrics.maxRadialKm)&&metrics.maxRadialKm>metrics.walkRadiusLimitKm;
+  metrics.walkbackExceeded=Number.isFinite(metrics.maxRadialKm)&&metrics.maxRadialKm>metrics.walkbackLimitKm;
   const dwellMinutes=sequence.reduce((s,p)=>s+(Number(p.dwellMin)||0),0);
   const duration=legs.reduce((sum,leg)=>sum+leg.durationHours,0)+dwellMinutes/60;
   const scores=legs.map(x=>riskScore(x.metrics)).filter(Number.isFinite);
@@ -467,7 +484,7 @@ function validateFinalPath(path,params){
   return true;
 }
 
-return Object.freeze({haversine,pathMetrics,nearestNode,neighbors,heuristic,analyzeEdge,edgeCost,aStar,forceEndpoints,shortestLonDelta,interpolateLon,buildGrid,stddev,annotateGridTerrain,gridSizeForDistanceKm,calculateLeg,riskScore,riskLabel,availableMissionHours,estimateDuration,formatHours,formatSignedMargin,sequenceWithReturn,createLegCache,getCachedLeg,evaluateSequence,routeOrderGeodesicCost,heldKarpWaypointOrder,heuristicWaypointOrder,waypointOrderSeed,missionOrderObjective,refineWaypointOrder,chooseSequence,aggregateMission,validateFinalPath});
+return Object.freeze({haversine,pathMetrics,nearestNode,neighbors,heuristic,analyzeEdge,edgeCost,aStar,forceEndpoints,shortestLonDelta,interpolateLon,buildGrid,stddev,annotateGridTerrain,gridSizeForDistanceKm,calculateLeg,riskScore,riskLabel,availableMissionHours,estimateDuration,formatHours,formatSignedMargin,sequenceWithReturn,createLegCache,getCachedLeg,evaluateSequence,routeOrderGeodesicCost,heldKarpWaypointOrder,heuristicWaypointOrder,waypointOrderSeed,missionOrderObjective,refineWaypointOrder,chooseSequence,aggregateMission,validateFinalPath,EVA_LIMITS});
   }
-  return Object.freeze({createEngine,algorithmVersion:'44.0'});
+  return Object.freeze({createEngine,algorithmVersion:'44.0',EVA_LIMITS});
 });

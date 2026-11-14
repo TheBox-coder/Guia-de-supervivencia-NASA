@@ -20,7 +20,7 @@ const PUBLIC_FILES = new Set([
   '/assets/jezero-mark.svg',
   '/service-worker.js','/modules/offline.js',
   '/survival.css','/modules/survival-engine.cjs','/modules/survival.js','/modules/demo.js','/examples/survival-demo.json','/assets/vendor/ol.js','/assets/vendor/ol.css',
-  '/interface.css','/modules/interface.js','/examples/01-jezero-corto.json','/examples/02-jezero-varios-objetivos.json','/examples/03-presupuesto-ajustado.json','/index.html','/style.css','/script.js','/mars-elevation.js','/mars-data.json',
+  '/interface.css','/modules/interface.js','/examples/01-jezero-corto.json','/examples/02-jezero-varios-objetivos.json','/examples/03-presupuesto-ajustado.json','/examples/04-eva-01-jezero.json','/index.html','/style.css','/script.js','/mars-elevation.js','/mars-data.json',
   '/modules/route-engine.cjs','/modules/theme.js','/modules/i18n.js','/modules/module-shell.js','/modules/validation.cjs',
   '/assets/favicon.ico','/assets/favicon-256.png','/assets/favicon-32.png',
   '/assets/favicon-64.png','/assets/mars-2020-logo.png',

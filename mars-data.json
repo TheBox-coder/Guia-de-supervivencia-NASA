@@ -1,23 +1,23 @@
 {
   "app": {
-    "name": "JEZERO Survival Lab",
+    "name": "JEZERO",
     "language": "es",
-    "region": "Marte Global",
+    "region": "Cráter Jezero · EVA-01",
     "mode": "research-planning",
     "disclaimer": "Índice experimental de riesgo topográfico; no constituye certificación de seguridad para una misión tripulada.",
     "scope": "global",
-    "version": "V51"
+    "version": "4.0.0-p0"
   },
   "region": {
-    "name": "Marte Global",
-    "lat": 0,
-    "lon": 0,
-    "zoom": 1.5,
+    "name": "Cráter Jezero · EVA-01",
+    "lat": 18.4448,
+    "lon": 77.4253,
+    "zoom": 11,
     "bbox": [
-      -180,
-      -90,
-      180,
-      90
+      77.2,
+      18.3,
+      77.65,
+      18.6
     ]
   },
   "referencePoints": [
@@ -32,6 +32,16 @@
     }
   ],
   "sources": [
+    {
+      "name": "Mars 2020 waypoints (MMGIS)",
+      "url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+      "use": "Paradas reales de Perseverance: coordenadas, sol, elevación y panorámicas. Instantánea del 14 de noviembre de 2026: 708 paradas, soles 13 a 2022."
+    },
+    {
+      "name": "NASA EVA-EXP-0042 Rev. B",
+      "url": "https://www.nasa.gov/wp-content/uploads/2017/02/eva-exp-0042_xeva_system_con_ops_rev_b_final_dtd_10192020_ref_doc.pdf",
+      "use": "Criterios de movilidad a pie con traje: pendiente hasta 20°, ritmo ~2 km/h, radio de caminata ~2 km, walkback ~10 km. Criterios lunares."
+    },
     {
       "name": "NASA Mars Trek",
       "url": "https://trek.nasa.gov/mars/",
@@ -204,6 +214,50 @@
     }
   ],
   "knownLocations": [
+    {
+      "id": "eva01-base",
+      "name": "EVA-01 · Base hipotética",
+      "category": "Base EVA (hipotética)",
+      "lat": 18.4448,
+      "lon": 77.4253,
+      "minZoom": 7,
+      "description": "Punto de partida hipotético de la caminata EVA-01, elegido por el equipo JEZERO porque deja los tres objetivos dentro del radio de caminata a pie de unos 2 km de NASA EVA-EXP-0042 Rev. B. No es un sitio de la NASA ni un emplazamiento propuesto de hábitat.",
+      "source": "Sitio hipotético del equipo JEZERO; criterio de radio de NASA EVA-EXP-0042 Rev. B",
+      "sourceUrl": "https://www.nasa.gov/wp-content/uploads/2017/02/eva-exp-0042_xeva_system_con_ops_rev_b_final_dtd_10192020_ref_doc.pdf"
+    },
+    {
+      "id": "eva01-fondo-crater",
+      "name": "EVA-01 · Fondo del cráter (Máaz / Séítah)",
+      "category": "Objetivo EVA-01 · ígneo",
+      "lat": 18.430739,
+      "lon": 77.444366,
+      "minZoom": 7,
+      "description": "Parada real de Perseverance del sol 180, dentro de la campaña del fondo del cráter. Las dos formaciones del fondo son ígneas y alteradas por agua: Séítah, ultramáfica y rica en olivino, debajo de Máaz, máfica. Objetivo: roca ígnea datable para fijar la cronología del cráter.",
+      "source": "NASA/JPL-Caltech · M20_waypoints.json, sol 180",
+      "sourceUrl": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json"
+    },
+    {
+      "id": "eva01-frente-delta",
+      "name": "EVA-01 · Frente del delta (Hogwallow Flats)",
+      "category": "Objetivo EVA-01 · sedimentario",
+      "lat": 18.458895,
+      "lon": 77.406168,
+      "minZoom": 7,
+      "description": "Parada real de Perseverance del sol 477, dentro de la ventana de la campaña de Hogwallow Flats (soles 461 a 517). Areniscas y limolitas de grano fino del frente del delta, con sulfatos, filosilicatos y materia orgánica. Objetivo: sedimento lacustre de grano fino, el mejor candidato a preservar bioseñales.",
+      "source": "NASA/JPL-Caltech · M20_waypoints.json, sol 477",
+      "sourceUrl": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json"
+    },
+    {
+      "id": "eva01-delta-superior",
+      "name": "EVA-01 · Delta superior",
+      "category": "Objetivo EVA-01 · sedimentario",
+      "lat": 18.453532,
+      "lon": 77.399147,
+      "minZoom": 7,
+      "description": "Parada real de Perseverance del sol 606, sobre el delta por encima del frente. Objetivo: contraste estratigráfico con el frente del delta dentro de la misma caminata, a 0,5 km de Hogwallow Flats.",
+      "source": "NASA/JPL-Caltech · M20_waypoints.json, sol 606",
+      "sourceUrl": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json"
+    },
     {
       "id": "olympus-mons",
       "name": "Olympus Mons",
@@ -749,6 +803,16 @@
     "marsRadiusKm": 3389.5,
     "demNominalResolutionM": 200,
     "sampleQualityMeaning": "Completitud y densidad del muestreo; no es una probabilidad de seguridad.",
-    "searchScope": "Corredor común de búsqueda para las tres estrategias."
+    "searchScope": "Corredor común de búsqueda para las tres estrategias.",
+    "evaCriteria": {
+      "source": "NASA EVA-EXP-0042 Rev. B",
+      "sourceUrl": "https://www.nasa.gov/wp-content/uploads/2017/02/eva-exp-0042_xeva_system_con_ops_rev_b_final_dtd_10192020_ref_doc.pdf",
+      "walkRadiusKm": 2,
+      "walkbackKm": 10,
+      "speedKmH": 2,
+      "maxSlopeDeg": 20,
+      "evaHours": 6,
+      "caveat": "Criterios de EVA lunar (1/6 g). En Marte (0,38 g) caminar con traje cuesta más: son un límite superior optimista, no una medida marciana."
+    }
   }
 }

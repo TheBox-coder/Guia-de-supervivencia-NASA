@@ -407,7 +407,7 @@
           </label>
           <label class="mapVisualModeLabel" for="mapVisualMode">Estilo cartográfico
             <select id="mapVisualMode">
-              <option value="geology">Geología · color MOLA</option>
+              <option value="geology">Topografía · color MOLA</option>
               <option value="relief">Relieve · contraste</option>
               <option value="mono">Monocromo científico</option>
               <option value="eva">EVA · baja luminosidad</option>
@@ -416,12 +416,12 @@
           <div class="mapQuickLayers">
             <label><input type="checkbox" data-quick-layer="slope"><span><b>Pendiente</b><small>Derivada del DEM</small></span></label>
             <label><input type="checkbox" data-quick-layer="roughness"><span><b>Rugosidad</b><small>Variación local</small></span></label>
-            <label><input type="checkbox" data-imagery-detail checked><span><b>Detalle automático CTX / HiRISE en Jezero</b><small>Cobertura regional. La imagen no cambia el DEM de ~200 m.</small></span></label><label><input type="checkbox" data-quick-layer="route" checked><span><b>Rutas EVA</b><small>Corredor y alternativas</small></span></label>
+            <label><input type="checkbox" data-imagery-detail checked><span><b>Detalle automático CTX / HiRISE en Jezero</b><small>Cobertura regional. La imagen no cambia el DEM de ~200 m.</small></span></label><label><input type="checkbox" data-thermal-themis><span><b>Térmica · THEMIS IR día</b><small>Mars Odyssey, 100 m/píxel. Inercia térmica diurna de la superficie; no es temperatura del aire.</small></span></label><label><input type="checkbox" data-quick-layer="route" checked><span><b>Rutas EVA</b><small>Corredor y alternativas</small></span></label>
             <label><input type="checkbox" data-quick-layer="points" checked><span><b>Puntos de misión</b><small>Base y paradas</small></span></label>
             <label><input type="checkbox" data-quick-layer="known" checked><span><b>Nombres IAU / USGS</b><small>Se cargan por zona al acercar</small></span></label>
             <label><input type="checkbox" data-quick-layer="landing" checked><span><b>Aterrizajes</b><small>NASA + Zhurong y referencias históricas</small></span></label>
           </div>
-          <div class="mapLayerSourceNote"><b>FUENTES</b><span>Viking VIS / MOLA: NASA Mars Trek · Nombres: USGS Gazetteer / IAU</span></div>
+          <div class="mapLayerSourceNote"><b>FUENTES</b><span>Viking VIS / MOLA / THEMIS IR: NASA Mars Trek · Nombres: USGS Gazetteer / IAU</span></div>
           <div class="mapLegend mapLegendInline is-collapsed" id="mapLegend" aria-label="Leyenda del mapa">
             <div class="mapLegendHeader"><div><strong>SIMBOLOGÍA</strong><small>Base, puntos, referencias y sentido de marcha</small></div><button id="toggleMapLegend" type="button" aria-expanded="false" aria-controls="mapLegendBody">＋</button></div>
             <div class="mapLegendBody" id="mapLegendBody">
@@ -546,13 +546,14 @@
 
       <section class="card">
         <div class="sectionTitle">PARÁMETROS OPERACIONALES</div>
-        <label class="inputRow"><span>Velocidad nominal</span><input id="speed" type="number" min="0.1" max="10" step="0.1" value="1.2"><em>km/h</em></label>
-        <label class="inputRow"><span>Tiempo máximo EVA</span><input id="evaTime" type="number" min="0.5" max="24" step="0.5" value="8"><em>h</em></label>
+        <label class="inputRow"><span>Velocidad nominal</span><input id="speed" type="number" min="0.1" max="10" step="0.1" value="2"><em>km/h</em></label>
+        <label class="inputRow"><span>Tiempo máximo EVA</span><input id="evaTime" type="number" min="0.5" max="24" step="0.5" value="6"><em>h</em></label>
         <label class="inputRow"><span>Margen de retorno</span><input id="returnMargin" type="number" min="0" max="80" step="5" value="25"><em>%</em></label>
         <div class="sectionTitle constraintTitle">LÍMITES DUROS DE NAVEGACIÓN</div>
-        <label class="inputRow"><span>Pendiente máxima permitida</span><input id="maxSlopeLimit" type="number" min="1" max="45" step="1" value="25"><em>°</em></label>
+        <label class="inputRow"><span>Pendiente máxima permitida</span><input id="maxSlopeLimit" type="number" min="1" max="45" step="1" value="20"><em>°</em></label>
         <label class="inputRow"><span>Transitabilidad mínima</span><input id="minTransitability" type="number" min="0" max="100" step="5" value="25"><em>/100</em></label>
         <label class="inputRow"><span>Calidad de muestreo mínima</span><input id="minConfidence" type="number" min="0" max="100" step="5" value="20"><em>%</em></label>
+        <small class="paramSource">Velocidad 2 km/h, EVA 6 h, pendiente ≤ 20° y el radio de caminata de 2 km vienen de NASA EVA-EXP-0042 Rev. B. Son criterios de EVA lunar (1/6 g): en Marte (0,38 g) caminar con traje cuesta más, así que son un límite superior optimista. Transitabilidad, calidad de muestreo y rugosidad son heurísticas propias de JEZERO, no criterios de la NASA.</small>
         <button class="primary recalcAction" id="recalculate" disabled><span>↻</span> Recalcular misión</button>
         <div class="calcMeta"><b id="calcParams">—</b><small id="lastCalculated">Último cálculo: —</small></div>
       </section>
@@ -565,6 +566,7 @@
           <div><span>CALIDAD</span><b id="avgConfidence" title="Índice de completitud y densidad del muestreo; no es una probabilidad de seguridad.">—</b></div>
           <div><span>CALIDAD MÍN.</span><b id="minConfidenceMetric">—</b></div>
           <div><span>RUGOSIDAD</span><b id="avgRoughnessDisplay">—</b></div>
+          <div><span>RADIO MÁX.</span><b id="maxRadialMetric" title="Distancia directa de la base a la parada más lejana, frente al radio de caminata a pie de NASA EVA-EXP-0042 Rev. B. Criterio de EVA lunar.">—</b></div>
         </div>
         <div class="riskBar"><i id="riskBar"></i></div>
         <div class="terrainInstrumentFooter"><span id="riskLabel">Sin evaluación</span><b id="riskNumber">—</b></div>

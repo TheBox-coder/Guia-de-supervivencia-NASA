@@ -7,8 +7,13 @@
   const MAX_POINTS = 64;
   const MODES = ['distance', 'balanced', 'risk'];
   const PARAM_RULES = {
-    speed: [.1, 20, 1.2], evaTime: [.5, 72, 8], returnMargin: [0, 80, 25],
-    maxSlopeLimit: [1, 45, 25], minTransitability: [0, 100, 25], minConfidence: [0, 100, 20]
+    // Valores por defecto con fuente: NASA EVA-EXP-0042 Rev. B, Exploration EVA System Concept of Operations.
+    // Ritmo de planificacion ~2 km/h en regolito relativamente llano (la NASA advierte que no considera
+    // pendientes ni bloques); EVA nominal 6 h +- 2 h; pendiente transitable a pie hasta 20 grados.
+    // Son criterios lunares (1/6 g): en Marte (0,38 g) caminar con traje cuesta mas, asi que son un
+    // limite superior optimista, no una medida marciana.
+    speed: [.1, 20, 2], evaTime: [.5, 72, 6], returnMargin: [0, 80, 25],
+    maxSlopeLimit: [1, 45, 20], minTransitability: [0, 100, 25], minConfidence: [0, 100, 20]
   };
   function numeric(value, fallback = null) {
     if (typeof value !== 'number' && typeof value !== 'string') return fallback;

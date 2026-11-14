@@ -13,14 +13,18 @@
     {id:'themis',kind:'themis',name:'THEMIS IR día · Marte global',label:'THEMIS_DayIR_ControlledMosaics_100m_v2_oct2018',extent:[-180,-90,180,90],maxZoom:9,minZoom:5,global:true},
     ...[...regional,...jezero].sort((a,b)=>(a.kind==='hirise')-(b.kind==='hirise'))
   ].map(c=>({...c,resolution:RESOLUTION[c.kind]}));
-  let layers=[],lastMap=null,mode='viking',failures=new Set(),loaded=new Set(),enabled=true;
+  let layers=[],lastMap=null,mode='viking',failures=new Set(),loaded=new Set(),enabled=true,thermal=false;
   try{enabled=localStorage.getItem('jezero-imagery-detail')!=='off';}catch{}
+  // THEMIS IR es una capa térmica con su propio interruptor: no es "detalle de imagen" de Jezero.
+  try{thermal=localStorage.getItem('jezero-thermal-themis')==='on';}catch{}
+  const isThermal=config=>config.kind==='themis';
+  const wanted=config=>isThermal(config)?thermal:(enabled&&mode!=='mola');
   function install(map){
     if(lastMap===map)return;lastMap=map;
     layers=configs.map((c,index)=>{const grid=new ol.tilegrid.TileGrid({extent:[-180,-90,180,90],origin:[-180,90],tileSize:256,resolutions:Array.from({length:c.maxZoom+1},(_,z)=>.703125/2**z)});
       const source=new ol.source.XYZ({projection:'EPSG:4326',tileGrid:grid,url:ROOT+c.label+'/1.0.0/default/default028mm/{z}/{y}/{x}.png',crossOrigin:'anonymous',transition:160,wrapX:c.global===true,attributions:c.global?'NASA / JPL / ASU · Mars Odyssey '+c.name:'NASA / JPL / USGS · MRO '+c.name});
       // Clase propia por capa: cada mosaico tiene su lienzo y el difuminado de uno no recorta al otro.
-      const layer=new ol.layer.Tile({source,extent:c.global?undefined:c.extent,minZoom:c.minZoom,zIndex:{themis:1.05,ctx:1.1,hirise:1.2}[c.kind],visible:enabled,className:`ol-layer jezero-detail-layer jezero-detail-${index}`});
+      const layer=new ol.layer.Tile({source,extent:c.global?undefined:c.extent,minZoom:c.minZoom,zIndex:{themis:1.05,ctx:1.1,hirise:1.2}[c.kind],visible:wanted(c),className:`ol-layer jezero-detail-layer jezero-detail-${index}`});
       source.on('tileloaderror',()=>{failures.add(c.id);status();});source.on('tileloadend',()=>{loaded.add(c.id);failures.delete(c.id);status();});
       if(!c.global)feather(layer,c.extent);
       map.addLayer(layer);return {config:c,layer};});
@@ -53,15 +57,18 @@
     const badge=document.getElementById('imageryDetailStatus');if(!badge||!lastMap)return;
     const [lon,lat]=lastMap.getView().getCenter(),zoom=lastMap.getView().getZoom();
     const inside=c=>lon>=c.extent[0]&&lon<=c.extent[2]&&lat>=c.extent[1]&&lat<=c.extent[3];
-    const eligible=enabled&&mode!=='mola'?configs.filter(c=>inside(c)&&zoom>c.minZoom):[];
+    const eligible=enabled&&mode!=='mola'?configs.filter(c=>!isThermal(c)&&inside(c)&&zoom>c.minZoom):[];
     const best=eligible.filter(c=>loaded.has(c.id)&&!failures.has(c.id)).at(-1),pending=eligible.at(-1);
     badge.dataset.state=best?'detail':pending?'loading':zoom>7&&mode!=='mola'?'limited':'global';
     badge.textContent=best?`${best.name} · ${best.resolution}`:pending?`${pending.name} · ${failures.has(pending.id)?'servicio no disponible':'cargando detalle'}`:mode==='mola'?'MOLA / HRSC · relieve':zoom>7?'Viking global · límite de detalle':'Viking · mosaico global';
     badge.title='Detalle de imagen, no resolución de cálculo. DEM del planificador: ~200 m. Los mosaicos regionales pueden tener huecos.';
     document.querySelectorAll('[data-imagery-detail]').forEach(el=>el.checked=enabled);
+    document.querySelectorAll('[data-thermal-themis]').forEach(el=>el.checked=thermal);
   }
-  function setMode(value){mode=value;layers.forEach(x=>x.layer.setVisible(enabled&&mode!=='mola'));status();}
+  function applyVisibility(){layers.forEach(x=>x.layer.setVisible(wanted(x.config)));}
+  function setMode(value){mode=value;applyVisibility();status();}
   document.querySelectorAll('[data-imagery-detail]').forEach(el=>el.addEventListener('change',()=>{enabled=el.checked;try{localStorage.setItem('jezero-imagery-detail',enabled?'on':'off');}catch{}setMode(mode);}));
+  document.querySelectorAll('[data-thermal-themis]').forEach(el=>el.addEventListener('change',()=>{thermal=el.checked;try{localStorage.setItem('jezero-thermal-themis',thermal?'on':'off');}catch{}applyVisibility();status();}));
   document.getElementById('mapJezeroDetail')?.addEventListener('click',()=>{if(lastMap)lastMap.getView().animate({center:[77.45088,18.44463],zoom:12.5,duration:450});});
-  window.JEZERO_IMAGERY=Object.freeze({install,setMode,status,getSources:()=>configs.map(c=>({...c}))});
+  window.JEZERO_IMAGERY=Object.freeze({install,setMode,status,setThermal:value=>{thermal=!!value;try{localStorage.setItem('jezero-thermal-themis',thermal?'on':'off');}catch{}applyVisibility();status();},isThermal:()=>thermal,getSources:()=>configs.map(c=>({...c}))});
 })();

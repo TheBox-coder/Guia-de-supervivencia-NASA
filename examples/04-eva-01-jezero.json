@@ -1,0 +1,51 @@
+{
+  "format": "JEZERO-MISSION",
+  "version": 44,
+  "mode": "balanced",
+  "returnBase": true,
+  "optimizeOrder": true,
+  "points": [
+    {
+      "lat": 18.4448,
+      "lon": 77.4253,
+      "name": "Base EVA-01 (hipotética)",
+      "type": "base",
+      "dwellMin": 0
+    },
+    {
+      "lat": 18.430739,
+      "lon": 77.444366,
+      "name": "Fondo del cráter · Máaz/Séítah (sol 180)",
+      "type": "target",
+      "dwellMin": 30
+    },
+    {
+      "lat": 18.458895,
+      "lon": 77.406168,
+      "name": "Frente del delta · Hogwallow Flats (sol 477)",
+      "type": "target",
+      "dwellMin": 30
+    },
+    {
+      "lat": 18.453532,
+      "lon": 77.399147,
+      "name": "Delta superior (sol 606)",
+      "type": "target",
+      "dwellMin": 20
+    }
+  ],
+  "params": {
+    "speed": 2,
+    "evaTime": 6,
+    "returnMargin": 25,
+    "maxSlopeLimit": 20,
+    "minTransitability": 25,
+    "minConfidence": 20
+  },
+  "missionMeta": {
+    "missionName": "EVA-01 Jezero: fondo del cráter al frente del delta",
+    "missionCode": "EVA-01",
+    "crew": "2 caminantes",
+    "notes": "Escenario de planificación, no una misión aprobada. La base es un punto hipotético elegido por el equipo JEZERO para que los tres objetivos queden dentro del radio de caminata a pie de unos 2 km de NASA EVA-EXP-0042 Rev. B; no es un sitio de la NASA. Los tres objetivos son paradas reales de Perseverance tomadas de M20_waypoints.json (soles 180, 477 y 606). Bucle de unos 6,1 km con radio máximo de 1,6 km. Con 80 minutos de tiempo en estaciones cabe en una EVA de 6 h con un 25% de margen de retorno; si subes el tiempo en estaciones, sube también el tiempo de EVA. El DEM de cálculo sigue siendo de ~200 m: a esa resolución no se detectan bloques ni escarpes métricos."
+  }
+}

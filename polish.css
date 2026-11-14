@@ -203,3 +203,8 @@ body.jezero-ui .toolButton svg,
     grid-template-columns: 1fr;
   }
 }
+
+/* Procedencia de los umbrales operacionales y aviso de radio de caminata. */
+.paramSource{display:block;margin:6px 0 10px;line-height:1.45;opacity:.72;font-size:11px}
+#maxRadialMetric[data-state="over-radius"]{color:var(--warn,#d9a21b)}
+#maxRadialMetric[data-state="over-walkback"]{color:var(--danger,#d4502a)}

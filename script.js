@@ -120,7 +120,7 @@ async function prepareLayerSources(){
 function initMap(){
   const projection = ol.proj.get('EPSG:4326');
   const layers = buildLayers().layers;
-  map = new ol.Map({ target:'map', layers, view:new ol.View({ projection, center:[0,0], zoom:1.5, resolutions:Array.from({length:18},(_,z)=>0.703125/Math.pow(2,z)) }), controls:[] });
+  map = new ol.Map({ target:'map', layers, view:new ol.View({ projection, center:[Number(D.region?.lon)||0,Number(D.region?.lat)||0], zoom:Number(D.region?.zoom)||1.5, resolutions:Array.from({length:18},(_,z)=>0.703125/Math.pow(2,z)) }), controls:[] });
   window.JEZERO_IMAGERY?.install(map);
   map.on('pointermove', evt=>{ const c=evt.coordinate; if(c) $('coordReadout').textContent=`${formatLat(c[1])} · ${formatLon(c[0])}`; });
   map.on('singleclick', onMapClick);
@@ -1010,7 +1010,16 @@ function renderMission(mission){
   $('riskNumber').textContent=Number.isFinite(score)?score:'—';$('riskLabel').textContent=Number.isFinite(score)?riskLabel(score):'Sin evaluación';$('riskBar').style.width=`${Number.isFinite(score)?score:0}%`;
   $('avgSlope').textContent=Number.isFinite(m.avgSlopeDeg)?`${m.avgSlopeDeg.toFixed(1)}°`:'—';$('segments').textContent=m.segments;$('legsCount').textContent=mission.legs.length;$('dwellTotal').textContent=`${Number.isFinite(mission.dwellMinutes)?mission.dwellMinutes:0} min`;$('missionMargin').textContent=formatSignedMargin(margin);
   if($('avgTransitability'))$('avgTransitability').textContent=Number.isFinite(m.avgTransitability)?`${m.avgTransitability.toFixed(0)}/100`:'—';if($('minTransitabilityMetric'))$('minTransitabilityMetric').textContent=Number.isFinite(m.minTransitability)?`${m.minTransitability.toFixed(0)}/100`:'—';if($('avgConfidence'))$('avgConfidence').textContent=Number.isFinite(m.avgConfidence)?`${m.avgConfidence.toFixed(0)}%`:'—';if($('minConfidenceMetric'))$('minConfidenceMetric').textContent=Number.isFinite(m.minConfidence)?`${m.minConfidence.toFixed(0)}%`:'—';if($('avgRoughnessDisplay'))$('avgRoughnessDisplay').textContent=Number.isFinite(m.avgRoughnessDeg)?`${m.avgRoughnessDeg.toFixed(1)}°`:'—';
+  if($('maxRadialMetric')){
+    const radial=$('maxRadialMetric');
+    radial.textContent=Number.isFinite(m.maxRadialKm)?`${m.maxRadialKm.toFixed(2)} / ${Number(m.walkRadiusLimitKm).toFixed(0)} km`:'—';
+    radial.dataset.state=m.walkbackExceeded?'over-walkback':m.radiusExceeded?'over-radius':'ok';
+  }
   $('calcParams').textContent=`${mission.params.speed.toFixed(1)} km/h · EVA ${mission.params.evaTime.toFixed(1)} h · margen ${mission.params.returnMargin}% · pendiente ≤${mission.params.maxSlopeLimit.toFixed(0)}° · transit. ≥${mission.params.minTransitability.toFixed(0)} · calidad de muestreo ≥${mission.params.minConfidence.toFixed(0)}%`;
+  if($('calcParams')&&Number.isFinite(mission.metrics?.maxRadialKm)){
+    const over=mission.metrics.radiusExceeded?ui(` · EXCEDE el radio de caminata de ${Number(mission.metrics.walkRadiusLimitKm).toFixed(0)} km`,` · EXCEEDS the ${Number(mission.metrics.walkRadiusLimitKm).toFixed(0)} km walking radius`):'';
+    $('calcParams').textContent+=` · ${ui('radio','radius')} ${mission.metrics.maxRadialKm.toFixed(2)} km${over}`;
+  }
   if($('dataQualitySummary')){
     const samples=mission.legs.reduce((n,l)=>n+(l.sampling?.sampleCount||0),0),valid=mission.legs.reduce((n,l)=>n+(l.sampling?.validCount||0),0);
     const resolutions=mission.legs.map(l=>l.sampling?.maxResolutionM).filter(finiteValue);
@@ -1194,7 +1203,7 @@ function renderHistory(){
 }
 function loadHistory(id){
   const item=getHistory().find(x=>x.id===id); if(!item)return;
-  try{missionPoints=validation.points(item.points);}catch(e){showToast(e.message);return;} $('returnBase').checked=item.returnBase!==false; if($('optimizeOrder'))$('optimizeOrder').checked=item.optimizeOrder!==false; $('speed').value=item.speed ?? 1.2; $('evaTime').value=item.evaTime ?? 8; $('returnMargin').value=item.returnMargin ?? 25; if($('maxSlopeLimit'))$('maxSlopeLimit').value=item.maxSlopeLimit ?? 25; if($('minTransitability'))$('minTransitability').value=item.minTransitability ?? 25; if($('minConfidence'))$('minConfidence').value=item.minConfidence ?? 20;
+  try{missionPoints=validation.points(item.points);}catch(e){showToast(e.message);return;} $('returnBase').checked=item.returnBase!==false; if($('optimizeOrder'))$('optimizeOrder').checked=item.optimizeOrder!==false; $('speed').value=item.speed ?? 2; $('evaTime').value=item.evaTime ?? 6; $('returnMargin').value=item.returnMargin ?? 25; if($('maxSlopeLimit'))$('maxSlopeLimit').value=item.maxSlopeLimit ?? 20; if($('minTransitability'))$('minTransitability').value=item.minTransitability ?? 25; if($('minConfidence'))$('minConfidence').value=item.minConfidence ?? 20;
   if(item.missionMeta) setMissionSettings(item.missionMeta);
   const radio=document.querySelector(`input[name="mode"][value="${item.mode}"]`);if(radio)radio.checked=true;
   invalidateMission();selecting=false;drawPointMarkers();renderMissionList();updatePlanningUI();centerGlobal();showToast('Misión cargada con sus parámetros originales. Pulsa “Calcular misión” o “Recalcular” para obtener el nuevo resultado.');
@@ -1591,10 +1600,10 @@ window.JEZERO_UI_ACTIONS=Object.freeze({
   previewProgress:fraction=>{const points=analyticsSeries(selectedMission());const point=points[Math.round((points.length-1)*fraction)];if(point)syncAnalyticsCursor(point,{pin:false});},
   beginMapSelection(){selecting=true;updatePlanningUI();showToast(ui('Toca el mapa para añadir un punto. Los puntos actuales se conservan.','Tap the map to add a point. Existing points are preserved.'));},
   async loadExample(){
-    const response=await fetch('/examples/01-jezero-corto.json');
+    const response=await fetch('/examples/04-eva-01-jezero.json');
     if(!response.ok)throw new Error(ui('No se pudo cargar el ejemplo.','The example could not be loaded.'));
     const text=await response.text();validation.missionFile(JSON.parse(text));
-    await importMissionJsonFile({target:{files:[new File([text],'jezero-ejemplo.json',{type:'application/json'})],value:''}});
-    map?.getView()?.cancelAnimations();map?.getView()?.animate({center:[77.45338,18.44463],zoom:8,duration:350});
+    await importMissionJsonFile({target:{files:[new File([text],'jezero-eva-01.json',{type:'application/json'})],value:''}});
+    map?.getView()?.cancelAnimations();map?.getView()?.animate({center:[77.4253,18.4448],zoom:12,duration:350});
   }
 });
