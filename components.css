@@ -1561,3 +1561,6 @@ body.jezero-ui :is(.opsNotice, .settingsHelp, .survivalNote, .safetyNote, .param
 .weatherObservationFields:disabled { opacity: .65; }
 .opsNotice[data-deficit="true"] { border-color: var(--theme-danger); color: var(--theme-danger); }
 .liveNotice[data-deficit="true"] { color: #ff8978; border-color: #fc3d21; }
+.opsFormStatus { padding: 12px; margin-top: 12px; border: 1px solid var(--theme-success); color: var(--text-primary); border-radius: 4px; }
+.opsFormStatus[data-state="error"] { border-color: var(--theme-danger); }
+.opsFormStatus[hidden] { display: none; }

@@ -116,3 +116,16 @@ test('previous Chariot crew counts above two require review without losing reser
  vm.runInContext("let state=engine.state({});const KEY='test';"+s.slice(s.indexOf(' let crewNeedsReview='),s.indexOf(' const domains='))+"result={state,crewNeedsReview};",ctx);
  assert.equal(ctx.result.crewNeedsReview,true);assert.equal(ctx.result.state.base.crew,null);assert.equal(ctx.result.state.base.waterL,30);assert.equal(ctx.result.state.base.energyKWh,42);
 });
+
+test('Chariot saving persists valid data and reports success or validation/storage errors beside the button',async()=>{
+ const fs=await import('node:fs'),vm=await import('node:vm'),source=fs.readFileSync(new URL('../modules/operations.js',import.meta.url),'utf8');
+ const saved=new Map(),errorNode={dataset:{},hidden:true},status={dataset:{},hidden:true,scrollIntoView(){}},specs={base:[{key:'crew',es:'Personas a bordo',en:'People aboard'},{key:'hours'},{key:'updatedAt'}]};
+ const inputs={crew:{name:'crew',value:'2',validity:{valid:true}},hours:{name:'hours',value:'2',validity:{valid:true}},updatedAt:{name:'updatedAt',value:'2026-11-14T22:00:00Z',validity:{valid:true}}},elements=Object.assign(Object.values(inputs),inputs),form={elements,reportValidity(){}};
+ const ctx=vm.createContext({engine,specs,state:engine.state({}),KEY:'test',structuredClone,crypto:{randomUUID:()=> 'test-id'},localStorage:{setItem:(k,v)=>saved.set(k,v)},$:()=>errorNode,ui:es=>es,fill(){},render(){},error(e){const [es,en]=e.message.split(' / ');errorNode.dataset.opsEs=es;errorNode.dataset.opsEn=en;errorNode.hidden=false;}});
+ vm.runInContext(source.slice(source.indexOf(' function saveForm('),source.indexOf(' function makeForm(')),ctx);
+ vm.runInContext(source.slice(source.indexOf(' function persist('),source.indexOf(' function activate(')),ctx);
+ ctx.saveForm('base',form,status);assert.equal(status.dataset.state,'saved');assert.match(status.textContent,/Datos guardados/);assert.equal(JSON.parse(saved.get('test')).base.crew,2);const old=saved.get('test');
+ inputs.crew.value='3';inputs.crew.validity.valid=false;ctx.saveForm('base',form,status);assert.equal(status.dataset.state,'error');assert.match(status.textContent,/Personas a bordo/);assert.equal(saved.get('test'),old);
+ inputs.crew.value='2';inputs.crew.validity.valid=true;inputs.updatedAt.value='today';ctx.saveForm('base',form,status);assert.equal(status.dataset.state,'error');assert.match(status.textContent,/Fecha/);assert.equal(saved.get('test'),old);
+ inputs.updatedAt.value='2026-11-14T22:00:00Z';ctx.localStorage.setItem=()=>{throw Error('Storage unavailable');};ctx.saveForm('base',form,status);assert.equal(status.dataset.state,'error');assert.match(status.textContent,/Storage/);assert.equal(saved.get('test'),old);
+});
