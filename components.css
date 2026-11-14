@@ -1426,3 +1426,89 @@ body.jezero-ui #controlMetrics .controlMetric > small {
 .mapToolbar > div:first-child:not(.mapToolsRight) {
   display: none;
 }
+/* Gráficos con la misma superficie de instrumentos que la consola CONTROL. */
+body.jezero-ui :is(.analyticsCard, .survivalCard:has(.weatherChart, .resourceChart), #forecastResults) {
+  --theme-line: #2b2f42;
+  --theme-muted: #aeb6d0;
+  --theme-accent-2: #59cbe8;
+  --theme-success: #52d9a0;
+  --theme-warning: #f4c66b;
+  --text-primary: #f0f3ff;
+  --text-secondary: #d0d6f9;
+  --text-tertiary: #aeb6d0;
+  --border-subtle: #2b2f42;
+  --surface-card: #151923;
+  color: #d0d6f9;
+  background: #151923;
+  border: 1px solid #2b2f42;
+  border-radius: 4px;
+}
+body.jezero-ui #forecastResults { padding: clamp(12px, 2vw, 24px); }
+body.jezero-ui :is(.analyticsCardHead, .survivalCard:has(.weatherChart, .resourceChart) .survivalCardHeading) {
+  border-bottom: 1px solid #2b2f42;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+body.jezero-ui :is(.analyticsCardHead, .survivalCard:has(.weatherChart, .resourceChart) .survivalCardHeading) :is(h2, h3) {
+  color: #f0f3ff;
+  font-family: var(--mono, monospace);
+  letter-spacing: .06em;
+}
+body.jezero-ui :is(.analyticsCardHead, .survivalCard:has(.weatherChart, .resourceChart) .survivalCardHeading) span {
+  color: #e27b58;
+  font-family: var(--mono, monospace);
+}
+body.jezero-ui :is(.analyticsChart, .terrainProfileMini, #forecastChart, .weatherChart, .resourceChart) {
+  --theme-line: #2b2f42;
+  --theme-muted: #aeb6d0;
+  --theme-accent-2: #59cbe8;
+  --theme-success: #52d9a0;
+  --theme-warning: #f4c66b;
+  --text-primary: #f0f3ff;
+  --text-secondary: #d0d6f9;
+  --text-tertiary: #aeb6d0;
+  --border-subtle: #2b2f42;
+  color: #d0d6f9;
+  background-color: #0b0d17;
+  background-image: linear-gradient(#2b2f4240 1px, transparent 1px), linear-gradient(90deg, #2b2f4240 1px, transparent 1px);
+  background-size: 24px 24px;
+  border: 1px solid #2b2f42;
+  border-radius: 3px;
+  padding: 10px;
+  box-sizing: border-box;
+  font-family: var(--mono, monospace);
+}
+body.jezero-ui :is(.analyticsChart, .terrainProfileMini, #forecastChart, .weatherChart, .resourceChart) svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+body.jezero-ui :is(.analyticsChart, .terrainProfileMini, #forecastChart, .weatherChart, .resourceChart) svg text {
+  fill: #aeb6d0;
+  font-family: var(--mono, monospace);
+}
+body.jezero-ui :is(.analyticsChart, .terrainProfileMini, #forecastChart, .weatherChart, .resourceChart) svg polyline {
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 2px currentColor);
+}
+body.jezero-ui :is(.analyticsChart, .terrainProfileMini) :is(.chartValue, .chartLabelStrong) { fill: #f0f3ff; }
+body.jezero-ui :is(.analyticsChart, .terrainProfileMini) :is(.chartCursor, .analyticsSyncCursor) { stroke: #e27b58; }
+body.jezero-ui :is(.v36BarTrack, .v35HealthTrack) {
+  background: #2b2f42;
+  border-radius: 2px;
+}
+body.jezero-ui :is(.v36BarFill, .v35HealthFill) {
+  background: linear-gradient(90deg, #993d00, #e27b58);
+  border-radius: 2px;
+  box-shadow: 0 0 8px #e27b5833;
+}
+body.jezero-ui .analyticsChart :is(.v36BarRow, .v35HealthItem, .v35EvaLegend) { color: #d0d6f9; }
+body.jezero-ui .analyticsChart :is(.v36BarRow, .v35HealthItem) :is(b, strong) { color: #f0f3ff; }
+body.jezero-ui :is(.analyticsChart, .terrainProfileMini, #forecastChart, .weatherChart, .resourceChart) .chartEmpty { color: #aeb6d0; }
+body.jezero-ui #forecastResults :is(.forecastSummary strong, .forecastFacts strong) { color: #e27b58; }
+body.jezero-ui #forecastResults .forecastFacts article { background: #0b0d17; border-color: #2b2f42; }
+body.jezero-ui :is(.analyticsChart, #forecastResults, .survivalCard:has(.weatherChart, .resourceChart)) :focus-visible {
+  outline: 2px solid #e27b58;
+  outline-offset: 3px;
+}
