@@ -78,3 +78,19 @@ test('Chariot departure remains a valid mission file for the existing importer',
  const payload=engine.evaFromChariot({base:{...base,lat:18.4448,lon:77.4253,mobility:'parked'}},draft,now);
  assert.doesNotThrow(()=>validation.missionFile(payload));assert.equal(payload.points.length,draft.points.length);
 });
+
+test('life support warns only beyond 14 Martian sols and includes delay scenarios',()=>{
+ const limit=14*engine.SOL_HOURS;assert.equal(engine.LIFE_SUPPORT_SOLS,14);
+ assert.equal(engine.lifeSupportLimit(limit).exceeded,false);assert.equal(engine.lifeSupportLimit(limit+.01).exceeded,true);assert.equal(engine.lifeSupportLimit(14*24).exceeded,false);assert.equal(engine.lifeSupportLimit(null).durationSols,null);
+ assert.equal(engine.assessBase({base:{hours:limit,delayHours:1}},{},now).lifeSupport.exceeded,false);assert.equal(engine.assessBase({base:{hours:limit,delayHours:1}},{},now).scenarioLifeSupport.exceeded,true);
+ assert.throws(()=>engine.lifeSupportLimit(-1));assert.throws(()=>engine.lifeSupportLimit(true));
+});
+
+test('Chariot form displays sols and stores compatible hour values at the 14-sol boundary',async()=>{
+ const fs=await import('node:fs'),vm=await import('node:vm'),s=fs.readFileSync(new URL('../modules/operations.js',import.meta.url),'utf8');
+ const input={value:''},form={elements:{hours:input,id:{value:''},namedItem:()=>input}},ctx=vm.createContext({engine,specs:{base:[{key:'hours',type:'number'}]},$:()=>form,state:engine.state({}),structuredClone,ui:es=>es,persist(next){ctx.saved=next;return true;}});
+ vm.runInContext(s.slice(s.indexOf(' function fill('),s.indexOf(' function fillAll(')),ctx);
+ vm.runInContext(s.slice(s.indexOf(' function submit('),s.indexOf(' function rowActions(')),ctx);
+ ctx.fill('base',{hours:14*engine.SOL_HOURS});assert.equal(input.value,14);
+ input.value='14';ctx.submit('base',form);assert.equal(ctx.saved.base.hours,14*engine.SOL_HOURS);assert.equal(engine.lifeSupportLimit(ctx.saved.base.hours).exceeded,false);
+});

@@ -1553,3 +1553,11 @@ body.jezero-ui[data-module="dashboard"][data-interface-open="false"] .dashboardW
 .srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 body.jezero-ui .plannerFooterTools { flex-wrap: wrap; justify-content: flex-start; }
 body.jezero-ui :is(.opsNotice, .settingsHelp, .survivalNote, .safetyNote, .paramSource, .dashboardContent p, .dashboardContent small) { font-size: 13px; line-height: 1.6; }
+.weatherObservation { margin: 14px 0; padding: 12px; border: 1px solid var(--theme-line); border-radius: 4px; }
+.weatherObservation summary { cursor: pointer; }
+.weatherObservationFields { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,190px),1fr)); gap: 12px; border: 0; padding: 12px 0; }
+.weatherObservationFields label { display: grid; gap: 6px; font-size: 13px; }
+.weatherObservationFields input { min-width: 0; width: 100%; padding: 9px; color: var(--text-primary); background: var(--surface-card); border: 1px solid var(--theme-line); border-radius: 4px; box-sizing: border-box; }
+.weatherObservationFields:disabled { opacity: .65; }
+.opsNotice[data-deficit="true"] { border-color: var(--theme-danger); color: var(--theme-danger); }
+.liveNotice[data-deficit="true"] { color: #ff8978; border-color: #fc3d21; }

@@ -172,3 +172,9 @@ Abre **Soporte** o el botón de la Guía. Los formularios se guardan con **Guard
 **Guardar paquete** exporta JEZERO-SUPPORT v1 con estado, bitácora, evaluación y referencia de misión. **Abrir paquete** valida antes de reemplazar datos de soporte y no sustituye la ruta. Guarda también misión JSON. Límite de importación: 10 MB; 40 registros por inventario, 50 pasos por protocolo, 500 entradas en bitácora. Exporta una copia y elimina una entrada para liberar espacio cuando se llene. Borrar datos del navegador elimina estas copias locales.
 
 Fecha de medición: `2026-10-12T14:00:00Z` es un ejemplo de formato, no una lectura preconfigurada. Fechas de mantenimiento usan `AAAA-MM-DD` en UTC. La interfaz y los registros funcionan sin conexión después de una primera carga completa; mapa y elevaciones externas requieren conexión. Ningún estado autoriza una salida ni certifica seguridad.
+
+## Clima de la zona y soporte vital
+
+Define la posición del Chariot y carga históricos de esa zona (radio de selección de 50 km). CLIMA entrena una regresión supervisada de temperatura y proyecta el próximo sol. Con históricos válidos puedes registrar observaciones del astronauta para actualizarla. No se generan predicciones sin datos locales suficientes ni se descargan automáticamente históricos NASA. La presión y el viento mostrados son observaciones.
+
+Introduce la duración total en soles en CHARIOT. Si el viaje, incluido el retraso del escenario, supera 14 soles, CHARIOT, Inicio y CONTROL muestran una alerta por el límite de soporte vital de la propuesta.

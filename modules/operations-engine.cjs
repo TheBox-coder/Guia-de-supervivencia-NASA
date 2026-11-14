@@ -1,7 +1,7 @@
 /* Planning budgets only. Measurements, equipment limits and procedures are supplied by the operator. */
-(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.JEZERO_OPERATIONS_ENGINE=factory();})(typeof globalThis!=='undefined'?globalThis:this,function(){
- const VERSION=1,MAX=40;
- const CHARIOT_PROPOSAL=Object.freeze({crew:2,batteryCapacityKWh:42,generationKW:1.2,autonomyMinSols:14,autonomyMaxSols:21});
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./survival-engine.cjs'));else root.JEZERO_OPERATIONS_ENGINE=factory(root.JEZERO_SURVIVAL_ENGINE);})(typeof globalThis!=='undefined'?globalThis:this,function(survival){
+ const VERSION=1,MAX=40,SOL_HOURS=survival.SOL_HOURS,LIFE_SUPPORT_SOLS=14;
+ const CHARIOT_PROPOSAL=Object.freeze({crew:2,batteryCapacityKWh:42,generationKW:1.2,lifeSupportSols:LIFE_SUPPORT_SOLS});
  const text=(v,max=160)=>{if(v==null)return '';if(typeof v!=='string'||v.length>max)throw Error('Texto inválido / Invalid text');return v.trim();};
  const n=(v,min=0,max=1e6)=>{if(v==null||v==='')return null;if(!['number','string'].includes(typeof v)||(typeof v==='string'&&!v.trim()))throw Error('Número inválido / Invalid number');const x=Number(v);if(!Number.isFinite(x)||x<min||x>max)throw Error('Número fuera de rango / Number out of range');return x;};
  const flag=v=>{if(v==null)return false;if(typeof v!=='boolean')throw Error('Booleano inválido / Invalid boolean');return v;};
@@ -22,6 +22,10 @@
   return {lat,lon,mobility:choice(x.mobility,['unknown','parked','moving'],'unknown'),crew,hours:n(x.hours,0,10000),delayHours:n(x.delayHours,0,10000)??0,energyLossPct:n(x.energyLossPct,0,100)??0,
    oxygenKg:n(x.oxygenKg),oxygenRateKgH:n(x.oxygenRateKgH,0,10),waterL:n(x.waterL),waterRateLH:n(x.waterRateLH,0,20),energyKWh,batteryCapacityKWh,generationKW:n(x.generationKW,0,10000),powerKW:n(x.powerKW,0,10000),co2CapacityKg:n(x.co2CapacityKg),co2RateKgH:n(x.co2RateKgH,0,10),source:text(x.source,500),updatedAt:date(x.updatedAt)};
  }
+ function lifeSupportLimit(hours){
+  const duration=n(hours,0,Number.MAX_VALUE),limitHours=LIFE_SUPPORT_SOLS*SOL_HOURS;
+  return {limitSols:LIFE_SUPPORT_SOLS,limitHours,durationHours:duration,durationSols:duration===null?null:duration/SOL_HOURS,exceeded:duration!==null&&duration>limitHours};
+ }
  function assessBase(raw={},context={},now=Date.now()){
   if(!Number.isFinite(now))throw Error('Invalid evaluation time');
   const s=state(raw),b=s.base,ageHours=b.updatedAt?(now-Date.parse(b.updatedAt))/36e5:null;
@@ -38,7 +42,7 @@
   ].map(([id,capacity,rate])=>({id,capacity,rate,remaining:usable&&capacity!==null&&rate!==null&&hours!==null?(id==='energy'&&rate<0?(b.batteryCapacityKWh===null?null:Math.min(b.batteryCapacityKWh,capacity-rate*hours)):capacity-rate*hours):null,autonomyHours:usable&&capacity!==null&&rate!==null&&rate>0?capacity/rate:null}));
   return {crew:b.crew,origin,positionDeclared,mobility:b.mobility,evaOrigin,rendezvousDistanceKm,rendezvousMoved:rendezvousDistanceKm!==null&&rendezvousDistanceKm>.001,source:b.source,updatedAt:b.updatedAt,ageHours,usable,generationKW:b.generationKW,powerKW:b.powerKW,
    hours:b.hours,scenarioHours:b.hours===null?null:b.hours+b.delayHours,delayHours:b.delayHours,energyLossPct:b.energyLossPct,
-   baseline:budgets(b.hours,0),scenario:budgets(b.hours===null?null:b.hours+b.delayHours,b.energyLossPct),
+   lifeSupport:lifeSupportLimit(b.hours),scenarioLifeSupport:lifeSupportLimit(b.hours===null?null:b.hours+b.delayHours),baseline:budgets(b.hours,0),scenario:budgets(b.hours===null?null:b.hours+b.delayHours,b.energyLossPct),
    equipment:s.equipment.filter(x=>x.type==='habitat'),kind:'calculated-from-declared-inputs'};
  }
  // La EVA conserva su punto de encuentro aunque cambie la posición declarada del Chariot.
@@ -89,5 +93,5 @@
   const unknown=[];if(duration===null)unknown.push('route');if(!s.shelters.length)unknown.push('shelters');if(!water.provenance||water.remaining===null)unknown.push('water');if(!co2.provenance||co2.remaining===null)unknown.push('co2');if(!thermal.provenance||thermal.remaining===null)unknown.push('thermal');if(dose===null)unknown.push('radiation');if(!linkFresh||s.communications.status==='unknown')unknown.push('link');if(!s.equipment.length||equipmentUnknown.length)unknown.push('equipment');if(!s.procedures.some(p=>p.reviewed&&p.source&&p.steps))unknown.push('procedures');if(!rules.length||!s.criteria.source)unknown.push('criteria');
   return {durationHours:duration,durationSource:duration===null?'missing':scenarioMatches?'scenario':'route',crew,water,co2,thermal,radiation:{totalMSv:dose,ageHours:age,usable:measurementUsable},communications:{status:s.communications.status,recorded:linkFresh,declaredCoverageFraction:coverage},equipment:{faults,unknown:equipmentUnknown,maintenance},shelters,rules,unknown,status:rules.some(x=>x.status==='fail')?'criterion-exceeded':unknown.length||rules.some(x=>x.status==='unknown')?'incomplete':'reviewed-inputs'};
  }
- return Object.freeze({VERSION,CHARIOT_PROPOSAL,state,imported,assess,assessBase,evaFromChariot,distance,shelter,relay,equipment,procedure});
+ return Object.freeze({VERSION,SOL_HOURS,LIFE_SUPPORT_SOLS,lifeSupportLimit,CHARIOT_PROPOSAL,state,imported,assess,assessBase,evaFromChariot,distance,shelter,relay,equipment,procedure});
 });

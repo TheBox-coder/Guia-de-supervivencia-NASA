@@ -36,3 +36,10 @@ test('control serialization preserves known and unknown results without computed
 test('model catalogue is immutable and explicitly separates evidence from certification',()=>{
   assert.equal(assurance.certified,false);assert.equal(assurance.models.length,5);assert.equal(assurance.dataKinds.length,7);assert.throws(()=>{assurance.models[0].version='fake';});assert.ok(assurance.models.every(x=>x.tests.length&&x.equations.length&&x.uncertainty&&x.limitations));
 });
+
+test('control exposes the 14-sol proposal limit for the whole trip and late returns',()=>{
+ const now=Date.parse('2026-11-14T20:00:00Z'),limit=14*24.6597;
+ assert.equal(control.overview({support:{base:{hours:limit}}},now).lifeSupport.exceeded,false);
+ const late=control.overview({support:{base:{hours:limit,delayHours:1}}},now);assert.equal(late.lifeSupport.exceeded,true);assert.equal(late.lifeSupport.durationHours,limit+1);
+ assert.equal(control.overview({mission:{duration:limit+1,legs:[{}]}} ,now).lifeSupport.exceeded,true);
+});

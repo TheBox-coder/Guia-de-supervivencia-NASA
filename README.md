@@ -61,3 +61,11 @@ La infografía del equipo se incluye como referencia de diseño. Sus 2 astronaut
 ## Idioma y navegación
 
 Dust Rider conserva los formatos de misión, las claves de almacenamiento y los archivos anteriores. El selector de la cabecera y el de Ajustes comparten la preferencia de idioma. Los textos de interfaz y avisos se traducen; los nombres propios, unidades, identificadores de archivo y referencias originales conservan su significado. En el planificador, «Configurar Chariot» abre su formulario; el manual incluye el flujo completo desde el hábitat hasta la EVA. La infografía del Chariot se identifica como referencia original en español y tiene una descripción de diseño en ambos idiomas.
+
+## Predicción local y límite de soporte vital
+
+CLIMA toma la posición declarada del Chariot o, si no existe, el punto de salida de la misión. Solo entrena con el archivo de observaciones importado si corresponde a una zona de 50 km alrededor de ese punto (criterio de selección de la propuesta, no homogeneidad meteorológica validada). Usa regresión armónica supervisada para proyectar la temperatura del próximo sol a partir de las muestras recientes. No hay descarga automática de históricos ni un modelo NASA preentrenado. Se requieren al menos 12 observaciones recientes distribuidas en seis franjas de tres horas. Presión y viento se muestran como observaciones, no como predicciones.
+
+El formulario de CLIMA permite añadir mediciones del astronauta una vez cargada una base histórica válida. Conserva fuente, posición y hora de registro; valida límites y duplicados y vuelve a entrenar el modelo. Si cambia la zona, CLIMA y los presupuestos EVA dejan de usar la referencia distante hasta cargar datos locales. Los errores de almacenamiento no reemplazan los datos guardados.
+
+La duración total del viaje se introduce en soles en CHARIOT; los archivos conservan horas para seguir siendo compatibles. Un sol equivale a 24,6597 horas terrestres. El límite de soporte vital de esta propuesta es de 14 soles: la alerta aparece al superarlo, también al añadir retrasos. Es un criterio del equipo, independiente de las reservas calculadas, no una especificación de hardware certificada.

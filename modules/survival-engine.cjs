@@ -3,7 +3,7 @@
   if(typeof module==='object'&&module.exports)module.exports=factory(require('./validation.cjs'));
   else root.JEZERO_SURVIVAL_ENGINE=factory(root.JEZERO_VALIDATION);
 })(typeof globalThis!=='undefined'?globalThis:this,function(validation){
-  const MODEL_VERSION='2.0.0',SOL_HOURS=24.6597;
+  const MODEL_VERSION='2.0.0',SOL_HOURS=24.6597,WEATHER_RADIUS_KM=50;
   const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
   const median=values=>{const a=values.filter(Number.isFinite).sort((a,b)=>a-b);return a.length?a[Math.floor(a.length/2)]:null;};
   // Fuentes y razonamiento: docs/PROPUESTA-MODELO-METABOLICO.md.
@@ -68,8 +68,8 @@
     for(const r of d.recent){const x=basis(r.localHour);for(let i=0;i<3;i++){v[i]+=x[i]*r.temperatureC;for(let j=0;j<3;j++)m[i][j]+=x[i]*x[j];}}
     const coefficients=solve(m,v);
     const errorC=Math.max(5,Math.sqrt(d.recent.reduce((sum,r)=>{const x=basis(r.localHour),estimate=x.reduce((n,b,i)=>n+b*coefficients[i],0);return sum+(r.temperatureC-estimate)**2;},0)/d.recent.length));
-    const unusedFields=[...new Set(dataset.records.flatMap(r=>Object.keys(r)))].filter(k=>!['sol','localHour','temperatureC','pressurePa','windMps'].includes(k)).slice(0,12);
-    return {kind:'imported-pattern',name:d.source.name,coefficients,errorC,pressurePa:median(d.recent.map(r=>r.pressurePa)),windMps:median(d.recent.map(r=>r.windMps)),baseSol:d.lastSol+1,location:d.location,recordCount:d.records.length,unusedFields,
+    const unusedFields=[...new Set(dataset.records.flatMap(r=>Object.keys(r)))].filter(k=>!['sol','localHour','temperatureC','pressurePa','windMps','observerSource','recordedAt','location'].includes(k)).slice(0,12);
+    return {kind:'imported-pattern',algorithm:'supervised-harmonic-regression',trainedRecords:d.recent.length,name:d.source.name,coefficients,errorC,pressurePa:median(d.recent.map(r=>r.pressurePa)),windMps:median(d.recent.map(r=>r.windMps)),baseSol:d.lastSol+1,location:d.location,recordCount:d.records.length,unusedFields,
       fieldCoverage:{temperature:d.records.length,pressure:d.records.filter(r=>Number.isFinite(r.pressurePa)).length,wind:d.records.filter(r=>Number.isFinite(r.windMps)).length},
       note:'Proyección de un sol mediante ajuste armónico a las últimas muestras. La banda es error residual, no intervalo de confianza calibrado. No predice tormentas.'};
   }
@@ -81,10 +81,24 @@
       return {hour,temperatureC:t,lowerC:t-model.errorC,upperC:t+model.errorC,pressurePa:model.pressurePa,windMps:model.windMps,dustIndex:dust};
     })};
   }
-  function observationForecast(dataset){
+  function observationForecast(dataset,origin){
+    if(origin!==undefined){
+      if(!origin)return {status:'missing-location',model:null,series:[]};
+      origin=validation.point(origin);
+      if(dataset){const separation=distance(origin,weatherData(dataset).location);if(separation>WEATHER_RADIUS_KM)return {status:'location-mismatch',model:null,series:[],distanceKm:separation,radiusKm:WEATHER_RADIUS_KM};}
+    }
     if(!dataset)return {status:'missing-data',model:null,series:[]};
     const result=forecast({},dataset);
-    return {status:'projection',horizonSols:1,model:result.model,series:result.series};
+    return {status:'projection',horizonSols:1,radiusKm:WEATHER_RADIUS_KM,model:result.model,series:result.series};
+  }
+  function appendWeatherObservation(dataset,origin,record,observerSource,now=Date.now()){
+    origin=validation.point(origin);
+    const current=observationForecast(dataset,origin);
+    if(current.status!=='projection')throw Error('Carga históricos válidos de la zona antes de añadir observaciones / Load valid regional history before adding observations');
+    if(typeof observerSource!=='string'||!observerSource.trim()||observerSource.length>160)throw Error('Indica la fuente o responsable de la observación / Enter the observation source or observer');
+    if(!record||typeof record!=='object'||!Number.isFinite(now))throw Error('Observación inválida / Invalid observation');
+    const next={...dataset,source:{...dataset.source},records:[...dataset.records.map(r=>({...r})),{sol:record.sol,localHour:record.localHour,temperatureC:record.temperatureC,pressurePa:record.pressurePa??null,windMps:record.windMps??null,observerSource:observerSource.trim(),recordedAt:new Date(now).toISOString(),location:validation.point(origin)}]};
+    weatherModel(next);return next;
   }
   function terrain(mission){
     const m=mission?.metrics||{};
@@ -138,7 +152,7 @@
     if(minTemp< -70)alerts.push({level:'warning',code:'cold',text:'La proyección incluye frío intenso. La carga térmica del traje no se modela por falta de datos de un traje para Marte.'});
     if(p.surface==='loose')alerts.push({level:'warning',code:'surface',text:'Superficie suelta asumida: el gasto metabólico usa el factor de arena suelta de Pandolf (2.1). No procede de un análisis geotécnico.'});
     const separation=distance(mission.sequence?.[0],environment.model.location);
-    if(separation!==null&&separation>50)alerts.push({level:'warning',code:'location',text:'La referencia meteorológica corresponde a otra ubicación (>50 km). Solo úsala como escenario ilustrativo.'});
+    if(separation!==null&&separation>WEATHER_RADIUS_KM)alerts.push({level:'warning',code:'location',text:'La referencia meteorológica corresponde a otra ubicación (>50 km). Solo úsala como escenario ilustrativo.'});
     const returning=mission.sequence?.length>1&&distance(mission.sequence[0],mission.sequence.at(-1))<.001;
     if(!returning)alerts.push({level:'warning',code:'return',text:'La ruta no incluye regreso a la base. Su presupuesto no demuestra capacidad de retorno.'});
     alerts.push({level:'unknown',code:'radiation',text:'Radiación y comunicaciones sin telemetría. Estos datos no permiten certificar una EVA.'});
@@ -156,5 +170,5 @@
     const recommended=(feasible.length?feasible:rows).sort((a,b)=>b.timeMarginHours-a.timeMarginHours)[0];
     return {rows,recommendedMode:recommended?.mode||null,hasFeasible:feasible.length>0};
   }
-  return Object.freeze({MODEL_VERSION,SOL_HOURS,DEFAULTS,METABOLIC,TERRAIN_FACTOR,O2_KG_PER_KCAL,pandolf,metabolism,config,weatherData,weatherModel,forecast,observationForecast,temperature,terrain,evaluate,compare});
+  return Object.freeze({MODEL_VERSION,SOL_HOURS,WEATHER_RADIUS_KM,DEFAULTS,METABOLIC,TERRAIN_FACTOR,O2_KG_PER_KCAL,pandolf,metabolism,config,weatherData,weatherModel,forecast,observationForecast,appendWeatherObservation,temperature,terrain,evaluate,compare});
 });

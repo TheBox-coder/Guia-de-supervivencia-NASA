@@ -159,3 +159,9 @@ Open **Support** or use the Guide button. Save forms with **Save inputs** or **S
 **Save pack** exports JEZERO-SUPPORT v1 with state, log, assessment and mission reference. **Open pack** validates before replacing support inputs and does not replace the route. Also save mission JSON. Import limit: 10 MB; 40 inventory records, 50 protocol steps and 500 log entries. Export and remove an entry to free log space. Clearing browser storage removes local copies.
 
 Measurement timestamps include a zone, for example `2026-10-12T14:00:00Z`; this is a format example, not a configured reading. Maintenance dates use UTC `YYYY-MM-DD`. The interface and records work offline after a complete first load; external imagery and elevation calculations require connection. No status authorizes departure or certifies safety.
+
+## Regional weather and life support
+
+Set the Chariot location and import historical observations for that region (50 km selection radius). WEATHER trains a supervised temperature regression and projects the next sol. Once valid history is loaded, astronaut observations can update the model. No prediction is generated without sufficient local data, and NASA history is not downloaded automatically. Pressure and wind are displayed as observations.
+
+Enter total mission duration in sols in CHARIOT. If the trip, including the delay scenario, exceeds 14 sols, CHARIOT, Home and CONTROL show an alert for the proposal’s life-support limit.

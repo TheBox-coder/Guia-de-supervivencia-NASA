@@ -25,11 +25,19 @@
     for(const i of [0,6,12,18,24])svg+=`<text x="${x(i)}" y="${H-8}" text-anchor="middle" fill="var(--theme-muted)" font-size="11">${percent?Math.round(i/24*100)+'% EVA':String(i).padStart(2,'0')+':00'}</text>`;
     return svg+'</svg>';
   }
+  function weatherOrigin(){
+    const base=window.JEZERO_OPERATIONS?.getState()?.base;
+    if(base?.lat!=null&&base?.lon!=null)return {lat:base.lat,lon:base.lon};
+    try{const p=window.JEZERO_UI_ACTIONS?.missionDraft()?.points?.[0];return p?{lat:p.lat,lon:p.lon}:null;}catch{return null;}
+  }
+  function applicableDataset(){if(!dataset)return null;try{return engine.observationForecast(dataset,weatherOrigin()).status==='projection'?dataset:null;}catch{return null;}}
+  let weatherOriginKey='';
   function mission(){return window.JEZERO_UI_ACTIONS?.selectedMission?.()||null;}
   function error(message=''){const host=$('survivalError');host.textContent=message;host.hidden=!message;}
   let ready=false,settingsInvalid=false;
   function focusCard(id){const card=$(id);if(card){card.scrollIntoView({behavior:'smooth',block:'start'});card.setAttribute('tabindex','-1');card.focus({preventScroll:true});}}
   function readiness(m){
+    const dataset=applicableDataset();
     const missing=[];
     if(settingsInvalid)missing.push("Corrige los valores de equipo o salida antes de continuar.");
     if(!m)missing.push('Calcula una ruta con base, destino y regreso.');
@@ -50,6 +58,7 @@
     return missing;
   }
   function render(){
+    const dataset=applicableDataset();weatherOriginKey=JSON.stringify(weatherOrigin());
     try{
       const selected=mission(),missing=readiness(selected);
       snapshot=engine.evaluate(ready?selected:null,settings,dataset);
@@ -139,7 +148,12 @@
   try{const checked=JSON.parse(localStorage.getItem(KEY+'-checklist')||'[]');document.querySelectorAll('[data-survival-check]').forEach(el=>el.checked=checked.includes(el.dataset.survivalCheck));}catch{}
   document.querySelectorAll('[data-survival-check]').forEach(el=>el.addEventListener('change',checklist));checklist();
   const observer=new MutationObserver(render);['routeStatus','pointCount','distance','duration'].forEach(id=>{if($(id))observer.observe($(id),{childList:true,subtree:true,characterData:true});});
+  window.addEventListener('jezero:supportchange',()=>{if(JSON.stringify(weatherOrigin())!==weatherOriginKey)render();});
   window.addEventListener('jezero:themechange',render);window.addEventListener('jezero:modulechange',render);
-  window.JEZERO_SURVIVAL=Object.freeze({getSnapshot:()=>snapshot,getConfig:()=>({...settings}),getDataset:()=>dataset,refresh:render,parseCsv:csvRecords});
+  function addWeatherObservation(record,origin,source){
+    const next=engine.appendWeatherObservation(dataset,origin,record,source);
+    localStorage.setItem(KEY+'-weather',JSON.stringify(next));dataset=next;error();render();
+  }
+  window.JEZERO_SURVIVAL=Object.freeze({addWeatherObservation,getSnapshot:()=>snapshot,getConfig:()=>({...settings}),getDataset:()=>dataset,getApplicableDataset:applicableDataset,getWeatherOrigin:weatherOrigin,refresh:render,parseCsv:csvRecords});
   render();
 })();

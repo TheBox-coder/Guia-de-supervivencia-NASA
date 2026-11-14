@@ -1,11 +1,19 @@
 (() => {
  const $=id=>document.getElementById(id),ui=(es,en)=>window.JEZERO_I18N?.ui(es,en)||es;
+ const origin=()=>window.JEZERO_SURVIVAL?.getWeatherOrigin()||null;
  function render(){
   document.querySelectorAll('[data-weather-es]').forEach(el=>{const copy=window.JEZERO_I18N?.getLanguage()==='en'?el.dataset.weatherEn:el.dataset.weatherEs;if(el.textContent!==copy)el.textContent=copy;});
   const data=window.JEZERO_SURVIVAL?.getDataset();
-  const forecast=window.JEZERO_SURVIVAL_ENGINE.observationForecast(data);
-  $('forecastEmpty').hidden=Boolean(data);$('forecastResults').hidden=!data;
-  if(!data)return;
+  const forecast=window.JEZERO_SURVIVAL_ENGINE.observationForecast(data,origin());
+  const site=origin(),available=forecast.status==='projection';
+  $('forecastRegion').textContent=site?ui('Zona declarada de la base / Chariot: ','Declared base / Chariot region: ')+site.lat.toFixed(4)+' / '+site.lon.toFixed(4)+ui(' · selección de datos a menos de 50 km (criterio de la propuesta).',' · data selected within 50 km (proposal criterion).'):ui('Define primero la posición del Chariot o el punto de salida de la misión.','First define the Chariot position or the mission departure point.');
+  $('forecastEmpty').hidden=available;$('forecastResults').hidden=!available;$('forecastObservationFields').disabled=!available;
+  if(!available){
+   const title=$('forecastEmpty').querySelector('h3'),description=$('forecastEmpty').querySelector('p');
+   title.textContent=forecast.status==='missing-location'?ui('Falta la ubicación de la base','Base location is missing'):forecast.status==='location-mismatch'?ui('Los históricos corresponden a otra zona','Historical observations belong to another region'):ui('Carga históricos de la zona para entrenar el modelo','Load regional history to train the model');
+   description.textContent=forecast.status==='location-mismatch'?ui('No se usa la predicción de otra región. Importa observaciones de esta zona.','A different region’s prediction is not used. Import observations for this region.'):ui('La regresión necesita al menos 12 observaciones recientes que cubran 6 franjas de 3 horas. Sin datos locales suficientes no se genera una predicción.','The regression needs at least 12 recent observations covering six 3-hour periods. No prediction is generated without sufficient regional data.');
+   $('forecastChart').replaceChildren();return;
+  }
   const {model,series}=forecast,hour=Number($('forecastHour').value),point=series[hour];
   $('forecastSource').textContent=model.name;
   $('forecastSol').textContent=ui(`Proyección para el sol ${model.baseSol}`,`Projection for sol ${model.baseSol}`);
@@ -16,7 +24,7 @@
   $('forecastWind').textContent=model.windMps===null?ui('Sin observaciones','No observations'):model.windMps.toFixed(1)+' m/s';
   const warm=series.slice(0,24).reduce((a,b)=>b.temperatureC>a.temperatureC?b:a);
   $('forecastWarm').textContent=String(warm.hour).padStart(2,'0')+':00 · '+warm.temperatureC.toFixed(1)+' °C';
-  $('forecastCoverage').textContent=ui(`${model.recordCount} observaciones · patrón de temperatura de las últimas muestras. Fuente declarada; vigencia no verificada.`,`${model.recordCount} observations · temperature pattern fitted to recent samples. Declared source; freshness not verified.`);
+  $('forecastCoverage').textContent=ui(`${model.recordCount} observaciones · regresión supervisada entrenada con las últimas muestras. Fuente declarada; vigencia no verificada.`,`${model.recordCount} observations · supervised regression trained on recent samples. Declared source; freshness not verified.`);
   const lo=Math.min(...series.map(p=>p.lowerC))-5,hi=Math.max(...series.map(p=>p.upperC))+5,x=h=>46+h/24*610,y=t=>20+(hi-t)/(hi-lo)*200;
   let svg='<svg viewBox="0 0 680 260" role="img" aria-label="'+ui('Predicción horaria de temperatura para el próximo sol','Hourly temperature projection for the next sol')+'">';
   for(let i=0;i<4;i++){const v=lo+(hi-lo)*i/3;svg+=`<line x1="46" y1="${y(v)}" x2="656" y2="${y(v)}" stroke="var(--theme-line)"/><text x="38" y="${y(v)+4}" text-anchor="end" fill="var(--theme-muted)" font-size="12">${v.toFixed(0)}°</text>`;}
@@ -25,9 +33,15 @@
   $('forecastChart').innerHTML=svg+'</svg>';
   $('forecastHours').replaceChildren();for(const h of [0,6,12,18]){const button=document.createElement('button');button.type='button';button.textContent=String(h).padStart(2,'0')+':00 · '+series[h].temperatureC.toFixed(1)+' °C';button.setAttribute('aria-pressed',String(hour===h));button.addEventListener('click',()=>{$('forecastHour').value=h;render();});$('forecastHours').append(button);}
  }
+ $('forecastObservationForm').addEventListener('submit',event=>{
+  event.preventDefault();
+  try{window.JEZERO_SURVIVAL.addWeatherObservation({sol:$('observationSol').value,localHour:$('observationHour').value,temperatureC:$('observationTemperature').value,pressurePa:$('observationPressure').value||null,windMps:$('observationWind').value||null},origin(),$('observationSource').value);$('forecastError').hidden=true;event.target.reset();render();}
+  catch(error){const [es,en]=error.message.split(' / '),host=$('forecastError');host.dataset.weatherEs=es;host.dataset.weatherEn=en||window.JEZERO_I18N.translateText(es,'en');host.textContent=ui(host.dataset.weatherEs,host.dataset.weatherEn);host.hidden=false;}
+ });
+ document.addEventListener('jezero:missionedited',render);
  $('forecastHour').addEventListener('input',render);
  document.querySelectorAll('[data-forecast-import]').forEach(b=>b.addEventListener('click',()=>{window.JEZERO_MODULES.activate('survival');const card=$('guideDataCard');card.scrollIntoView({behavior:'smooth',block:'start'});card.setAttribute('tabindex','-1');card.focus({preventScroll:true});}));
  document.querySelectorAll('[data-close-interface]').forEach(b=>b.addEventListener('click',()=>window.JEZERO_MODULES.close()));
  $('openWeatherForecast')?.addEventListener('click',()=>window.JEZERO_MODULES.activate('weather'));
- ['jezero:modulechange','jezero:weatherchange','jezero:languagechange','jezero:themechange'].forEach(name=>window.addEventListener(name,render));render();
+ ['jezero:modulechange','jezero:weatherchange','jezero:languagechange','jezero:themechange','jezero:supportchange'].forEach(name=>window.addEventListener(name,render));render();
 })();
