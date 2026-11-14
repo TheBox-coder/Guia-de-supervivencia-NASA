@@ -24,7 +24,7 @@
     layers=configs.map((c,index)=>{const grid=new ol.tilegrid.TileGrid({extent:[-180,-90,180,90],origin:[-180,90],tileSize:256,resolutions:Array.from({length:c.maxZoom+1},(_,z)=>.703125/2**z)});
       const source=new ol.source.XYZ({projection:'EPSG:4326',tileGrid:grid,url:ROOT+c.label+'/1.0.0/default/default028mm/{z}/{y}/{x}.png',crossOrigin:'anonymous',transition:160,wrapX:c.global===true,attributions:c.global?'NASA / JPL / ASU · Mars Odyssey '+c.name:'NASA / JPL / USGS · MRO '+c.name});
       // Clase propia por capa: cada mosaico tiene su lienzo y el difuminado de uno no recorta al otro.
-      const layer=new ol.layer.Tile({source,extent:c.global?undefined:c.extent,minZoom:c.minZoom,zIndex:{themis:1.05,ctx:1.1,hirise:1.2}[c.kind],visible:wanted(c),className:`ol-layer jezero-detail-layer jezero-detail-${index}`});
+      const layer=new ol.layer.Tile({source,extent:c.global?undefined:c.extent,minZoom:c.minZoom,zIndex:{themis:3,ctx:1.1,hirise:1.2}[c.kind],visible:wanted(c),className:`ol-layer jezero-detail-layer jezero-detail-${index}`});
       source.on('tileloaderror',()=>{failures.add(c.id);status();});source.on('tileloadend',()=>{loaded.add(c.id);failures.delete(c.id);status();});
       if(!c.global)feather(layer,c.extent);
       map.addLayer(layer);return {config:c,layer};});

@@ -458,11 +458,11 @@ function aggregateMission(legs,mode,params,sequence){
   metrics.avgTransitability=weightedDistance?weightedTransit/weightedDistance:null;
   metrics.avgConfidence=weightedDistance?weightedConfidence/weightedDistance:null;
   metrics.avgRoughnessDeg=weightedDistance?weightedRough/weightedDistance:null;
-  // Radio maximo: distancia directa de la base a la parada mas lejana. No es la longitud recorrida,
+  // Radio maximo: distancia directa de la base al punto mas lejano del recorrido. No es la longitud recorrida,
   // y se compara con los criterios de EVA-EXP-0042 (radio de caminata y walkback).
   const originPoint=sequence.find(p=>p.type==='base')||sequence[0];
-  const radialDistances=originPoint?sequence.map(p=>haversine(originPoint,p)).filter(Number.isFinite):[];
-  metrics.maxRadialKm=radialDistances.length?Math.max(...radialDistances):null;
+  const radialDistances=originPoint?sequence.concat(legs.flatMap(leg=>leg.path||[])).map(p=>haversine(originPoint,p)).filter(Number.isFinite):[];
+  metrics.maxRadialKm=radialDistances.length?radialDistances.reduce((max,d)=>Math.max(max,d),0):null;
   metrics.walkRadiusLimitKm=finiteValue(params.walkRadiusKm)?Number(params.walkRadiusKm):EVA_LIMITS.walkRadiusKm;
   metrics.walkbackLimitKm=finiteValue(params.walkbackKm)?Number(params.walkbackKm):EVA_LIMITS.walkbackKm;
   metrics.radiusExceeded=Number.isFinite(metrics.maxRadialKm)&&metrics.maxRadialKm>metrics.walkRadiusLimitKm;

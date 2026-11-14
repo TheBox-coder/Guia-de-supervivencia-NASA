@@ -128,7 +128,6 @@ function initMap(){
   $('zoomIn').onclick=()=>map.getView().setZoom(Math.min(17,map.getView().getZoom()+.7));
   $('zoomOut').onclick=()=>map.getView().setZoom(Math.max(0,map.getView().getZoom()-.7));
   $('center').onclick=()=>fitCurrentMission();
-  centerGlobal();
   updateMapScale();
   drawPointMarkers();
   populateReferenceLayers();
@@ -666,7 +665,10 @@ async function calculateMission({saveHistory=true}={}){
     lastCalculatedAt=new Date();
     const radio=document.querySelector(`input[name="mode"][value="${selectedMode}"]`);if(radio)radio.checked=true;
     renderMission(mission[selectedMode]);drawMissionRoutes(mission,selectedMode);updatePlanningUI();
-    if(saveHistory)saveHistoryEntry(selectedMode);
+    if(saveHistory){
+      try{saveHistoryEntry(selectedMode);}
+      catch{showToast(ui('Misión calculada, pero no se pudo guardar el historial local. Exporta una copia.','Mission calculated, but local history could not be saved. Export a copy.'));}
+    }
     setBusy(false,`${ui('MISIÓN CALCULADA','MISSION CALCULATED')} · ${Object.keys(mission).filter(k=>validation.MODES.includes(k)).length}/3 ${ui('estrategias disponibles','strategies available')}`);
   }catch(err){
     currentMission=null;lastCalculatedAt=null;routeLayer?.getSource()?.clear();
@@ -1079,7 +1081,8 @@ function setLanding(){
   showToast('Perseverance se marcó automáticamente como el punto BASE (P0).');
 }
 function resetMetrics(){
-  ['distance','duration','maxSlope','gain','avgSlope','segments','riskNumber','legsCount','dwellTotal','missionMargin','avgTransitability','minTransitabilityMetric','avgConfidence','minConfidenceMetric','__legacyScienceRemoved'].forEach(id=>{if($(id))$(id).textContent='—';});
+  if($('maxRadialMetric'))delete $('maxRadialMetric').dataset.state;
+  ['maxRadialMetric','distance','duration','maxSlope','gain','avgSlope','segments','riskNumber','legsCount','dwellTotal','missionMargin','avgTransitability','minTransitabilityMetric','avgConfidence','minConfidenceMetric','__legacyScienceRemoved'].forEach(id=>{if($(id))$(id).textContent='—';});
   if($('routeName'))$('routeName').textContent=ui('Esperando misión','Waiting for mission');
   if($('routeDescription'))$('routeDescription').textContent=ui('Define una base y al menos un objetivo. Calcula para obtener resultados actuales.','Define a base and at least one target. Calculate to obtain current results.');
   if($('dataQualitySummary'))$('dataQualitySummary').textContent=ui('Calcula para consultar la cobertura y resolución del muestreo.','Calculate to inspect sampling coverage and resolution.');
@@ -1201,12 +1204,16 @@ function renderHistory(){
   box.innerHTML=items.map(item=>`<div class="historyItem"><div><strong>${escapeHtml(item.name)}</strong><small>${new Date(item.date).toLocaleString(locale,{dateStyle:'short',timeStyle:'short'})} · ${item.points.length} ${ui('puntos','points')} · ${item.mode==='risk'?ui('Menor exposición','Lower exposure'):item.mode==='distance'?ui('Más directa','Most direct'):ui('Equilibrada','Balanced')}</small></div><div class="historyActions"><button data-load="${item.id}" title="${ui('Cargar','Load')}">${ui('Abrir','Open')}</button><button data-delete="${item.id}" title="${ui('Eliminar','Delete')}">×</button></div></div>`).join('');
   box.querySelectorAll('[data-load]').forEach(b=>b.onclick=()=>loadHistory(b.dataset.load)); box.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteHistory(b.dataset.delete));
 }
+function confirmMissionReplacement(){
+  return !missionPoints.length||window.confirm(ui('¿Reemplazar el plan actual? Exporta una copia antes si deseas conservarlo.','Replace the current plan? Export a copy first if you want to keep it.'));
+}
 function loadHistory(id){
   const item=getHistory().find(x=>x.id===id); if(!item)return;
-  try{missionPoints=validation.points(item.points);}catch(e){showToast(e.message);return;} $('returnBase').checked=item.returnBase!==false; if($('optimizeOrder'))$('optimizeOrder').checked=item.optimizeOrder!==false; $('speed').value=item.speed ?? 2; $('evaTime').value=item.evaTime ?? 6; $('returnMargin').value=item.returnMargin ?? 25; if($('maxSlopeLimit'))$('maxSlopeLimit').value=item.maxSlopeLimit ?? 20; if($('minTransitability'))$('minTransitability').value=item.minTransitability ?? 25; if($('minConfidence'))$('minConfidence').value=item.minConfidence ?? 20;
-  if(item.missionMeta) setMissionSettings(item.missionMeta);
+  let points;
+  try{points=validation.points(item.points);if(!confirmMissionReplacement())return;if(item.missionMeta)setMissionSettings(item.missionMeta);}catch(e){showToast(e.message);return;}
+  invalidateMission();missionPoints=points; $('returnBase').checked=item.returnBase!==false; if($('optimizeOrder'))$('optimizeOrder').checked=item.optimizeOrder!==false; $('speed').value=item.speed ?? 2; $('evaTime').value=item.evaTime ?? 6; $('returnMargin').value=item.returnMargin ?? 25; if($('maxSlopeLimit'))$('maxSlopeLimit').value=item.maxSlopeLimit ?? 20; if($('minTransitability'))$('minTransitability').value=item.minTransitability ?? 25; if($('minConfidence'))$('minConfidence').value=item.minConfidence ?? 20;
   const radio=document.querySelector(`input[name="mode"][value="${item.mode}"]`);if(radio)radio.checked=true;
-  invalidateMission();selecting=false;drawPointMarkers();renderMissionList();updatePlanningUI();centerGlobal();showToast('Misión cargada con sus parámetros originales. Pulsa “Calcular misión” o “Recalcular” para obtener el nuevo resultado.');
+  selecting=false;drawPointMarkers();renderMissionList();updatePlanningUI();centerGlobal();showToast('Misión cargada con sus parámetros originales. Pulsa “Calcular misión” o “Recalcular” para obtener el nuevo resultado.');
 }
 function deleteHistory(id){if(!window.confirm(ui('¿Borrar esta misión del historial local?','Delete this mission from the local history?')))return;setHistory(getHistory().filter(x=>x.id!==id));renderHistory();}
 
@@ -1322,17 +1329,22 @@ async function importMissionJsonFile(ev){
   try{
     if(file.size>5_000_000)throw new Error(ui('El archivo supera el límite de 5 MB.','The file exceeds the 5 MB limit.'));
     const data=validation.missionFile(JSON.parse(await file.text()));
-    missionPoints=data.points;
+    if(!confirmMissionReplacement())return false;
     if(data.missionMeta) setMissionSettings(data.missionMeta);
-    if(data.interface?.theme) window.JEZERO_THEMES?.setTheme?.(data.interface.theme);
-    if(typeof data.interface?.routeAnimation==='boolean') setRouteAnimationEnabled(data.interface.routeAnimation,{notify:false});
-    if(data.interface?.language) window.JEZERO_I18N?.setLanguage?.(data.interface.language);
+    invalidateMission();
+    missionPoints=data.points;
     if(data.params) applyDefaults(data.params,{notify:false});
     if($('returnBase')) $('returnBase').checked=data.returnBase!==false; if($('optimizeOrder')) $('optimizeOrder').checked=data.optimizeOrder!==false;
     const radio=document.querySelector(`input[name="mode"][value="${data.mode}"]`); if(radio) radio.checked=true;
     currentMission=null; selecting=false; routeLayer?.getSource()?.clear(); drawPointMarkers(); renderMissionList(); resetMetrics(); updatePlanningUI(); centerGlobal();
     showToast(ui(`Misión importada: ${missionPoints.length} punto(s). Recalcula para actualizar resultados.`,`Mission imported: ${missionPoints.length} point(s). Recalculate to update results.`));
-  }catch(err){showToast(err.message||ui('No se pudo importar la misión.','The mission could not be imported.'));}
+    try{
+      if(data.interface?.theme) window.JEZERO_THEMES?.setTheme?.(data.interface.theme);
+      if(typeof data.interface?.routeAnimation==='boolean') setRouteAnimationEnabled(data.interface.routeAnimation,{notify:false});
+      if(data.interface?.language) window.JEZERO_I18N?.setLanguage?.(data.interface.language);
+    }catch{showToast(ui('Misión importada; no se pudieron guardar las preferencias de interfaz.','Mission imported; interface preferences could not be saved.'));}
+    return true;
+  }catch(err){showToast(err.message||ui('No se pudo importar la misión.','The mission could not be imported.'));return false;}
   finally{ev.target.value='';}
 }
 
@@ -1592,7 +1604,7 @@ window.addEventListener('jezero:modulechange',()=>{
 function missionDraft(){return {format:'JEZERO-MISSION',version:44,missionMeta:getMissionSettings(),interface:{language:uiLang(),theme:themeInfo().key},points:missionPoints.map(p=>({lat:p.lat,lon:p.lon,name:p.name,type:p.type==='base'?'base':'target',dwellMin:Number(p.dwellMin)||0})),returnBase:$('returnBase').checked,optimizeOrder:$('optimizeOrder')?.checked!==false,mode:document.querySelector('input[name="mode"]:checked')?.value||'balanced',params:readOperationalDefaults()};}
 window.JEZERO_UI_ACTIONS=Object.freeze({
   missionDraft,
-  async loadMissionPayload(payload){validation.missionFile(payload);await importMissionJsonFile({target:{files:[new File([JSON.stringify(payload)],'mission.json',{type:'application/json'})],value:''}});fitCurrentMission();},
+  async loadMissionPayload(payload){validation.missionFile(payload);const loaded=await importMissionJsonFile({target:{files:[new File([JSON.stringify(payload)],'mission.json',{type:'application/json'})],value:''}});if(loaded)fitCurrentMission();return loaded;},
   selectedMission:()=>selectedMission(),
   allMissions:()=>currentMission,
   missionSnapshot:()=>currentMission?{selectedMode:selectedMission()?.mode,strategies:validation.MODES.map(k=>pdfStrategyPayload(currentMission[k])).filter(Boolean)}:null,
@@ -1603,7 +1615,8 @@ window.JEZERO_UI_ACTIONS=Object.freeze({
     const response=await fetch('/examples/04-eva-01-jezero.json');
     if(!response.ok)throw new Error(ui('No se pudo cargar el ejemplo.','The example could not be loaded.'));
     const text=await response.text();validation.missionFile(JSON.parse(text));
-    await importMissionJsonFile({target:{files:[new File([text],'jezero-eva-01.json',{type:'application/json'})],value:''}});
+    const loaded=await importMissionJsonFile({target:{files:[new File([text],'jezero-eva-01.json',{type:'application/json'})],value:''}});
+    if(!loaded)return false;
     map?.getView()?.cancelAnimations();map?.getView()?.animate({center:[77.4253,18.4448],zoom:12,duration:350});
   }
 });

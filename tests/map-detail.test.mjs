@@ -18,6 +18,10 @@ test('regional imagery feathers stay bounded at deep zoom without canvas blur',(
   let scale=100;
   const map={addLayer(){},on(){},getPixelFromCoordinate:([x,y])=>[x*scale,-y*scale]};
   context.window.JEZERO_IMAGERY.install(map);
+  const thermal=layers[0];
+  assert.ok(thermal.options.zIndex>2,'thermal imagery stays above MOLA');
+  assert.ok(thermal.options.zIndex<4,'terrain and mission overlays stay above thermal imagery');
+  assert.ok(layers.slice(1).every(layer=>layer.options.zIndex<thermal.options.zIndex));
   const regional=layers.filter(layer=>layer.listeners.postrender);
   assert.equal(regional.length,2);
   for(const zoomScale of [100,1e7])for(const pixelRatio of [1,2]){

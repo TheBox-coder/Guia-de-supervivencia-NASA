@@ -95,7 +95,6 @@
     const file=event.dataTransfer.files[0],input=byId('importMissionFile');
     if(!file||!input)return;
     if(!/\.json$/i.test(file.name)&&file.type!=='application/json'){window.showToast?.(copy('Suelta un archivo de misión .json.','Drop a .json mission file.'));return;}
-    if((Number(byId('pointCount')?.textContent)||0)>0&&!window.confirm(copy('¿Reemplazar el plan actual por la misión del archivo?','Replace the current plan with the mission in this file?')))return;
     const transfer=new DataTransfer();transfer.items.add(file);input.files=transfer.files;
     input.dispatchEvent(new Event('change'));
   });
