@@ -3,7 +3,7 @@
   const labels = {
     home:'INICIO',
     survival:'GUÍA',
-    operations:'BASE',
+    operations:'CHARIOT',
     weather:'CLIMA',
     dashboard:'CONTROL',
     explorer: 'MAPA',
@@ -12,7 +12,7 @@
     analysis: 'RESULTADOS',
     settings: 'AJUSTES'
   };
-  const labelFor = name => name==='home'?(window.JEZERO_I18N?.ui('INICIO','HOME')):name==='dashboard'?(window.JEZERO_I18N?.ui('CONTROL','CONTROL')):name==='operations'?(window.JEZERO_I18N?.ui('BASE','BASE')):name==='weather'?(window.JEZERO_I18N?.ui('CLIMA','WEATHER')):name==='survival'?(window.JEZERO_I18N?.ui('GUÍA','GUIDE')):window.JEZERO_I18N?.moduleLabel?.(name) || labels[name];
+  const labelFor = name => name==='home'?(window.JEZERO_I18N?.ui('INICIO','HOME')):name==='dashboard'?(window.JEZERO_I18N?.ui('CONTROL','CONTROL')):name==='operations'?(window.JEZERO_I18N?.ui('CHARIOT','CHARIOT')):name==='weather'?(window.JEZERO_I18N?.ui('CLIMA','WEATHER')):name==='survival'?(window.JEZERO_I18N?.ui('GUÍA','GUIDE')):window.JEZERO_I18N?.moduleLabel?.(name) || labels[name];
 
   const qsa = (sel, root=document) => [...root.querySelectorAll(sel)];
   const byId = id => document.getElementById(id);

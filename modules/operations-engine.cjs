@@ -1,6 +1,7 @@
 /* Planning budgets only. Measurements, equipment limits and procedures are supplied by the operator. */
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.JEZERO_OPERATIONS_ENGINE=factory();})(typeof globalThis!=='undefined'?globalThis:this,function(){
  const VERSION=1,MAX=40;
+ const CHARIOT_PROPOSAL=Object.freeze({crew:2,batteryCapacityKWh:42,generationKW:1.2,autonomyMinSols:14,autonomyMaxSols:21});
  const text=(v,max=160)=>{if(v==null)return '';if(typeof v!=='string'||v.length>max)throw Error('Texto inválido / Invalid text');return v.trim();};
  const n=(v,min=0,max=1e6)=>{if(v==null||v==='')return null;if(!['number','string'].includes(typeof v)||(typeof v==='string'&&!v.trim()))throw Error('Número inválido / Invalid number');const x=Number(v);if(!Number.isFinite(x)||x<min||x>max)throw Error('Número fuera de rango / Number out of range');return x;};
  const flag=v=>{if(v==null)return false;if(typeof v!=='boolean')throw Error('Booleano inválido / Invalid boolean');return v;};
@@ -16,23 +17,37 @@
  function resources(x={}){return {waterL:n(x.waterL),waterRateLH:n(x.waterRateLH,0,20),co2CapacityKg:n(x.co2CapacityKg),co2RateKgH:n(x.co2RateKgH,0,10),thermalKWh:n(x.thermalKWh),thermalKW:n(x.thermalKW,0,100),source:text(x.source,500)};}
  function base(x={}){
   const crew=n(x.crew,0,100);if(crew!==null&&!Number.isInteger(crew))throw Error('Tripulación entera requerida / Whole crew count required');
-  return {crew,hours:n(x.hours,0,10000),delayHours:n(x.delayHours,0,10000)??0,energyLossPct:n(x.energyLossPct,0,100)??0,
-   oxygenKg:n(x.oxygenKg),oxygenRateKgH:n(x.oxygenRateKgH,0,10),waterL:n(x.waterL),waterRateLH:n(x.waterRateLH,0,20),energyKWh:n(x.energyKWh),powerKW:n(x.powerKW,0,10000),co2CapacityKg:n(x.co2CapacityKg),co2RateKgH:n(x.co2RateKgH,0,10),source:text(x.source,500),updatedAt:date(x.updatedAt)};
+  const lat=n(x.lat,-90,90),lon=n(x.lon,-180,180);if((lat===null)!==(lon===null))throw Error('Latitud y longitud del Chariot requeridas juntas / Chariot latitude and longitude must be provided together');
+  const energyKWh=n(x.energyKWh),batteryCapacityKWh=n(x.batteryCapacityKWh);if(energyKWh!==null&&batteryCapacityKWh!==null&&energyKWh>batteryCapacityKWh)throw Error('La carga supera la capacidad de batería / Charge exceeds battery capacity');
+  return {lat,lon,mobility:choice(x.mobility,['unknown','parked','moving'],'unknown'),crew,hours:n(x.hours,0,10000),delayHours:n(x.delayHours,0,10000)??0,energyLossPct:n(x.energyLossPct,0,100)??0,
+   oxygenKg:n(x.oxygenKg),oxygenRateKgH:n(x.oxygenRateKgH,0,10),waterL:n(x.waterL),waterRateLH:n(x.waterRateLH,0,20),energyKWh,batteryCapacityKWh,generationKW:n(x.generationKW,0,10000),powerKW:n(x.powerKW,0,10000),co2CapacityKg:n(x.co2CapacityKg),co2RateKgH:n(x.co2RateKgH,0,10),source:text(x.source,500),updatedAt:date(x.updatedAt)};
  }
  function assessBase(raw={},context={},now=Date.now()){
   if(!Number.isFinite(now))throw Error('Invalid evaluation time');
   const s=state(raw),b=s.base,ageHours=b.updatedAt?(now-Date.parse(b.updatedAt))/36e5:null;
   const usable=Boolean(b.source)&&ageHours!==null&&ageHours>=0&&(s.criteria.sensorAgeH===null||ageHours<=s.criteria.sensorAgeH);
+  const positionDeclared=b.lat!==null&&b.lon!==null;
+  const origin=positionDeclared?{lat:b.lat,lon:b.lon,name:'Chariot'}:context.draft?.points?.find(p=>p.type==='base')||context.draft?.points?.[0]||null;
+  const evaOrigin=context.mission?.sequence?.[0]||context.draft?.points?.[0]||null;
+  const rendezvousDistanceKm=positionDeclared?distance(origin,evaOrigin):null;
   const budgets=(hours,loss)=>[
    ['oxygen',b.oxygenKg,b.crew===null||b.oxygenRateKgH===null?null:b.crew*b.oxygenRateKgH],
    ['water',b.waterL,b.crew===null||b.waterRateLH===null?null:b.crew*b.waterRateLH],
-   ['energy',b.energyKWh===null?null:b.energyKWh*(1-loss/100),b.powerKW],
+   ['energy',b.energyKWh===null?null:b.energyKWh*(1-loss/100),b.powerKW===null?null:b.powerKW-(b.generationKW??0)],
    ['co2',b.co2CapacityKg,b.crew===null||b.co2RateKgH===null?null:b.crew*b.co2RateKgH]
-  ].map(([id,capacity,rate])=>({id,capacity,rate,remaining:usable&&capacity!==null&&rate!==null&&hours!==null?capacity-rate*hours:null,autonomyHours:usable&&capacity!==null&&rate!==null&&rate>0?capacity/rate:null}));
-  return {crew:b.crew,origin:context.draft?.points?.find(p=>p.type==='base')||context.draft?.points?.[0]||null,source:b.source,updatedAt:b.updatedAt,ageHours,usable,
+  ].map(([id,capacity,rate])=>({id,capacity,rate,remaining:usable&&capacity!==null&&rate!==null&&hours!==null?(id==='energy'&&rate<0?(b.batteryCapacityKWh===null?null:Math.min(b.batteryCapacityKWh,capacity-rate*hours)):capacity-rate*hours):null,autonomyHours:usable&&capacity!==null&&rate!==null&&rate>0?capacity/rate:null}));
+  return {crew:b.crew,origin,positionDeclared,mobility:b.mobility,evaOrigin,rendezvousDistanceKm,rendezvousMoved:rendezvousDistanceKm!==null&&rendezvousDistanceKm>.001,source:b.source,updatedAt:b.updatedAt,ageHours,usable,generationKW:b.generationKW,powerKW:b.powerKW,
    hours:b.hours,scenarioHours:b.hours===null?null:b.hours+b.delayHours,delayHours:b.delayHours,energyLossPct:b.energyLossPct,
    baseline:budgets(b.hours,0),scenario:budgets(b.hours===null?null:b.hours+b.delayHours,b.energyLossPct),
    equipment:s.equipment.filter(x=>x.type==='habitat'),kind:'calculated-from-declared-inputs'};
+ }
+ // La EVA conserva su punto de encuentro aunque cambie la posición declarada del Chariot.
+ function evaFromChariot(raw,draft,now=Date.now()){
+  const b=assessBase(raw,{draft},now);
+  if(!b.positionDeclared||!b.usable)throw Error('Guarda posición, fuente y fecha vigentes del Chariot / Save a current Chariot position, source and timestamp');
+  if(b.mobility!=='parked')throw Error('Declara el Chariot estacionado para planificar la salida EVA / Declare Chariot parked to plan an EVA departure');
+  if(!Array.isArray(draft?.points))throw Error('Plan de misión inválido / Invalid mission draft');
+  return {...draft,returnBase:true,points:[{lat:b.origin.lat,lon:b.origin.lon,name:'Chariot · EVA',type:'base',dwellMin:0},...draft.points.filter(p=>p.type!=='base').map(p=>({...p}))]};
  }
  function radiation(x={}){return {rateUSvH:n(x.rateUSvH),accumulatedMSv:n(x.accumulatedMSv),source:text(x.source,500),measuredAt:date(x.measuredAt)};}
  function communications(x={}){return {status:choice(x.status,['unknown','verified','degraded','lost'],'unknown'),source:text(x.source,500),checkedAt:date(x.checkedAt),contact:text(x.contact,500)};}
@@ -74,5 +89,5 @@
   const unknown=[];if(duration===null)unknown.push('route');if(!s.shelters.length)unknown.push('shelters');if(!water.provenance||water.remaining===null)unknown.push('water');if(!co2.provenance||co2.remaining===null)unknown.push('co2');if(!thermal.provenance||thermal.remaining===null)unknown.push('thermal');if(dose===null)unknown.push('radiation');if(!linkFresh||s.communications.status==='unknown')unknown.push('link');if(!s.equipment.length||equipmentUnknown.length)unknown.push('equipment');if(!s.procedures.some(p=>p.reviewed&&p.source&&p.steps))unknown.push('procedures');if(!rules.length||!s.criteria.source)unknown.push('criteria');
   return {durationHours:duration,durationSource:duration===null?'missing':scenarioMatches?'scenario':'route',crew,water,co2,thermal,radiation:{totalMSv:dose,ageHours:age,usable:measurementUsable},communications:{status:s.communications.status,recorded:linkFresh,declaredCoverageFraction:coverage},equipment:{faults,unknown:equipmentUnknown,maintenance},shelters,rules,unknown,status:rules.some(x=>x.status==='fail')?'criterion-exceeded':unknown.length||rules.some(x=>x.status==='unknown')?'incomplete':'reviewed-inputs'};
  }
- return Object.freeze({VERSION,state,imported,assess,assessBase,distance,shelter,relay,equipment,procedure});
+ return Object.freeze({VERSION,CHARIOT_PROPOSAL,state,imported,assess,assessBase,evaFromChariot,distance,shelter,relay,equipment,procedure});
 });

@@ -1544,3 +1544,7 @@ body.jezero-ui[data-module="dashboard"][data-interface-open="false"] .dashboardW
 .routeLimitsPanel { margin: 14px 0; border: 1px solid var(--border-subtle); border-radius: 4px; }
 .routeLimitsPanel > summary { cursor: pointer; padding: 12px; color: var(--text-primary); font-size: 12px; }
 .routeLimitsPanel > .card { border: 0; margin: 0; }
+.chariotProposal { margin-top: 20px; border: 1px solid var(--theme-line); padding: 12px; border-radius: 4px; }
+.chariotProposal summary { cursor: pointer; }
+.chariotProposal img { display: block; max-width: 100%; height: auto; margin-top: 12px; }
+.chariotProposal p { font-size: 12px; line-height: 1.6; }
