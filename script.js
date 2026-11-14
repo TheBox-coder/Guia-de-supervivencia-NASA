@@ -154,7 +154,7 @@ function pointStyle(kind,label,feature){
       text:new ol.style.Text({text:'⌂',offsetY:1,fill:new ol.style.Fill({color:success}),stroke:new ol.style.Stroke({color:bg,width:2}),font:'900 15px Inter,Segoe UI,sans-serif'})
     }));
     styles.push(new ol.style.Style({
-      text:new ol.style.Text({text:returnsHome?ui('BASE · HOME','BASE · HOME'):ui('BASE','BASE'),offsetY:-29,fill:new ol.style.Fill({color:textColor}),stroke:new ol.style.Stroke({color:bg,width:5}),font:'900 10px "DM Mono",Consolas,monospace',padding:[2,5,2,5]})
+      text:new ol.style.Text({text:returnsHome?ui('BASE · REGRESO','BASE · RETURN'):ui('BASE','BASE'),offsetY:-29,fill:new ol.style.Fill({color:textColor}),stroke:new ol.style.Stroke({color:bg,width:5}),font:'900 10px "DM Mono",Consolas,monospace',padding:[2,5,2,5]})
     }));
     return styles;
   }
@@ -300,7 +300,7 @@ function analysisHighlightStyle(feature){
   ];
   return new ol.style.Style({
     image:new ol.style.Circle({radius:9,fill:new ol.style.Fill({color:c.warning||'#ffc857'}),stroke:new ol.style.Stroke({color:c.bg||'#020611',width:3})}),
-    text:new ol.style.Text({text:feature.get('label')||'',offsetY:-19,fill:new ol.style.Fill({color:c.text||'#fff'}),stroke:new ol.style.Stroke({color:c.bg||'#020611',width:4}),font:'900 10px "DM Mono",Consolas,monospace'})
+    text:new ol.style.Text({text:window.JEZERO_I18N?.translateText(feature.get('label')||'')||(feature.get('label')||''),offsetY:-19,fill:new ol.style.Fill({color:c.text||'#fff'}),stroke:new ol.style.Stroke({color:c.bg||'#020611',width:4}),font:'900 10px "DM Mono",Consolas,monospace'})
   });
 }
 
@@ -929,7 +929,7 @@ function updateRouteSequenceStrip(mission){
   const parts=seq.map((p,i)=>{
     const isBase=p.type==='base'||i===0;
     const isHome=i===seq.length-1&&i>0&&pointCoordKey(p)===startKey;
-    const code=isBase?(isHome?'HOME':'BASE'):String(++visit).padStart(2,'0');
+    const code=isBase?(isHome?ui('REGRESO','RETURN'):'BASE'):String(++visit).padStart(2,'0');
     const cls=isHome?'home':isBase?'base':'point';
     return `<b class="${cls}" title="${escapeHtml(p.name||code)}">${code}</b>`;
   });
@@ -943,7 +943,7 @@ function renderMissionTimeline(mission){
   let visit=0;
   host.innerHTML=seq.map((p,i)=>{
     const base=p.type==='base'||i===0,home=base&&i===seq.length-1&&i>0;
-    const code=base?(home?'HOME':'BASE'):`${String(++visit).padStart(2,'0')}`;
+    const code=base?(home?ui('REGRESO','RETURN'):'BASE'):`${String(++visit).padStart(2,'0')}`;
     return `<div class="timelineNode ${base?'base':'required'}"><span>${code}</span><b>${escapeHtml(p.name||code)}</b></div>${i<seq.length-1?'<i class="timelineLink"></i>':''}`;
   }).join('');
 }
@@ -1030,7 +1030,7 @@ function renderMission(mission){
     $('dataQualitySummary').textContent=ui(`DEM solicitado: 200 m · resolución recibida: ${resolutions.length?Math.max(...resolutions).toFixed(0)+' m':'no informada'} · espaciamiento máximo de malla por tramo: ${spacing.toFixed(0)} m · cobertura: ${valid}/${samples} muestras. Calidad = completitud y densidad; no probabilidad de seguridad.`,`Requested DEM: 200 m · reported resolution: ${resolutions.length?Math.max(...resolutions).toFixed(0)+' m':'not reported'} · maximum median grid spacing across legs: ${spacing.toFixed(0)} m · coverage: ${valid}/${samples} samples. Quality = completeness and density; not a safety probability.`);
   }
   renderMissionTimeline(mission);updateRouteSequenceStrip(mission);renderTerrainProfile(mission);renderMissionAnalytics(mission);updateMissionHud(mission);updateHeaderStatus();updateStrategyCards(currentMission);drawPointMarkers();
-  $('recalculate').disabled=false;$('saveMission').disabled=false;if($('lastCalculated'))$('lastCalculated').textContent=lastCalculatedAt?`Último cálculo: ${lastCalculatedAt.toLocaleString('es-NI',{dateStyle:'short',timeStyle:'short'})}`:'Último cálculo: —';
+  $('recalculate').disabled=false;$('saveMission').disabled=false;if($('lastCalculated'))$('lastCalculated').textContent=lastCalculatedAt?`Último cálculo: ${lastCalculatedAt.toLocaleString(uiLang()==='en'?'en-US':'es-GT',{dateStyle:'short',timeStyle:'short'})}`:'Último cálculo: —';
 }
 
 function renderMissionList(){
@@ -1143,8 +1143,8 @@ async function exportMissionPdf(mode){
   const points=missionPoints.map(pdfPointPayload).filter(Boolean);
   const params={...selected.params};
   const report={
-    fileName:`jezero-mision-${now.toISOString().slice(0,19).replace(/[T:]/g,'-')}`,
-    reportId:`JEZERO-${now.toISOString().replace(/[-:TZ.]/g,'').slice(0,14)}`,
+    fileName:`dust-rider-mission-${now.toISOString().slice(0,19).replace(/[T:]/g,'-')}`,
+    reportId:`Dust Rider-${now.toISOString().replace(/[-:TZ.]/g,'').slice(0,14)}`,
     generatedAt:now.toISOString(),
     selectedMode:mode,
     returnBase:selected.sequence?.at(-1)?.type==='base',
@@ -1163,14 +1163,14 @@ async function exportMissionPdf(mode){
     dataSources:{
       elevation:window.JEZERO_DEMO?.enabled?'DEM sintético de demostración · NO SON DATOS NASA':'MDEM200M mediante ArcGIS ElevationLayer',
       cartography:'NASA / USGS / ESA / HRSC',
-      map:'NASA Mars Trek / capas configuradas en JEZERO',
+      map:'NASA Mars Trek / capas configuradas en Dust Rider',
       marsRadiusKm:MARTIAN_RADIUS,
       demResolutionRequestedM:200,
       sampleQuality:'Índice de completitud y densidad del muestreo; no es una probabilidad de seguridad.'
     },
     survival:window.JEZERO_SURVIVAL?.getSnapshot?.()||null,
     software:{
-      name:'JEZERO',
+      name:'Dust Rider',
       version:JEZERO_UI_VERSION,
       algorithmVersion:ALGORITHM_VERSION,
       interfaceTheme:themeInfo().label,
@@ -1322,7 +1322,7 @@ function exportMissionJson(){
   const mode=document.querySelector('input[name="mode"]:checked')?.value||'balanced';
   const payload={format:'JEZERO-MISSION',version:44,algorithmVersion:ALGORITHM_VERSION,exportedAt:new Date().toISOString(),missionMeta:getMissionSettings(),interface:{language:uiLang(),theme:themeInfo().key,routeAnimation:routeAnimationEnabled},points:missionPoints.map(p=>({lat:p.lat,lon:p.lon,name:p.name,type:p.type==='base'?'base':'target',dwellMin:Number(p.dwellMin)||0})),returnBase:$('returnBase')?.checked!==false,optimizeOrder:$('optimizeOrder')?.checked!==false,mode,params:readOperationalDefaults(),snapshot:currentMission?{calculatedAt:lastCalculatedAt?.toISOString(),algorithmVersion:ALGORITHM_VERSION,terrain:window.JEZERO_DEMO?.enabled?{source:'DEM sintético de demostración',resolutionM:200}:window.marsElevationInfo||null,survival:window.JEZERO_SURVIVAL?.getSnapshot?.()||null,strategies:validation.MODES.map(k=>pdfStrategyPayload(currentMission[k])).filter(Boolean),errors:{...currentMission.errors}}:null};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a');
-  const code=(payload.missionMeta.missionCode||'mision').replace(/[^a-z0-9_-]+/gi,'-'); a.href=url; a.download=`jezero-${code}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1200);
+  const code=(payload.missionMeta.missionCode||'mision').replace(/[^a-z0-9_-]+/gi,'-'); a.href=url; a.download=`dust-rider-${code}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1200);
   showToast(ui('Misión exportada a JSON.','Mission exported to JSON.'));
 }
 async function importMissionJsonFile(ev){
@@ -1433,13 +1433,14 @@ if(hudEl&&hudToggle){
   hudToggle.addEventListener('click',()=>{const compact=hudEl.classList.toggle('is-compact');hudToggle.setAttribute('aria-expanded',String(!compact));hudToggle.textContent=compact?'⌄':'⌃';localStorage.setItem(hudPrefKey,compact?'compact':'expanded');});
 }
 window.addEventListener('jezero:themechange',()=>renderMissionAnalytics(selectedMission()));
-window.addEventListener('jezero:languagechange',()=>renderMissionAnalytics(selectedMission()));
+window.addEventListener('jezero:languagechange',()=>{renderMissionAnalytics(selectedMission());renderTerrainProfile(selectedMission());markerLayer?.changed?.();knownLayer?.changed?.();landingLayer?.changed?.();});
 $('analyticsStrategySelect')?.addEventListener('change',e=>activateStrategyFromAnalytics(e.target.value));
 $('analyticsClearSelection')?.addEventListener('click',clearAnalyticsSelection);
 window.addEventListener('jezero:modulechange',e=>{if(e.detail?.module!=='analysis')clearAnalyticsSelection();});
 
 $('planMode').onclick=newMission;
 $('calculate').onclick=()=>calculateMission();
+$('setupChariot').onclick=()=>{window.JEZERO_MODULES.activate('operations');window.JEZERO_OPERATIONS.open('base',true);};
 $('routeLimitsPanel').append($('maxSlopeLimit').closest('.card'));
 $('reviewRouteLimits').onclick=()=>{$('routeLimitsPanel').open=true;$('maxSlopeLimit').focus();$('routeLimitsPanel').scrollIntoView({block:'nearest'});};
 $('clearRoute').onclick=clearMission;
@@ -1503,7 +1504,7 @@ document.querySelectorAll('[data-layer],[data-quick-layer]').forEach(el=>el.addE
 
 document.querySelectorAll('input[name="mode"]').forEach(el=>el.onchange=()=>{updateStrategyCards(currentMission);if(currentMission?.[el.value]){const mode=el.value;renderMission(currentMission[mode]);drawMissionRoutes(currentMission,mode);if(strategiesEquivalent(currentMission))showToast(ui('Las tres estrategias son prácticamente equivalentes en este terreno y con estos límites.','The three strategies are practically equivalent on this terrain with these limits.'));}});
 $('returnBase').onchange=()=>{currentMission=null;routeLayer?.getSource()?.clear();resetMetrics();updatePlanningUI();};
-$('optimizeOrder')?.addEventListener('change',()=>{currentMission=null;routeLayer?.getSource()?.clear();resetMetrics();updatePlanningUI();showToast($('optimizeOrder').checked?ui('Orden automático activado. JEZERO elegirá la mejor secuencia al calcular.','Automatic ordering enabled. JEZERO will choose the best sequence when calculating.'):ui('Orden manual activado. JEZERO respetará la lista de puntos.','Manual ordering enabled. JEZERO will respect the point list.'));});
+$('optimizeOrder')?.addEventListener('change',()=>{currentMission=null;routeLayer?.getSource()?.clear();resetMetrics();updatePlanningUI();showToast($('optimizeOrder').checked?ui('Orden automático activado. Dust Rider elegirá la mejor secuencia al calcular.','Automatic ordering enabled. Dust Rider will choose the best sequence when calculating.'):ui('Orden manual activado. Dust Rider respetará la lista de puntos.','Manual ordering enabled. Dust Rider will respect the point list.'));});
 ['speed','evaTime','returnMargin','maxSlopeLimit','minTransitability','minConfidence'].forEach(id=>$(id).addEventListener('input',()=>{invalidateMission();$('statusText').textContent=ui('PARÁMETROS CAMBIADOS · vuelve a calcular','PARAMETERS CHANGED · recalculate');}));
 function showToast(msg){$('toast').textContent=msg;$('toast').classList.remove('hide');clearTimeout(showToast.t);showToast.t=setTimeout(()=>$('toast').classList.add('hide'),5000);}
 

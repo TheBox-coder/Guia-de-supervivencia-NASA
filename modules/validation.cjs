@@ -57,7 +57,7 @@
     });
   }
   function missionFile(data) {
-    if (!data || data.format !== 'JEZERO-MISSION') throw new Error('El archivo no es una misión JEZERO válida.');
+    if (!data || data.format !== 'JEZERO-MISSION') throw new Error('El archivo no es una misión Dust Rider válida.');
     if (!Number.isInteger(data.version) || data.version < 1 || data.version > 44) throw new Error('Versión de misión no compatible (máximo V44).');
     if (data.mode != null && !MODES.includes(data.mode)) throw new Error('Estrategia de misión inválida.');
     for (const key of ['returnBase', 'optimizeOrder']) if (data[key] != null && typeof data[key] !== 'boolean') throw new Error(`Valor inválido: ${key}.`);

@@ -1548,3 +1548,8 @@ body.jezero-ui[data-module="dashboard"][data-interface-open="false"] .dashboardW
 .chariotProposal summary { cursor: pointer; }
 .chariotProposal img { display: block; max-width: 100%; height: auto; margin-top: 12px; }
 .chariotProposal p { font-size: 12px; line-height: 1.6; }
+.quickLanguage select { min-height: 34px; max-width: 108px; padding: 5px 8px; font: inherit; font-size: 12px; color: var(--text-primary); background: var(--surface-card); border: 1px solid var(--border-subtle); border-radius: 5px; cursor: pointer; }
+.quickLanguage select:focus-visible { outline: 2px solid var(--theme-accent-2); outline-offset: 2px; }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+body.jezero-ui .plannerFooterTools { flex-wrap: wrap; justify-content: flex-start; }
+body.jezero-ui :is(.opsNotice, .settingsHelp, .survivalNote, .safetyNote, .paramSource, .dashboardContent p, .dashboardContent small) { font-size: 13px; line-height: 1.6; }

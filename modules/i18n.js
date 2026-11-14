@@ -8,15 +8,15 @@
     'Flujo animado de la ruta':'Animated route flow','Muestra pequeños indicadores moviéndose en el sentido real de la caminata. No afecta el cálculo.':'Shows small indicators moving in the actual travel direction. It does not affect calculations.','Animación de ruta desactivada.':'Route animation disabled.','Flujo animado de ruta activado.':'Animated route flow enabled.',
     'EVA MISSION SYSTEM':'EVA MISSION SYSTEM',
     'TERRAIN · ROUTING · NAVIGATION':'TERRAIN · ROUTING · NAVIGATION',
-    'Define la base, agrega puntos de misión y deja que JEZERO optimice automáticamente el orden de visita sobre el terreno marciano.':'Define the base, add mission points, and let JEZERO automatically optimize the visit order across Martian terrain.',
+    'Define la base, agrega puntos de misión y deja que Dust Rider optimice automáticamente el orden de visita sobre el terreno marciano.':'Define the base, add mission points, and let Dust Rider automatically optimize the visit order across Martian terrain.',
     'PUNTOS DE MISIÓN':'MISSION POINTS','ORDEN AUTOMÁTICO':'AUTOMATIC ORDER','La numeración final se asigna después de calcular la ruta óptima; el orden en que agregas los puntos no obliga al recorrido.':'Final numbering is assigned after calculating the optimized route; the order in which you add points does not constrain the traverse.',
-    'Optimizar automáticamente el orden de visita':'Automatically optimize visit order','Punto de misión':'Mission point','Tiempo de parada (min)':'Stop time (min)','PARADA':'STOP','ORDEN CALCULADO':'CALCULATED ORDER','PENDIENTE DE CÁLCULO':'PENDING CALCULATION','ORDEN MANUAL':'MANUAL ORDER','INICIO':'START',
+    'Optimizar automáticamente el orden de visita':'Automatically optimize visit order','Punto de misión':'Mission point','Tiempo de parada (min)':'Stop time (min)','PARADA':'STOP','ORDEN CALCULADO':'CALCULATED ORDER','PENDIENTE DE CÁLCULO':'PENDING CALCULATION','ORDEN MANUAL':'MANUAL ORDER','INICIO':'HOME',
     'Ruta, terreno y desempeño EVA en una sola lectura':'Route, terrain, and EVA performance in one view','Abre el centro de análisis para revisar terreno, movilidad, retorno, estrategias y generar el informe técnico completo.':'Open the analysis center to review terrain, mobility, return margin, strategies, and generate the complete technical report.',
     'ANÁLISIS INTERACTIVO DE MISIÓN':'INTERACTIVE MISSION ANALYSIS','Todos los gráficos están concentrados aquí y sincronizados con la ruta: terreno, movilidad, retorno y comparación de estrategias.':'All charts are concentrated here and synchronized with the route: terrain, mobility, return margin, and strategy comparison.',
     'ESTRATEGIA DE RUTA':'ROUTE STRATEGY','Equilibrada':'Balanced','Menor exposición':'Lower exposure','Más directa':'Most direct','Distancia + terreno + calidad de muestreo':'Distance + terrain + sampling quality','Evita pendiente, rugosidad e incertidumbre':'Avoids slope, roughness and uncertainty','Minimiza distancia; el terreno solo bloquea límites duros':'Minimizes distance; terrain only blocks hard limits','Calcula para comparar':'Calculate to compare','Centro':'Center',
     'ESTRATEGIA':'STRATEGY','× LIMPIAR SELECCIÓN':'× CLEAR SELECTION','Mueve el cursor sobre un gráfico para inspeccionar la ruta.':'Move the cursor over a chart to inspect the route.',
     'PERFIL MULTICAPA DE LA RUTA':'MULTI-LAYER ROUTE PROFILE','Elevación · pendiente · rugosidad · transitabilidad · calidad de muestreo':'Elevation · slope · roughness · traversability · sampling quality',
-    'DISTRIBUCIÓN DE PENDIENTES':'SLOPE DISTRIBUTION','TRANSITABILIDAD':'TRAVERSABILITY','RUGOSIDAD':'ROUGHNESS','CALIDAD CARTOGRÁFICA':'CARTOGRAPHIC sampling quality',
+    'DISTRIBUCIÓN DE PENDIENTES':'SLOPE DISTRIBUTION','TRANSITABILIDAD':'TRAVERSABILITY','RUGOSIDAD':'ROUGHNESS','CALIDAD CARTOGRÁFICA':'CARTOGRAPHIC SAMPLING QUALITY',
     'PRESUPUESTO DE TIEMPO':'TIME BUDGET','Tránsito · paradas · reserva / exceso':'Travel · stops · reserve / overrun','RESERVA DE RETORNO':'RETURN RESERVE','Margen estimado conforme avanza la ruta':'Estimated margin along the route',
     'ASCENSO Y DESCENSO ACUMULADO':'CUMULATIVE ASCENT AND DESCENT','Metros acumulados por distancia':'Accumulated meters by distance','DIFICULTAD DEL TERRENO':'TERRAIN DIFFICULTY','Índice derivado de pendiente, movilidad y calidad de muestreo':'Index derived from slope, mobility, and sampling quality',
     'COMPARACIÓN INTERACTIVA DE RUTAS':'INTERACTIVE ROUTE COMPARISON','Haz clic en una estrategia para convertirla en la ruta activa':'Click a strategy to make it the active route','ESTADO GLOBAL DEL PLAN':'GLOBAL PLAN STATUS','Solo métricas calculadas':'Calculated metrics only',
@@ -26,7 +26,7 @@
     'MISIÓN':'MISSION','MAPA':'MAP','CONFIG.':'SETTINGS',
     'MAPA Y CAPAS':'MAP & LAYERS','Cartografía científica · NASA / USGS':'Scientific cartography · NASA / USGS',
     'Exploración cartográfica':'Cartographic exploration','Navega por Marte, consulta referencias y activa las capas de terreno que alimentan la planificación EVA.':'Navigate Mars, inspect references and enable terrain layers used by EVA planning.',
-    'Térmica · THEMIS IR día':'Thermal · THEMIS day IR','Mars Odyssey, 100 m/píxel. Inercia térmica diurna de la superficie; no es temperatura del aire.':'Mars Odyssey, 100 m/pixel. Daytime surface thermal inertia; not air temperature.','RADIO MÁX.':'MAX RADIUS','Velocidad 2 km/h, EVA 6 h, pendiente ≤ 20° y el radio de caminata de 2 km vienen de NASA EVA-EXP-0042 Rev. B. Son criterios de EVA lunar (1/6 g): en Marte (0,38 g) caminar con traje cuesta más, así que son un límite superior optimista. Transitabilidad, calidad de muestreo y rugosidad son heurísticas propias de JEZERO, no criterios de la NASA.':'Walking speed 2 km/h, 6 h EVA, slope under 20 degrees and the 2 km walking radius come from NASA EVA-EXP-0042 Rev. B. These are lunar EVA criteria (1/6 g): on Mars (0.38 g) walking in a suit costs more, so treat them as an optimistic upper bound. Traversability, sampling quality and roughness are JEZERO heuristics, not NASA criteria.','CAPAS DEL MAPA':'MAP LAYERS','VISTA DEL MAPA':'MAP VIEW','Representación visual; no modifica los cálculos':'Visual representation; it does not change calculations','Estilo cartográfico':'Map style','Mapa base':'Basemap','Topografía · color MOLA':'Topography · MOLA color','Relieve · contraste':'Relief · contrast','Monocromo científico':'Scientific monochrome','EVA · baja luminosidad':'EVA · low light','Capas':'Layers','Paneles':'Panels','CARTOGRAFÍA':'CARTOGRAPHY','TERRENO':'TERRAIN','Corredor y rutas EVA':'EVA corridor & routes','Alternativas calculadas':'Calculated alternatives','Base y objetivos':'Base & targets','Simbología JEZERO':'JEZERO symbology',
+    'Térmica · THEMIS IR día':'Thermal · THEMIS day IR','Mars Odyssey, 100 m/píxel. Inercia térmica diurna de la superficie; no es temperatura del aire.':'Mars Odyssey, 100 m/pixel. Daytime surface thermal inertia; not air temperature.','RADIO MÁX.':'MAX RADIUS','Velocidad 2 km/h, EVA 6 h, pendiente ≤ 20° y el radio de caminata de 2 km vienen de NASA EVA-EXP-0042 Rev. B. Son criterios de EVA lunar (1/6 g): en Marte (0,38 g) caminar con traje cuesta más, así que son un límite superior optimista. Transitabilidad, calidad de muestreo y rugosidad son heurísticas propias de Dust Rider, no criterios de la NASA.':'Walking speed 2 km/h, 6 h EVA, slope under 20 degrees and the 2 km walking radius come from NASA EVA-EXP-0042 Rev. B. These are lunar EVA criteria (1/6 g): on Mars (0.38 g) walking in a suit costs more, so treat them as an optimistic upper bound. Traversability, sampling quality and roughness are Dust Rider heuristics, not NASA criteria.','CAPAS DEL MAPA':'MAP LAYERS','VISTA DEL MAPA':'MAP VIEW','Representación visual; no modifica los cálculos':'Visual representation; it does not change calculations','Estilo cartográfico':'Map style','Mapa base':'Basemap','Topografía · color MOLA':'Topography · MOLA color','Relieve · contraste':'Relief · contrast','Monocromo científico':'Scientific monochrome','EVA · baja luminosidad':'EVA · low light','Capas':'Layers','Paneles':'Panels','CARTOGRAFÍA':'CARTOGRAPHY','TERRENO':'TERRAIN','Corredor y rutas EVA':'EVA corridor & routes','Alternativas calculadas':'Calculated alternatives','Base y objetivos':'Base & targets','Simbología Dust Rider':'Dust Rider symbology',
     'MAPA BASE':'BASEMAP',
     'Marte real · Viking VIS':'Real Mars · Viking VIS','Mosaico fotográfico global · NASA / JPL / USGS':'Global photographic mosaic · NASA / JPL / USGS',
     'Topografía MOLA + HRSC':'MOLA + HRSC topography','Relieve científico coloreado':'Color-coded scientific relief',
@@ -46,7 +46,7 @@
     'Guardar misión y generar PDF completo':'Save mission and generate complete PDF',
     'PLAN':'PLAN','RETURN RESERVE':'RETURN RESERVE','RUTA ACTIVA':'ACTIVE ROUTE','SIN RUTA':'NO ROUTE',
     'Corredor EVA':'EVA corridor','Zona visual de navegación':'Visual navigation zone','BASE / HOME':'BASE / HOME','Inicio y retorno de la caminata':'Traverse start and return','El número indica el orden optimizado de visita':'The number indicates the optimized visit order','Fin':'Finish','Último punto cuando no se regresa a base':'Last point when the route does not return to base','Sentido de marcha':'Travel direction','Las flechas siguen la dirección real del recorrido':'Arrows follow the actual direction of travel','SECUENCIA':'SEQUENCE','CALCULA UNA RUTA':'CALCULATE A ROUTE',
-    'TERRENO / CORREDOR EVA':'TERRAIN / EVA CORRIDOR','PEND. MEDIA':'AVG. SLOPE','TRANSIT. MEDIA':'AVG. TRAVERSABILITY','TRANSIT. MÍN.':'MIN. TRAVERSABILITY','CALIDAD MÍN.':'MIN. sampling quality',
+    'TERRENO / CORREDOR EVA':'TERRAIN / EVA CORRIDOR','PEND. MEDIA':'AVG. SLOPE','TRANSIT. MEDIA':'AVG. TRAVERSABILITY','TRANSIT. MÍN.':'MIN. TRAVERSABILITY','CALIDAD MÍN.':'MIN. SAMPLING QUALITY',
     'PENDIENTE MÁX.':'MAX. SLOPE','DESNIVEL':'ELEVATION CHANGE','RETORNO':'RETURN',
     'INCLUIDO':'INCLUDED','OMITIDO POR RESTRICCIONES / UTILIDAD':'OMITTED BY CONSTRAINTS / UTILITY','PENDIENTE DE CÁLCULO':'PENDING CALCULATION',
     'SIN ID':'NO ID','OBJETIVOS':'TARGETS','RUTA':'ROUTE',
@@ -55,7 +55,7 @@
     'MÓDULO ACTIVO':'ACTIVE MODULE',
     'PLANIFICADOR DE MISIÓN':'MISSION PLANNER',
     'DATOS CARTOGRÁFICOS · NASA / USGS':'CARTOGRAPHIC DATA · NASA / USGS',
-    'EXPLORAR':'EXPLORE','PLANIFICAR':'PLAN','CIENCIA':'SCIENCE','TERRENO':'TERRAIN','NAVEGADOR EVA':'EVA NAVIGATOR','CONTROL':'CONTROL','RESULTADOS':'RESULTS','CONFIGURACIÓN':'SETTINGS','AJUSTES':'SETTINGS','Guía de supervivencia':'Survival guide','JEZERO / GUÍA':'JEZERO / GUIDE',
+    'EXPLORAR':'EXPLORE','PLANIFICAR':'PLAN','CIENCIA':'SCIENCE','TERRENO':'TERRAIN','NAVEGADOR EVA':'EVA NAVIGATOR','CONTROL':'CONTROL','RESULTADOS':'RESULTS','CONFIGURACIÓN':'SETTINGS','AJUSTES':'SETTINGS','Guía de supervivencia':'Survival guide','Dust Rider / GUÍA':'Dust Rider / GUIDE',
     'EXPLORAR / COBERTURA':'EXPLORE / COVERAGE','MARTE GLOBAL':'GLOBAL MARS','Cobertura planetaria · NASA / USGS':'Planetary coverage · NASA / USGS',
     'Explora antes de planificar':'Explore before planning','Navega por Marte, consulta referencias y selecciona un sitio de aterrizaje como punto de partida.':'Navigate Mars, review references and select a landing site as your starting point.',
     'REFERENCIAS MARCIANAS':'MARTIAN REFERENCES','Usar un aterrizaje como base':'Use a landing site as base','Selecciona un sitio de aterrizaje…':'Select a landing site…','Usar como base':'Use as base',
@@ -74,7 +74,7 @@
     'SIGUIENTE OBJETIVO':'NEXT TARGET','Esperando misión':'Waiting for mission','RETORNO / MARGEN':'RETURN / MARGIN','DIFICULTAD':'DIFFICULTY','Sin evaluación':'Not evaluated','REGRESAR A BASE':'RETURN TO BASE','Recalcular la misión asegurando el retorno a la base':'Recalculate the mission ensuring return to base','Editar la misión':'Edit mission','Ajustar puntos y restricciones':'Adjust points and constraints','El Navegador EVA es todavía un modo de planificación y simulación. No constituye navegación humana certificada.':'The EVA Navigator is still a planning and simulation mode. It is not certified human navigation.',
     'CONTROL DE MISIÓN':'MISSION CONTROL','Vista operacional':'Operational view','Panel pensado para seguir tripulación, progreso, alertas y eventos de una EVA.':'Panel designed to follow crew, progress, alerts and EVA events.','PLAN ACTIVO':'ACTIVE PLAN','DISTANCIA':'DISTANCE','TRAMOS':'LEGS','ESTADO':'STATUS','SIN RUTA':'NO ROUTE','Telemetría y localización':'Telemetry and localization','Preparado para posición de EV1/EV2, comunicaciones, recursos del traje y eventos de misión.':'Prepared for EV1/EV2 position, communications, suit resources and mission events.',
     'Análisis y documentación en un solo lugar':'Analysis and documentation in one place','Revisa el resultado seleccionado, guarda la misión y genera el informe PDF sin cambiar de módulo.':'Review the selected result, save the mission and generate the PDF report without changing modules.','DURACIÓN':'DURATION','TRANSITABILIDAD':'TRAVERSABILITY','CALIDAD':'sampling quality','Guardar misión y generar PDF':'Save mission and generate PDF','HISTORIAL DE MISIONES':'MISSION HISTORY','El historial se conserva localmente en este navegador.':'History is stored locally in this browser.',
-    'Perfil de misión y preferencias':'Mission profile and preferences','Define la identificación del plan, guarda parámetros operacionales como predeterminados y administra los datos locales de JEZERO.':'Define the plan identity, save operational defaults and manage JEZERO local data.','INTERFAZ':'INTERFACE','Idioma':'Language','Español':'Spanish','Inglés':'English','El idioma se guarda en este navegador y se aplica a toda la interfaz.':'The language is stored in this browser and applied across the interface.',
+    'Perfil de misión y preferencias':'Mission profile and preferences','Define la identificación del plan, guarda parámetros operacionales como predeterminados y administra los datos locales de Dust Rider.':'Define the plan identity, save operational defaults and manage Dust Rider local data.','INTERFAZ':'INTERFACE','Idioma':'Language','Español':'Spanish','Inglés':'English','El idioma se guarda en este navegador y se aplica a toda la interfaz.':'The language is stored in this browser and applied across the interface.',
     'Tema visual':'Visual theme','TEMA':'THEME','IDIOMA':'LANGUAGE','La paleta se aplica inmediatamente y queda guardada en este navegador.':'The palette is applied immediately and stored in this browser.',
     'NASA Clásico':'NASA Classic','Azul NASA, rojo de misión y blanco técnico.':'NASA blue, mission red and technical white.',
     'Artemis Lunar':'Artemis Lunar','Grafito, plata lunar y azul frío de navegación.':'Graphite, lunar silver and cold navigation blue.',
@@ -108,6 +108,30 @@
   function translatePattern(text, lang=current){
     const extra=window.JEZERO_COPY?.pattern(text,lang);if(extra&&extra!==text)return extra;
     let s=String(text ?? '');
+    const diagnostics=[
+      [/Parámetro inválido: (.+?) \((.+?)\)\./g,'Invalid parameter: $1 ($2).'],
+      [/Coordenadas inválidas en el punto (\d+)\./g,'Invalid coordinates at waypoint $1.'],
+      [/La misión debe tener entre (\d+) y (\d+) puntos\./g,'The mission must contain between $1 and $2 waypoints.'],
+      [/El punto (\d+) repite una coordenada de la misión\./g,'Waypoint $1 duplicates a mission coordinate.'],
+      [/El nombre del punto (\d+) supera 80 caracteres\./g,'The name of waypoint $1 exceeds 80 characters.'],
+      [/Punto (\d+) inválido\./g,'Invalid waypoint $1.'],
+      [/Tipo inválido en el punto (\d+)\./g,'Invalid type at waypoint $1.'],
+      [/Parada inválida en el punto (\d+)\./g,'Invalid stop duration at waypoint $1.'],
+      [/Observación (\d+) inválida\./g,'Invalid observation $1.'],
+      [/Observación (\d+) duplicada\./g,'Duplicate observation $1.'],
+      [/Observación (\d+): (.+?) fuera de rango\./g,'Observation $1: $2 is out of range.'],
+      [/Identificación de misión inválida: (.+?)\./g,'Invalid mission identification: $1.'],
+      [/Valor inválido: (.+?)\./g,'Invalid value: $1.']
+    ];
+    if(lang==='en'){
+      for(const [pattern,translated] of diagnostics)s=s.replace(pattern,translated);
+      s=s.replace(/No se encontró una trayectoria entre (.+) y (.+)\. Límites: /g,'No route was found between $1 and $2. Limits: ')
+       .replace(/La ruta final incumple límites en el segmento (\d+): /g,'The final route exceeds limits at segment $1: ')
+       .replaceAll('Bloqueos detectados en el corredor: ','Blocked conditions in the corridor: ')
+       .replaceAll('Cambia los puntos o revisa los parámetros; no se han relajado los límites.','Change the waypoints or review the parameters; limits have not been relaxed.')
+       .replace(/\bpendiente (?=[≤>\d])/g,'slope ').replaceAll('transitabilidad ','traversability ').replaceAll('calidad ≥','sampling quality ≥').replaceAll('calidad de muestreo ','sampling quality ').replaceAll('elevación desconocida','unknown elevation');
+    }
+
     if(lang==='en'){
       s=s.replace(/^(\d+) misiones$/,'$1 missions').replace(/^1 misión$/,'1 mission');
       s=s.replace(/^(\d+) puntos$/,'$1 points').replace(/^(\d+) punto\(s\)$/,'$1 point(s)');
@@ -137,18 +161,29 @@
     return leading+direct+trailing;
   }
 
+  const textSources=new WeakMap(),attributeSources=new WeakMap();
+  function translateNode(node){
+    if(['SCRIPT','STYLE'].includes(node.parentElement?.tagName)||node.parentElement?.closest?.('[data-i18n-skip], [data-ops-es], [data-weather-es]'))return;
+    let saved=textSources.get(node);if(!saved||saved.last!==node.nodeValue)saved={source:node.nodeValue};
+    saved.last=translateText(saved.source,current);textSources.set(node,saved);if(saved.last!==node.nodeValue)node.nodeValue=saved.last;
+  }
+  function translateAttribute(el,name){
+    let fields=attributeSources.get(el);if(!fields){fields=new Map();attributeSources.set(el,fields);}
+    const value=el.getAttribute(name);let saved=fields.get(name);if(!saved||saved.last!==value)saved={source:value};
+    saved.last=translateText(saved.source,current);fields.set(name,saved);if(saved.last!==value)el.setAttribute(name,saved.last);
+  }
   function translateTree(root=document){
     if(mutating) return;
     mutating=true;
     try{
       const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(node){
-        if(!node.parentElement || ['SCRIPT','STYLE'].includes(node.parentElement.tagName)) return NodeFilter.FILTER_REJECT;
+        if(!node.parentElement || node.parentElement.closest?.('[data-i18n-skip], [data-ops-es], [data-weather-es]') || ['SCRIPT','STYLE'].includes(node.parentElement.tagName)) return NodeFilter.FILTER_REJECT;
         return node.nodeValue.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;
       }});
       const nodes=[]; let n; while((n=walker.nextNode())) nodes.push(n);
-      nodes.forEach(node=>{ const next=translateText(node.nodeValue,current); if(next!==node.nodeValue) node.nodeValue=next; });
-      const attrs=['title','placeholder','aria-label'];
-      root.querySelectorAll?.('*').forEach(el=>attrs.forEach(a=>{ if(el.hasAttribute(a)){const v=el.getAttribute(a);const nv=translateText(v,current);if(nv!==v)el.setAttribute(a,nv);} }));
+      nodes.forEach(translateNode);
+      const attrs=['title','placeholder','aria-label','alt'];
+      [...(root.nodeType===1?[root]:[]),...(root.querySelectorAll?.('*')||[])].filter(el=>!el.closest?.('[data-i18n-skip]')).forEach(el=>attrs.forEach(a=>{ if(el.hasAttribute(a))translateAttribute(el,a); }));
     } finally { mutating=false; }
   }
 
@@ -158,8 +193,7 @@
     if(persist) localStorage.setItem(KEY,lang);
     document.documentElement.lang=lang;
     translateTree(document);
-    const selector=document.getElementById('languageSetting');
-    if(selector && selector.value!==lang) selector.value=lang;
+    for(const id of ['languageSetting','quickLanguage']){const selector=document.getElementById(id);if(selector&&selector.value!==lang)selector.value=lang;}
     window.dispatchEvent(new CustomEvent('jezero:languagechange',{detail:{language:lang}}));
   }
 
@@ -167,13 +201,15 @@
     if(mutating) return;
     for(const m of mutations){
       if(m.type==='characterData' && m.target?.nodeValue?.trim()){
-        const nv=translateText(m.target.nodeValue,current); if(nv!==m.target.nodeValue){mutating=true;m.target.nodeValue=nv;mutating=false;}
+        translateNode(m.target);
+      } else if(m.type==='attributes'&&!m.target.closest?.('[data-i18n-skip]')){
+        if(m.target.hasAttribute(m.attributeName))translateAttribute(m.target,m.attributeName);else attributeSources.get(m.target)?.delete(m.attributeName);
       } else if(m.type==='childList'){
-        m.addedNodes.forEach(node=>{ if(node.nodeType===1) translateTree(node); else if(node.nodeType===3 && node.nodeValue.trim()){const nv=translateText(node.nodeValue,current);if(nv!==node.nodeValue){mutating=true;node.nodeValue=nv;mutating=false;}} });
+        m.addedNodes.forEach(node=>{ if(node.nodeType===1) translateTree(node); else if(node.nodeType===3 && node.nodeValue.trim()){translateNode(node);} });
       }
     }
   });
-  observer.observe(document.documentElement,{subtree:true,childList:true,characterData:true});
+  observer.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['title','placeholder','aria-label','alt']});
 
   window.JEZERO_I18N=Object.freeze({
     getLanguage:()=>current,
@@ -183,5 +219,6 @@
     ui:(es,en)=>current==='en'?en:es
   });
 
+  document.getElementById('quickLanguage')?.addEventListener('change',event=>applyLanguage(event.target.value));
   applyLanguage(current,{persist:false});
 })();

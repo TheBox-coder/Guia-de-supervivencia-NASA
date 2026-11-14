@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>JEZERO — Centro de misión</title>
+  <title>Dust Rider — Centro de misión</title>
   <link rel="icon" type="image/svg+xml" href="assets/jezero-mark.svg?v=4p3">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=4p5">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=4p5">
@@ -24,11 +24,11 @@
 <a class="controlSkip" href="#appContent">Ir al contenido</a>
 <header class="topbar">
   <div class="brand">
-    <img class="brandLogo" src="assets/jezero-mark.svg?v=4p3" alt="JEZERO">
+    <img class="brandLogo" src="assets/jezero-mark.svg?v=4p3" alt="Dust Rider">
     <div class="brandText">
-      <b>JEZERO</b>
+      <b>Dust Rider</b>
       <small>Guía de supervivencia en Marte</small>
-      <em>TERRAIN · ROUTING · NAVIGATION</em>
+      <em>TERRENO · RUTAS · EXPLORACIÓN</em>
     </div>
   </div>
   <div class="missionHeaderStrip" aria-label="Estado de misión">
@@ -39,7 +39,7 @@
     <div><span>MARGEN / RUTA</span><b data-mirror="missionMargin">—</b></div>
     <ol class="headerSteps" aria-label="Progreso de la misión"><li id="headerStepBase"><b>1</b><span>Base</span></li><li id="headerStepTargets"><b>2</b><span>Objetivos</span></li><li id="headerStepRoute"><b>3</b><span>Ruta</span></li></ol>
   </div>
-  <div class="topMeta"><a href="/control" class="topbarDashboardBtn" id="openLiveControl" title="Abrir Consola de Control de Misión y Telemetría Jezero">🛰 CONSOLA DE MISIÓN</a><span class="liveDot"></span><span id="statusText">CARTOGRAFÍA NASA / USGS</span><button class="topbarCommand" type="button" id="openCommands" title="Paleta de comandos (Ctrl+K)" aria-keyshortcuts="Control+K Meta+K"><span>Buscar</span><kbd>Ctrl K</kbd></button><button class="topbarHelp" type="button" data-open-help="start" title="Abrir manual (tecla ?)">? Ayuda</button></div>
+  <div class="topMeta"><label class="quickLanguage"><span class="srOnly">Idioma</span><select id="quickLanguage" aria-label="Idioma"><option value="es" data-i18n-skip>Español</option><option value="en" data-i18n-skip>English</option></select></label><a href="/control" class="topbarDashboardBtn" id="openLiveControl" title="Abrir control del Chariot y de la misión">Control</a><span class="liveDot"></span><span id="statusText">CARTOGRAFÍA NASA / USGS</span><button class="topbarCommand" type="button" id="openCommands" title="Paleta de comandos (Ctrl+K)" aria-keyshortcuts="Control+K Meta+K"><span>Buscar</span><kbd>Ctrl K</kbd></button><button class="topbarHelp" type="button" data-open-help="start" title="Abrir manual (tecla ?)">? Ayuda</button></div>
 </header>
 
 <main class="appShell" id="appContent" tabindex="-1">
@@ -47,12 +47,12 @@
   <button class="panelEdgeToggle panelEdgeToggleLeft" id="toggleLeftPanel" type="button" aria-label="Ocultar panel izquierdo" title="Ocultar panel izquierdo">‹</button>
   <button class="panelEdgeToggle panelEdgeToggleRight" id="toggleRightPanel" type="button" aria-label="Ocultar panel derecho" title="Ocultar panel derecho">›</button>
   <section id="homeWorkspace" class="homeWorkspace" aria-labelledby="controlTitle"></section>
-  <section id="dashboardWorkspace" class="dashboardWorkspace" aria-label="Consola de Control de Misión Jezero">
+  <section id="dashboardWorkspace" class="dashboardWorkspace" aria-label="Control del Chariot y de la misión">
     <div id="dashboardContent" class="dashboardContent"></div>
   </section>
-  <nav class="moduleRail" aria-label="Áreas principales de JEZERO">
+  <nav class="moduleRail" aria-label="Áreas principales de Dust Rider">
     <button class="moduleNav" data-module-target="home" title="Inicio"><span>⌂</span><small>INICIO</small></button>
-    <button class="moduleNav" data-module-target="dashboard" title="Control de Misión Jezero (Aeroespacial)"><span>🛰</span><small>CONTROL</small></button>
+    <button class="moduleNav" data-module-target="dashboard" title="Control del Chariot y de la misión"><span>🛰</span><small>CONTROL</small></button>
     <button class="moduleNav" data-module-target="survival" title="Supervivencia"><span>◇</span><small>GUÍA</small></button>
     <button class="moduleNav" data-module-target="operations" title="Chariot · hábitat móvil"><span>⊞</span><small>CHARIOT</small></button>
     <button class="moduleNav" data-module-target="weather" title="Predicción de clima"><span>☁</span><small>CLIMA</small></button>
@@ -70,7 +70,7 @@
       <section>
         <div class="sectionTitle">MAPA Y CAPAS</div>
         <div class="missionCard">
-          <div class="missionBadge">MARS</div>
+          <div class="missionBadge">MARTE</div>
           <div><strong>MARTE GLOBAL</strong><small>Cartografía científica · NASA / USGS</small></div>
         </div>
         <div class="moduleIntro">
@@ -99,7 +99,7 @@
         <label class="layerRow"><span class="check"><input type="checkbox" data-layer="roughness"><span class="layerCopy"><strong>Rugosidad</strong><small>Variación local</small></span></span><b class="layerStatus ready" data-layer-status="roughness">ACERCA PARA ANALIZAR</b></label>
         <div class="layerGroupLabel">MISIÓN</div>
         <label class="layerRow"><span class="check"><input type="checkbox" data-layer="route" checked><span class="layerCopy"><strong>Ruta EVA activa</strong><small>Recorrido seleccionado · alternativas en Resultados</small></span></span><b class="layerStatus live" data-layer-status="route">ACTIVA</b></label>
-        <label class="layerRow"><span class="check"><input type="checkbox" data-layer="points" checked><span class="layerCopy"><strong>Base y puntos</strong><small>Simbología JEZERO</small></span></span><b class="layerStatus live" data-layer-status="points">ACTIVA</b></label>
+        <label class="layerRow"><span class="check"><input type="checkbox" data-layer="points" checked><span class="layerCopy"><strong>Base y puntos</strong><small>Simbología Dust Rider</small></span></span><b class="layerStatus live" data-layer-status="points">ACTIVA</b></label>
         <div class="layerGroupLabel">REFERENCIAS</div>
         <label class="layerRow"><span class="check"><input type="checkbox" data-layer="known" checked><span class="layerCopy"><strong>Nombres oficiales IAU / USGS</strong><small>Nomenclatura por zona y nivel de zoom</small></span></span><b class="layerStatus live" data-layer-status="known">ACTIVA</b></label>
         <label class="layerRow"><span class="check"><input type="checkbox" data-layer="landing" checked><span class="layerCopy"><strong>Aterrizajes en Marte</strong><small>Misiones exitosas y referencias históricas</small></span></span><b class="layerStatus live" data-layer-status="landing">ACTIVA</b></label>
@@ -190,12 +190,12 @@
         <div class="sectionTitle">Secuencia de la misión</div>
         <div id="missionTimeline" class="missionTimeline"><div class="timelineEmpty">BASE → PUNTOS → REGRESO</div></div>
       </section>
-    <details id="routeLimitsPanel" class="routeLimitsPanel"><summary>Parámetros y límites de la misión</summary></details></div><div class="plannerFooter"><div id="missionWarnings" class="missionWarnings" role="alert" tabindex="-1" hidden></div><span id="uiCalcHint" class="uiCalcHint">Añade una base y un objetivo para comenzar.</span><button class="action primaryAction" id="calculate" disabled><span>⌁</span> Calcular misión</button><div class="plannerFooterTools"><button type="button" id="reviewRouteLimits" class="action ghost">Revisar límites</button><div class="missionCounter"><span>Puntos</span><b id="pointCount">0</b></div><button class="action ghost" id="planMode"><span>＋</span> Nueva misión</button><button class="action ghost" id="clearRoute"><span>×</span> Limpiar misión</button></div></div></div>
+    <details id="routeLimitsPanel" class="routeLimitsPanel"><summary>Parámetros y límites de la misión</summary></details></div><div class="plannerFooter"><div id="missionWarnings" class="missionWarnings" role="alert" tabindex="-1" hidden></div><span id="uiCalcHint" class="uiCalcHint">Añade una base y un objetivo para comenzar.</span><button class="action primaryAction" id="calculate" disabled><span>⌁</span> Calcular misión</button><div class="plannerFooterTools"><button type="button" id="setupChariot" class="action ghost">Configurar Chariot</button><button type="button" id="reviewRouteLimits" class="action ghost">Revisar límites</button><div class="missionCounter"><span>Puntos</span><b id="pointCount">0</b></div><button class="action ghost" id="planMode"><span>＋</span> Nueva misión</button><button class="action ghost" id="clearRoute"><span>×</span> Limpiar misión</button></div></div></div>
 
     <!-- EVA -->
     <div class="modulePanel" data-module-panel="eva"><div class="panelScroll">
       <section>
-        <div class="sectionTitle">EVA NAVIGATOR</div>
+        <div class="sectionTitle">NAVEGADOR EVA</div>
         <div class="evaHero">
           <span class="evaEyebrow">NAVEGACIÓN / PLAN ACTIVO</span>
           <b data-mirror="routeName">Esperando misión</b>
@@ -247,7 +247,7 @@
     <div class="modulePanel" data-module-panel="settings"><div class="panelScroll">
       <section>
         <div class="sectionTitle">CONFIGURACIÓN</div>
-        <div class="moduleIntro"><b>Perfil de misión y preferencias</b><p>Define la identificación del plan, guarda parámetros operacionales como predeterminados y administra los datos locales de JEZERO.</p></div>
+        <div class="moduleIntro"><b>Perfil de misión y preferencias</b><p>Define la identificación del plan, guarda parámetros operacionales como predeterminados y administra los datos locales de Dust Rider.</p></div>
       </section>
 
       <section class="settingsGroup interfaceSettings">
@@ -324,19 +324,19 @@
 
   <section class="mapPanel">
     <section id="operationsWorkspace" class="operationsWorkspace" aria-label="Chariot · hábitat móvil">
- <header class="operationsHeader"><div><small data-ops-es="JEZERO / CHARIOT" data-ops-en="JEZERO / CHARIOT">JEZERO / CHARIOT</small><h2 data-ops-es="Chariot · hábitat móvil" data-ops-en="Chariot · mobile habitat">Chariot · hábitat móvil</h2></div><div class="operationsActions"><button id="opsExport" type="button" data-ops-es="Guardar paquete ↓" data-ops-en="Save pack ↓">Guardar paquete ↓</button><button id="opsImport" type="button" data-ops-es="Abrir paquete ↑" data-ops-en="Open pack ↑">Abrir paquete ↑</button><button id="opsClose" type="button" aria-label="Cerrar Chariot">×</button></div></header>
+ <header class="operationsHeader"><div><small data-ops-es="Dust Rider / CHARIOT" data-ops-en="Dust Rider / CHARIOT">Dust Rider / CHARIOT</small><h2 data-ops-es="Chariot · hábitat móvil" data-ops-en="Chariot · mobile habitat">Chariot · hábitat móvil</h2></div><div class="operationsActions"><button id="opsExport" type="button" data-ops-es="Guardar paquete ↓" data-ops-en="Save pack ↓">Guardar paquete ↓</button><button id="opsImport" type="button" data-ops-es="Abrir paquete ↑" data-ops-en="Open pack ↑">Abrir paquete ↑</button><button id="opsClose" type="button" aria-label="Cerrar Chariot">×</button></div></header>
  <input id="opsFile" type="file" accept=".json,application/json" hidden>
  <div class="operationsLayout"><label class="opsSectionPicker"><span data-ops-es="Sección de soporte" data-ops-en="Support section">Sección de soporte</span><select id="opsSectionSelect" aria-controls="opsPanels"></select></label><nav id="opsTabs" aria-label="Módulos de supervivencia"></nav><div class="operationsContent"><div id="opsError" role="alert" hidden></div><div class="opsContext"><label><span data-ops-es="Origen para refugios" data-ops-en="Shelter reference location">Origen para refugios</span><select id="opsOrigin"></select></label><span><b data-ops-es="Duración estimada" data-ops-en="Estimated duration">Duración estimada</b> <span id="opsDuration">—</span></span><span><b data-ops-es="Tripulación del escenario" data-ops-en="Scenario crew">Tripulación del escenario</b> <span id="opsCrew"></span></span><b id="opsStatus" role="status"></b></div><div id="opsPanels"></div><p class="operationsFootnote" data-ops-es="Datos declarados y cálculos bajo supuestos. Sin inspección de hardware, protocolos certificados o telemetría automática. Guarda también tu misión JSON; importar este paquete no reemplaza su ruta." data-ops-en="Declared data and calculations under assumptions. No hardware inspection, certified protocols or automatic telemetry. Also save mission JSON; importing this pack does not replace its route.">Datos declarados y cálculos bajo supuestos. Sin inspección de hardware, protocolos certificados o telemetría automática. Guarda también tu misión JSON; importar este paquete no reemplaza su ruta.</p></div></div>
 </section>
     <section id="forecastWorkspace" class="forecastWorkspace" aria-label="Predicción meteorológica">
- <header class="workspaceHeading"><div><small>JEZERO / CLIMA</small><h2 data-weather-es="Predicción del próximo sol" data-weather-en="Next-sol forecast">Predicción del próximo sol</h2></div><button data-close-interface type="button" aria-label="Cerrar predicción">×</button></header>
+ <header class="workspaceHeading"><div><small>Dust Rider / CLIMA</small><h2 data-weather-es="Predicción del próximo sol" data-weather-en="Next-sol forecast">Predicción del próximo sol</h2></div><button data-close-interface type="button" aria-label="Cerrar predicción">×</button></header>
  <div id="forecastEmpty" class="forecastEmpty"><h3 data-weather-es="Añade observaciones para predecir" data-weather-en="Add observations for a projection">Añade observaciones para predecir</h3><p data-weather-es="No hay mediciones cargadas. Importa tu archivo para proyectar la temperatura del próximo sol; no se genera clima ficticio." data-weather-en="No observations loaded. Import your file to project temperature for the next sol; fictional weather is not generated.">No hay mediciones cargadas. Importa tu archivo para proyectar la temperatura del próximo sol; no se genera clima ficticio.</p><button data-forecast-import type="button" data-weather-es="Añadir observaciones →" data-weather-en="Add observations →">Añadir observaciones →</button></div>
  <div id="forecastResults" hidden><div class="forecastSummary"><div><span id="forecastSol"></span><strong id="forecastTemp"></strong><small id="forecastHourValue"></small></div><div><b data-weather-es="Fuente de observaciones" data-weather-en="Observation source">Fuente de observaciones</b><p id="forecastSource"></p><p id="forecastCoverage"></p></div></div><div id="forecastChart"></div><label class="forecastHourLabel"><span data-weather-es="Explora la hora local" data-weather-en="Explore local time">Explora la hora local</span><input id="forecastHour" type="range" min="0" max="23" value="12"></label><div id="forecastHours"></div><p id="forecastBand"></p><div class="forecastFacts"><article><b data-weather-es="Hora más templada del modelo" data-weather-en="Warmest modeled hour">Hora más templada del modelo</b><strong id="forecastWarm"></strong></article><article><b data-weather-es="Presión observada · mediana" data-weather-en="Observed pressure · median">Presión observada · mediana</b><strong id="forecastPressure"></strong></article><article><b data-weather-es="Viento observado · mediana" data-weather-en="Observed wind · median">Viento observado · mediana</b><strong id="forecastWind"></strong></article></div><p data-weather-es="Proyección térmica por patrón diario. No predice tormentas ni garantiza condiciones seguras. Presión y viento son observaciones, no predicciones." data-weather-en="Temperature projection from a daily pattern. It does not predict storms or guarantee safe conditions. Pressure and wind are observations, not predictions.">Proyección térmica por patrón diario. No predice tormentas ni garantiza condiciones seguras. Presión y viento son observaciones, no predicciones.</p><button data-forecast-import type="button" data-weather-es="Cambiar observaciones" data-weather-en="Change observations">Cambiar observaciones</button></div>
 </section>
     <div id="demoModeBadge" class="demoModeBadge" hidden>DEMO · TERRENO SINTÉTICO, NO NASA</div>
 <section id="survivalWorkspace" class="survivalWorkspace" aria-label="Guía de supervivencia en Marte">
   <div class="survivalScroll">
-    <div class="workspaceHeading"><div><small>JEZERO / GUÍA</small><h2>Guía de supervivencia</h2></div><div class="workspaceActions"><button id="missionLibraryOpen" type="button">Misiones</button><button type="button" data-mission-file-action="importMissionJson">Abrir misión ↑</button><button id="workspaceSaveMission" type="button" data-mission-file-action="exportMissionJson" disabled>Guardar misión ↓</button><span class="workspaceLabel">4.0 P0</span></div></div>
+    <div class="workspaceHeading"><div><small>Dust Rider / GUÍA</small><h2>Guía de supervivencia</h2></div><div class="workspaceActions"><button id="missionLibraryOpen" type="button">Misiones</button><button type="button" data-mission-file-action="importMissionJson">Abrir misión ↑</button><button id="workspaceSaveMission" type="button" data-mission-file-action="exportMissionJson" disabled>Guardar misión ↓</button><span class="workspaceLabel">4.0 P0</span></div></div>
     <div id="draftRecovery" class="draftRecovery" hidden><div><b>Encontramos un borrador</b><p>Recupera tus puntos y parámetros guardados en este navegador.</p></div><div><button id="draftRecover" type="button">Recuperar</button><button id="draftDismiss" type="button">Descartar</button></div></div>
     <header class="survivalHero">
       <div><div class="survivalEyebrow">PLANIFICA · EVALÚA · REGRESA <span id="survivalDataBadge">PLANIFICACIÓN</span></div>
@@ -372,7 +372,7 @@
       <article class="survivalCard guideDataCard" id="guideDataCard"><div class="survivalCardHeading"><div><span>DATOS DEL CLIMA</span><h2>Tus observaciones</h2></div><span class="survivalTag">IMPORTACIÓN LOCAL</span></div><p>Carga tus observaciones de temperatura. Sin ellas, la app deja el clima y la autonomía pendientes. Se guardan en este navegador para continuar después.</p><div class="survivalDataActions"><button id="survivalImportWeather" type="button">↑ Importar observaciones</button><button id="survivalSampleWeather" type="button">↓ Plantilla vacía CSV</button><button id="survivalClearWeather" type="button">Quitar observaciones</button></div><input id="survivalWeatherFile" type="file" accept=".json,.csv,application/json,text/csv" hidden><div class="survivalInputs weatherImportLocation"><label>Fuente de las mediciones CSV <input id="weatherSourceName" type="text" maxlength="160" placeholder="Instrumento, archivo o conjunto de datos"></label><label>Latitud declarada de CSV <input id="weatherLatitude" type="number" min="-90" max="90" step="0.00001" value="18.44463"></label><label>Longitud declarada de CSV <input id="weatherLongitude" type="number" min="-180" max="180" step="0.00001" value="77.45088"></label></div><div id="survivalDatasetStatus" class="survivalDatasetStatus">Todavía no hay observaciones.</div><details class="survivalAssumptions"><summary>Formato, unidades y utilidad de los datos</summary><p>JSON normalizado o CSV con <code>sol, localHour, temperatureC, pressurePa, windMps</code>. Temperatura en °C, presión en Pa, viento en m/s. Las columnas de presión y viento pueden estar vacías. Necesitamos al menos 12 muestras que cubran 6 franjas de 3 horas.</p><p>La temperatura alimenta una proyección por patrón diario y la demanda térmica del escenario. Presión y viento se muestran como observaciones: no se convierten automáticamente en garantías de seguridad. La plantilla está vacía: complétala con tus mediciones y declara su procedencia.</p></details></article>
     </div>
     <section class="guideSupport"><div><h3>Ayuda cuando la necesites</h3><p>Formatos de datos, conceptos y soluciones a los errores más frecuentes.</p></div><button type="button" data-open-help="problems">Consultar el manual ↗</button></section>
-    <footer class="survivalFooter"><span>JEZERO · GUÍA DE PLANIFICACIÓN EN MARTE</span><p>Tus rutas usan cartografía real; las proyecciones dependen de las observaciones y supuestos declarados. No hay conexión automática a telemetría actual. <a href="https://www.nasa.gov/directorates/stmd/nasas-first-weather-report-from-jezero-crater-on-mars/" target="_blank" rel="noreferrer">MEDA: referencia histórica ↗</a> · <a href="https://science.nasa.gov/mars/facts/" target="_blank" rel="noreferrer">Entorno de Marte ↗</a> · <a href="https://www.nasa.gov/missions/mars-science-laboratory/how-nasas-curiosity-rover-is-making-mars-safer-for-astronauts/" target="_blank" rel="noreferrer">Radiación ↗</a></p></footer>
+    <footer class="survivalFooter"><span>Dust Rider · GUÍA DE PLANIFICACIÓN EN MARTE</span><p>Tus rutas usan cartografía real; las proyecciones dependen de las observaciones y supuestos declarados. No hay conexión automática a telemetría actual. <a href="https://www.nasa.gov/directorates/stmd/nasas-first-weather-report-from-jezero-crater-on-mars/" target="_blank" rel="noreferrer">MEDA: referencia histórica ↗</a> · <a href="https://science.nasa.gov/mars/facts/" target="_blank" rel="noreferrer">Entorno de Marte ↗</a> · <a href="https://www.nasa.gov/missions/mars-science-laboratory/how-nasas-curiosity-rover-is-making-mars-safer-for-astronauts/" target="_blank" rel="noreferrer">Radiación ↗</a></p></footer>
   </div>
 </section>
 
@@ -433,7 +433,7 @@
               <div class="legendItem"><span class="legendSymbol landing"></span><span><b>Sitio de aterrizaje</b><small>Misiones que aterrizaron en Marte</small></span></div>
               <div class="legendItem"><span class="legendSymbol known"></span><span><b>Nomenclatura marciana</b><small>Nombres oficiales IAU / USGS visibles según zoom</small></span></div>
               <div class="mapLegendGroupTitle">MISIÓN</div>
-              <div class="legendItem"><span class="legendMissionIcon baseStation">⌂</span><span><b>BASE / HOME</b><small>Inicio y retorno de la caminata</small></span></div>
+              <div class="legendItem"><span class="legendMissionIcon baseStation">⌂</span><span><b>BASE / REGRESO</b><small>Inicio y retorno de la caminata</small></span></div>
               <div class="legendItem"><span class="legendMissionIcon missionNode">01</span><span><b>Punto de misión</b><small>Orden optimizado de visita</small></span></div>
               <div class="legendItem"><span class="legendMissionIcon finishNode">F</span><span><b>FIN</b><small>Último punto cuando no se regresa a base</small></span></div>
               <div class="mapLegendGroupTitle">RUTA</div>
@@ -458,7 +458,7 @@
 
     <section class="analyticsWorkspace" id="analyticsWorkspace" aria-label="Centro de análisis de la misión">
       <header class="analyticsHeader">
-        <div><span>JEZERO / MISSION ANALYTICS V51</span><h2>Resultados de la misión</h2><p>Compara las alternativas y explora cómo cambia el terreno a lo largo del recorrido.</p></div>
+        <div><span>Dust Rider / ANÁLISIS DE MISIÓN</span><h2>Resultados de la misión</h2><p>Compara las alternativas y explora cómo cambia el terreno a lo largo del recorrido.</p></div>
         <div class="analyticsHeaderMeta"><b id="analyticsRouteName">SIN MISIÓN</b><span id="analyticsGeneratedAt">CALCULA UNA RUTA</span></div>
       </header>
       <div class="analyticsToolbar">
@@ -473,7 +473,7 @@
           <div class="analyticsTooltip" id="analyticsProfileTooltip" hidden></div>
         </article>
         <div class="analyticsGrid2">
-          <article class="analyticsCard"><div class="analyticsCardHead"><div><span>02 / TERRENO</span><h3>DISTRIBUCIÓN DE PENDIENTES</h3></div><small>Hover para ver distancia y porcentaje</small></div><div class="analyticsChart" id="analyticsSlopeChart"><div class="chartEmpty">Sin datos.</div></div></article>
+          <article class="analyticsCard"><div class="analyticsCardHead"><div><span>02 / TERRENO</span><h3>DISTRIBUCIÓN DE PENDIENTES</h3></div><small>Selecciona una barra para ver la distancia y el porcentaje</small></div><div class="analyticsChart" id="analyticsSlopeChart"><div class="chartEmpty">Sin datos.</div></div></article>
           <article class="analyticsCard"><div class="analyticsCardHead"><div><span>03 / MOVILIDAD</span><h3>TRANSITABILIDAD</h3></div><small>Distribución ponderada por distancia</small></div><div class="analyticsChart" id="analyticsTransitChart"><div class="chartEmpty">Sin datos.</div></div></article>
         </div>
         <div class="analyticsGrid2">
@@ -493,7 +493,7 @@
           <div class="analyticsChart" id="analyticsRoutesChart"><div class="chartEmpty">Calcula la misión para comparar estrategias.</div></div>
         </article>
         <div class="analyticsGrid2">
-          <article class="analyticsCard"><div class="analyticsCardHead"><div><span>11 / MISSION HEALTH</span><h3>ESTADO GLOBAL DEL PLAN</h3></div><small>Solo métricas calculadas</small></div><div class="analyticsChart" id="analyticsHealthChart"><div class="chartEmpty">Sin datos.</div></div></article>
+          <article class="analyticsCard"><div class="analyticsCardHead"><div><span>11 / ESTADO DEL PLAN</span><h3>ESTADO GLOBAL DEL PLAN</h3></div><small>Solo métricas calculadas</small></div><div class="analyticsChart" id="analyticsHealthChart"><div class="chartEmpty">Sin datos.</div></div></article>
           <article class="analyticsCard"><div class="analyticsCardHead"><div><span>12 / MAPA ANALÍTICO</span><h3>UBICACIÓN DEL TRAMO</h3></div><small>El punto seleccionado se sincroniza con los gráficos</small></div><div class="analyticsChart" id="analyticsMiniMap"><div class="chartEmpty">Sin datos.</div></div></article>
         </div>
         <article class="analyticsCard analyticsCardWide">
@@ -557,7 +557,7 @@
         <label class="inputRow"><span>Pendiente máxima permitida</span><input id="maxSlopeLimit" type="number" min="1" max="45" step="1" value="20"><em>°</em></label>
         <label class="inputRow"><span>Transitabilidad mínima</span><input id="minTransitability" type="number" min="0" max="100" step="5" value="25"><em>/100</em></label>
         <label class="inputRow"><span>Calidad de muestreo mínima</span><input id="minConfidence" type="number" min="0" max="100" step="5" value="20"><em>%</em></label>
-        <small class="paramSource">Velocidad 2 km/h, EVA 6 h, pendiente ≤ 20° y el radio de caminata de 2 km vienen de NASA EVA-EXP-0042 Rev. B. Son criterios de EVA lunar (1/6 g): en Marte (0,38 g) caminar con traje cuesta más, así que son un límite superior optimista. Transitabilidad, calidad de muestreo y rugosidad son heurísticas propias de JEZERO, no criterios de la NASA.</small>
+        <small class="paramSource">Velocidad 2 km/h, EVA 6 h, pendiente ≤ 20° y el radio de caminata de 2 km vienen de NASA EVA-EXP-0042 Rev. B. Son criterios de EVA lunar (1/6 g): en Marte (0,38 g) caminar con traje cuesta más, así que son un límite superior optimista. Transitabilidad, calidad de muestreo y rugosidad son heurísticas propias de Dust Rider, no criterios de la NASA.</small>
         <button class="primary recalcAction" id="recalculate" disabled><span>↻</span> Recalcular misión</button>
         <div class="calcMeta"><b id="calcParams">—</b><small id="lastCalculated">Último cálculo: —</small></div>
       </section>
@@ -589,7 +589,7 @@
     <div class="modulePanel" data-module-panel="analysis"><div class="panelScroll">
       <section class="card"><div class="sectionTitle">RESULTADO DE LA RUTA</div><div class="metricGrid"><div><small>RIESGO / DIFICULTAD</small><strong data-mirror="riskNumber">—</strong></div><div><small>PENDIENTE MEDIA</small><strong data-mirror="avgSlope">—</strong></div><div><small>TRANSITABILIDAD</small><strong data-mirror="avgTransitability">—</strong></div><div><small>CALIDAD</small><strong data-mirror="avgConfidence">—</strong></div><div><small>PENDIENTE MÁX.</small><strong data-mirror="maxSlope">—</strong></div><div><small>MARGEN</small><strong data-mirror="missionMargin">—</strong></div></div></section>
       <section class="card"><div class="sectionTitle">CALIDAD DE LOS DATOS</div><p id="dataQualitySummary">Calcula para consultar la cobertura y resolución del muestreo.</p></section>
-      <section class="card"><div class="sectionTitle">DOCUMENTO DE MISIÓN</div><div class="evaStatusLine"><span>RUTA</span><b data-mirror="routeName">Esperando misión</b></div><div class="evaStatusLine"><span>DISTANCIA</span><b data-mirror="distance">—</b></div><div class="evaStatusLine"><span>DURACIÓN</span><b data-mirror="duration">—</b></div><p>El PDF V44 conserva toda la información calculada: identificación, orden optimizado, estrategias, perfiles, distribuciones, EVA, retorno, Mission Health, terreno por tramo, nodos, fuentes, parámetros y limitaciones.</p></section>
+      <section class="card"><div class="sectionTitle">DOCUMENTO DE MISIÓN</div><div class="evaStatusLine"><span>RUTA</span><b data-mirror="routeName">Esperando misión</b></div><div class="evaStatusLine"><span>DISTANCIA</span><b data-mirror="distance">—</b></div><div class="evaStatusLine"><span>DURACIÓN</span><b data-mirror="duration">—</b></div><p>El PDF V44 conserva toda la información calculada: identificación, orden optimizado, estrategias, perfiles, distribuciones, EVA, retorno, estado del plan, terreno por tramo, nodos, fuentes, parámetros y limitaciones.</p></section>
     </div></div>
 
     <!-- Settings details -->

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "JEZERO",
+    "name": "Dust Rider",
     "language": "es",
     "region": "Cráter Jezero · EVA-01",
     "mode": "research-planning",
@@ -221,8 +221,8 @@
       "lat": 18.4448,
       "lon": 77.4253,
       "minZoom": 7,
-      "description": "Punto de partida hipotético de la caminata EVA-01, elegido por el equipo JEZERO porque deja los tres objetivos dentro del radio de caminata a pie de unos 2 km de NASA EVA-EXP-0042 Rev. B. No es un sitio de la NASA ni un emplazamiento propuesto de hábitat.",
-      "source": "Sitio hipotético del equipo JEZERO; criterio de radio de NASA EVA-EXP-0042 Rev. B",
+      "description": "Punto de partida hipotético de la caminata EVA-01, elegido por el equipo Dust Rider porque deja los tres objetivos dentro del radio de caminata a pie de unos 2 km de NASA EVA-EXP-0042 Rev. B. No es un sitio de la NASA ni un emplazamiento propuesto de hábitat.",
+      "source": "Sitio hipotético del equipo Dust Rider; criterio de radio de NASA EVA-EXP-0042 Rev. B",
       "sourceUrl": "https://www.nasa.gov/wp-content/uploads/2017/02/eva-exp-0042_xeva_system_con_ops_rev_b_final_dtd_10192020_ref_doc.pdf"
     },
     {

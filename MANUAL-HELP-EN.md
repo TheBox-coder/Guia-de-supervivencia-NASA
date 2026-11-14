@@ -1,20 +1,20 @@
-# JEZERO 4.0.0-p0 — Mission Control
+# Dust Rider 4.0.0-p0 — Mission Control
 
 Home consolidates the current route, hypothetical O₂/battery and declared water/CO₂/thermal budgets. Missing inputs remain unknown. Use Area on narrow screens, × to close and ↑ to reopen. Existing saved module preference is retained.
 
 Prepare mission opens the existing planner. Review contingencies opens the current documented protocol editor. Scientific Assurance & Validation expands the inspected equations, versions, tests and limitations. No physical certification is claimed. Export evidence produces JEZERO-ASSURANCE v1 with inputs and a recalculated snapshot; it is not a mission restore or Survival Twin replay. Keep the original mission and support JSON exports too.
 
-This increment preserves all previous data keys. Deleting saved records, clearing/replacing a mission and removing weather now require confirmation. Starting another mission preserves the previous recoverable draft until a new draft replaces it or you explicitly dismiss it. Offline the cached shell and stored inputs remain available; new remote imagery, elevation and server PDF are not guaranteed. Survival Twin, Academy and the new Emergency Center remain future increments. See docs/ESTADO-JEZERO-4.md for actual phase status.
+This increment preserves all previous data keys. Deleting saved records, clearing/replacing a mission and removing weather now require confirmation. Starting another mission preserves the previous recoverable draft until a new draft replaces it or you explicitly dismiss it. Offline the cached shell and stored inputs remain available; new remote imagery, elevation and server PDF are not guaranteed. Survival Twin, Academy and the new Emergency Center remain future increments. See docs/ESTADO-Dust Rider-4.md for actual phase status.
 
 > V50: click a navigation button to open its interface, then click again to close it. Weather projects next-sol temperature from imported observations with an hour selector. Pressure and wind are observed data. It does not predict storms or automatically retrieve current telemetry.
 
-# JEZERO · Help manual
+# Dust Rider · Help manual
 
 Version 49. Open Help or press ? outside a text field. The tutorial preserves your progress without modifying mission data.
 
 ## Getting started
 
-JEZERO combines three tasks: planning a route, adding weather observations and estimating resources for the return journey.
+Dust Rider combines three tasks: planning a route, adding weather observations and estimating resources for the return journey.
 
 - In **Mission**, define a base and at least one destination.
 
@@ -128,7 +128,7 @@ Reload after updating the project. The cache updates when the server publishes t
 
 ## Glossary and scope
 
-**EVA**: Activity outside a vehicle or habitat. JEZERO uses it as the available window to travel, work and return.
+**EVA**: Activity outside a vehicle or habitat. Dust Rider uses it as the available window to travel, work and return.
 
 **Sol**: A Martian day, used to identify observations.
 
@@ -140,7 +140,7 @@ Reload after updating the project. The cache updates when the server publishes t
 
 **Declared provenance**: A source supplied by the file author; not automatically verified.
 
-JEZERO is a planning tool with explainable models. It has no automatic link to current NASA telemetry and does not replace mission protocols.
+Dust Rider is a planning tool with explainable models. It has no automatic link to current NASA telemetry and does not replace mission protocols.
 
 
 ## Survival planning center · V51

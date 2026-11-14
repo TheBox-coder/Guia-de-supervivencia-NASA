@@ -8,7 +8,7 @@
     {id:'communications',version:'1',name:['Cobertura declarada','Declared communication coverage'],kind:'hypothetical',equations:['coverage = sampled route nodes inside declared relay circles / sampled route nodes'],units:['km','fraction'],variables:['relay coordinates','declared radius','sampled route nodes','dated operator link check'],assumptions:['Circles are operator assumptions. Checked link state is evaluated separately.'],uncertainty:'Terrain occlusion, antenna, propagation and interference are not modelled.',limitations:'Coverage is not proof of a working link.',tests:['tests/operations.test.mjs'],implementation:['modules/operations-engine.cjs'],references:[]}
   ];
   const references=[
-    {name:'NASA-STD-7009',url:'https://standards.nasa.gov/standard/NASA/NASA-STD-7009',scope:'Modelling and simulation good practice; does not validate JEZERO coefficients.'},
+    {name:'NASA-STD-7009',url:'https://standards.nasa.gov/standard/NASA/NASA-STD-7009',scope:'Modelling and simulation good practice; does not validate Dust Rider coefficients.'},
     {name:'NASA-STD-3001',url:'https://www.nasa.gov/reference/nasa-std-3001v1/',scope:'Human-system context only; no thresholds imported or compliance claimed.'},
     {name:'ISO/IEC 25010:2023',url:'https://www.iso.org/standard/78176.html',scope:'Public product-quality model summary; full standard not audited.'},
     {name:'WCAG 2.2',url:'https://www.w3.org/TR/WCAG22/',scope:'Accessibility design reference; no full conformance audit.'}

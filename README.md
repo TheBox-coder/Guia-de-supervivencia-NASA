@@ -1,6 +1,6 @@
-# JEZERO — Survival Intelligence · 4.0.0-p0
+# Dust Rider — Survival Intelligence · 4.0.0-p0
 
-Primer incremento de JEZERO 4: auditoría, Mission Control, trazabilidad y protección de datos. **No es la versión 4.0 completa**. Survival Twin, Academy y el nuevo Emergency Center quedan pendientes. Todos los módulos anteriores permanecen accesibles.
+Primer incremento de Dust Rider 4: auditoría, Mission Control, trazabilidad y protección de datos. **No es la versión 4.0 completa**. Survival Twin, Academy y el nuevo Emergency Center quedan pendientes. Todos los módulos anteriores permanecen accesibles.
 
 ## Ejecutar localmente
 
@@ -10,12 +10,12 @@ En una instalación nueva abre Inicio. Una preferencia anterior conserva su mód
 
 ## Documentación del incremento
 
-- [Auditoría y matriz funcional](docs/AUDITORIA-JEZERO-4.md)
+- [Auditoría y matriz funcional](docs/AUDITORIA-Dust Rider-4.md)
 - [Arquitectura y contratos](docs/ARQUITECTURA-ACTUAL.md)
 - [Riesgos](docs/MATRIZ-DE-RIESGOS.md)
 - [Migración e incrementos](docs/PLAN-DE-MIGRACION.md)
-- [Estado real y evidencias](docs/ESTADO-JEZERO-4.md)
-- [Cambios P0](CHANGELOG-JEZERO-4-P0.md)
+- [Estado real y evidencias](docs/ESTADO-Dust Rider-4.md)
+- [Cambios P0](CHANGELOG-Dust Rider-4-P0.md)
 
 Solo shell/entradas almacenadas funcionan offline tras una primera carga completa. Mapas y nuevas elevaciones requieren servicios remotos; PDF necesita servidor disponible. Los coeficientes EVA de polvo, frío, esfuerzo y fallo son heurísticos educativos, no modelos validados de hardware ni fisiología. La proyección del próximo sol no es un pronóstico operativo. No existe telemetría NASA activa ni certificación de soporte vital.
 
@@ -30,7 +30,7 @@ Solo shell/entradas almacenadas funcionan offline tras una primera carga complet
 
 > V48: centro de misión con jerarquía visual renovada, tutorial reanudable de siete pasos y manual de ayuda con búsqueda. El manual se abre desde Ayuda o la tecla ?. Consulta MANUAL-DE-AYUDA.md para la versión descargable.
 
-# JEZERO · Guía de planificación en Marte
+# Dust Rider · Guía de planificación en Marte
 
 La experiencia principal utiliza cartografía y elevación remotas reales. No carga terreno sintético ni una misión de demostración.
 
@@ -57,3 +57,7 @@ Guarda coordenadas, fuente y fecha vigentes y selecciona «Planificar EVA desde 
 CONTROL prioriza CHARIOT y reúne sus reservas, estado, encuentro EVA, equipos de tipo hábitat, misión y observaciones climáticas. Las posiciones vigentes se muestran también en el mapa. No hay GPS, señales aleatorias, telemetría automática ni descuentos de inventario. La ubicación sin fuente/fecha vigente no habilita una nueva salida; el límite de antigüedad de mediciones, si se configura en Cancelación, se aplica a estos datos. Los presupuestos del hábitat y del equipo EVA son independientes.
 
 La infografía del equipo se incluye como referencia de diseño. Sus 2 astronautas, 42 kWh y generación ASRG de 1,2 kW pueden cargarse explícitamente en el formulario; no se guardan como mediciones ni se asigna consumo ficticio. La autonomía de 14–21 soles se identifica como una propuesta, separada de los presupuestos calculados. Sin generación declarada se asume aporte cero y se identifica ese supuesto. El balance de batería usa consumo menos generación continua; la recarga se limita a la capacidad declarada. Sin capacidad máxima, no se proyecta recarga. Con generación igual o superior al consumo no se estima una autonomía finita por batería: no implica autonomía ilimitada del hábitat.
+
+## Idioma y navegación
+
+Dust Rider conserva los formatos de misión, las claves de almacenamiento y los archivos anteriores. El selector de la cabecera y el de Ajustes comparten la preferencia de idioma. Los textos de interfaz y avisos se traducen; los nombres propios, unidades, identificadores de archivo y referencias originales conservan su significado. En el planificador, «Configurar Chariot» abre su formulario; el manual incluye el flujo completo desde el hábitat hasta la EVA. La infografía del Chariot se identifica como referencia original en español y tiene una descripción de diseño en ambos idiomas.

@@ -10,9 +10,9 @@
     if (typeof require === 'function') return Promise.resolve();
     return new Promise((resolve,reject)=>{
       const script=document.createElement('script');script.src='https://js.arcgis.com/4.34/';script.async=true;
-      const timer=setTimeout(()=>reject(new Error('El servicio de elevación tardó demasiado. Puedes usar la demo sintética.')),12000);
+      const timer=setTimeout(()=>reject(new Error('El servicio de elevación tardó demasiado. Vuelve a intentarlo cuando esté disponible.')),12000);
       script.onload=()=>{clearTimeout(timer);resolve();};
-      script.onerror=()=>{clearTimeout(timer);reject(new Error('No se pudo cargar ArcGIS. La demo sintética sigue disponible.'));};
+      script.onerror=()=>{clearTimeout(timer);reject(new Error('No se pudo cargar ArcGIS. Revisa tu conexión y vuelve a intentarlo.'));};
       document.head.appendChild(script);
     });
   }

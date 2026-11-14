@@ -64,7 +64,7 @@
     const label = labelFor(name);
     if (byId('activeModuleLabel')) byId('activeModuleLabel').textContent = label;
     if (byId('mapContext')) byId('mapContext').textContent = label;
-    document.title = `JEZERO — ${label}`;
+    document.title = `Dust Rider — ${label}`;
     if (save) localStorage.setItem(MODULE_KEY, name);
 
     const sidebar = document.querySelector('.sidebar');

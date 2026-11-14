@@ -1,16 +1,16 @@
-# JEZERO 4.0.0-p0 — Mission Control
+# Dust Rider 4.0.0-p0 — Mission Control
 
 Inicio consolida la ruta actual, O₂/batería hipotéticos y presupuestos declarados de agua/CO₂/térmico. Lo desconocido sigue pendiente. Usa Área en ventanas pequeñas, × para cerrar y ↑ para abrir. Se conserva la preferencia de módulo previamente guardada.
 
-Preparar misión abre el planificador existente. Consultar contingencias abre el editor actual de protocolos documentados. Scientific Assurance & Validation despliega ecuaciones, versiones, pruebas y límites inspeccionados, sin certificación física. Exportar evidencia produce JEZERO-ASSURANCE v1 con entradas y evaluación recalculada; no es restauración de misión ni replay Survival Twin. Conserva también los JSON originales de misión y soporte.
+Preparar misión abre el planificador existente. Consultar contingencias abre el editor actual de protocolos documentados. Modelos, fuentes y limitaciones despliega ecuaciones, versiones, pruebas y límites inspeccionados, sin certificación física. Exportar evidencia produce JEZERO-ASSURANCE v1 con entradas y evaluación recalculada; no es restauración de misión ni reproducción de una sesión anterior. Conserva también los JSON originales de misión y soporte.
 
-Este incremento conserva las claves de datos anteriores. Eliminar registros, vaciar/reemplazar una misión y quitar observaciones requiere confirmación. Iniciar otra misión conserva el borrador recuperable anterior hasta sustituirlo por otro o descartarlo explícitamente. Offline funcionan shell almacenado y entradas guardadas; nuevas imágenes, elevaciones y PDF del servidor no están garantizados. Survival Twin, Academy y el nuevo Emergency Center quedan para siguientes incrementos. Consulta docs/ESTADO-JEZERO-4.md para el estado real de las fases.
+Este incremento conserva las claves de datos anteriores. Eliminar registros, vaciar/reemplazar una misión y quitar observaciones requiere confirmación. Iniciar otra misión conserva el borrador recuperable anterior hasta sustituirlo por otro o descartarlo explícitamente. Offline funcionan shell almacenado y entradas guardadas; nuevas imágenes, elevaciones y PDF del servidor no están garantizados. Survival Twin, Academy y el nuevo Emergency Center quedan para siguientes incrementos. Consulta docs/ESTADO-Dust Rider-4.md para el estado real de las fases.
 
 > V50: toca un botón de navegación para abrir su interfaz y vuelve a tocarlo para cerrarla. Clima muestra la proyección del próximo sol con selector horario. Requiere observaciones importadas; presión y viento son datos observados. No predice tormentas ni utiliza telemetría actual automática.
 
 > V49: Biblioteca local de hasta 20 misiones con guardado, duplicado y apertura. Borradores válidos recuperables al recargar. Nueva misión y Limpiar misión eliminan el borrador. El control Jezero carga detalle CTX/HiRISE de NASA Trek; su cobertura tiene huecos y la resolución del DEM de cálculo sigue en ~200 m.
 
-# JEZERO · Manual de ayuda
+# Dust Rider · Manual de ayuda
 
 Versión 49. Herramienta de planificación con datos del usuario.
 
@@ -18,7 +18,7 @@ Abre Ayuda en la cabecera o pulsa ? fuera de un campo de texto. El tutorial de s
 
 ## Primeros pasos
 
-JEZERO reúne tres tareas: planificar una ruta, añadir observaciones del clima y estimar los recursos necesarios para regresar.
+Dust Rider reúne tres tareas: planificar una ruta, añadir observaciones del clima y estimar los recursos necesarios para regresar.
 
 - En **Misión**, define una base y al menos un destino.
 
@@ -125,7 +125,7 @@ Recarga la página después de actualizar el proyecto. La caché se renueva cuan
 
 ## Glosario y alcance
 
-**EVA**: Actividad fuera de un vehículo o hábitat. En JEZERO representa la ventana disponible para recorrer, trabajar y regresar.
+**EVA**: Actividad fuera de un vehículo o hábitat. En Dust Rider representa la ventana disponible para recorrer, trabajar y regresar.
 
 **Sol**: Día marciano, utilizado para identificar las observaciones.
 
@@ -137,7 +137,7 @@ Recarga la página después de actualizar el proyecto. La caché se renueva cuan
 
 **Procedencia declarada**: Fuente escrita por quien importa el archivo; no se valida automáticamente.
 
-JEZERO es una herramienta de planificación con modelos explicables. No tiene un enlace automático a telemetría NASA actual ni sustituye los protocolos de una misión real.
+Dust Rider es una herramienta de planificación con modelos explicables. No tiene un enlace automático a telemetría NASA actual ni sustituye los protocolos de una misión real.
 
 ## Tutorial guiado
 

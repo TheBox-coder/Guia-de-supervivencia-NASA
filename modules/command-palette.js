@@ -4,7 +4,7 @@
   const enabled=id=>Boolean($(id))&&!$(id).disabled;
   const area=name=>document.querySelector(`.moduleRail [data-module-target="${name}"]`);
   const goTo=name=>window.JEZERO_MODULES.activate(name);
-  const areas=[['home','Inicio','Home','H'],['survival','Guía de supervivencia','Survival guide'],['operations','Soporte','Support'],['weather','Clima','Weather'],['explorer','Mapa y capas','Map and layers','M'],['planner','Misión','Mission'],['eva','Recorrido EVA','EVA traverse'],['analysis','Resultados','Results','R'],['settings','Ajustes','Settings']];
+  const areas=[['home','Inicio','Home','H'],['survival','Guía de supervivencia','Survival guide'],['operations','Chariot y recursos','Chariot and resources'],['dashboard','Control del Chariot','Chariot control'],['weather','Clima','Weather'],['explorer','Mapa y capas','Map and layers','M'],['planner','Misión','Mission'],['eva','Recorrido EVA','EVA traverse'],['analysis','Resultados','Results','R'],['settings','Ajustes','Settings']];
   const commands=()=>[
     ...areas.map(([name,es,en,key])=>({group:ui('Ir a','Go to'),label:ui(es,en),key,run:()=>goTo(name),available:()=>Boolean(area(name))})),
     {group:ui('Misión','Mission'),label:ui('Nueva misión','New mission'),key:'N',run:()=>$('planMode').click(),available:()=>enabled('planMode')},
@@ -14,7 +14,7 @@
     {group:ui('Misión','Mission'),label:ui('Guardar misión en JSON','Save mission as JSON'),run:()=>$('exportMissionJson').click(),available:()=>enabled('exportMissionJson')},
     ...[['viking','Mapa base: Viking (imagen real)','Base map: Viking (real imagery)'],['mola','Mapa base: topografía MOLA','Base map: MOLA topography'],['hybrid','Mapa base: híbrido imagen + relieve','Base map: hybrid imagery + relief']].map(([id,es,en])=>({group:ui('Mapa','Map'),label:ui(es,en),run:()=>{goTo('explorer');document.querySelector(`[data-base-map="${id}"]`)?.click();},available:()=>Boolean(document.querySelector(`[data-base-map="${id}"]`))})),
     {group:ui('Vista','View'),label:ui('Mostrar u ocultar paneles','Show or hide panels'),run:()=>window.JEZERO_PANELS.toggleBoth(),available:()=>Boolean(window.JEZERO_PANELS)},
-    {group:ui('Vista','View'),label:ui('Cambiar idioma a English','Switch language to Español'),run:()=>window.JEZERO_I18N.setLanguage(window.JEZERO_I18N.getLanguage()==='en'?'es':'en'),available:()=>typeof window.JEZERO_I18N?.setLanguage==='function'},
+    {group:ui('Vista','View'),label:ui('Cambiar al inglés','Switch to Spanish'),run:()=>window.JEZERO_I18N.setLanguage(window.JEZERO_I18N.getLanguage()==='en'?'es':'en'),available:()=>typeof window.JEZERO_I18N?.setLanguage==='function'},
     {group:ui('Ayuda','Help'),label:ui('Abrir manual','Open manual'),key:'?',run:()=>document.querySelector('.topbarHelp').click(),available:()=>Boolean(document.querySelector('.topbarHelp'))}
   ].filter(command=>command.available());
 
