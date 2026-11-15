@@ -1,5 +1,99 @@
 DUST RIDER - WINDING JEZERO DEMO (ENGLISH)
 
+STEP-BY-STEP WALKTHROUGH (ABOUT 10 MINUTES)
+
+1. START DUST RIDER
+   Install Node.js 20 or later. Open a terminal in the project folder (the
+   folder containing package.json), run npm start, then open
+   http://localhost:8000. Keep the terminal open. If someone hosts the app,
+   open their app URL instead. You still need the three JSON files below.
+   Select English using the language selector in the top bar.
+
+2. PROTECT YOUR EXISTING WORK
+   Export your current mission and save your Chariot support pack before
+   importing. Export any weather observations you want to keep. Demo imports
+   can replace local data. Use a separate browser profile for a clean demo.
+   All demo files are in examples/jezero-demo in this repository.
+
+3. IMPORT THE MISSION
+   Open Mission and use the JSON mission import action. Choose
+   01-mission-five-points.json. Check that five points appear: Landing base,
+   North checkpoint, South checkpoint, Delta approach and Destination.
+   The base is the historical Perseverance landing-site reference in Jezero;
+   the four destinations are demonstration waypoints, not historical stops.
+
+4. IMPORT CHARIOT
+   Open Chariot, choose Open pack and select 02-chariot-and-support.json.
+   Read the replacement prompt before confirming. Check: crew 2, battery
+   capacity 42 kWh, generator 1.2 kW, elapsed time 0 sols and a 2-sol planning
+   horizon. The base and departure position should be in Jezero.
+   These are demonstration inputs based partly on a conceptual dossier.
+
+5. IMPORT WEATHER
+   Open Weather and use its observations import action. Select
+   03-weather-synthetic.json. Check that observations are loaded, including
+   dust and radiation. There are 72 synthetic hourly records for sols
+   1000-1002. These are not live measurements or NASA telemetry.
+
+6. CALCULATE THE MISSION
+   Return to Mission. Choose the shortest-distance / most-direct strategy.
+   Keep Return to base OFF and Optimize order OFF. Click Calculate mission.
+   Wait for terrain data to load. Open Results to inspect distance, duration
+   and terrain warnings. A previous calculation gave about 9.71 km and
+   6 h 18 min; this is a reference, not a guaranteed exact result.
+   If calculation fails, read the detailed error and check internet access.
+   Do not relax terrain limits simply to force a successful demonstration.
+
+7. PRESENT THE MAP
+   Open Map and press Fit to frame the route. Follow the five points and
+   inspect the winding path. Green, yellow, orange and red describe modeled
+   terrain difficulty; they do not prove that Chariot can safely drive it.
+   Select MOLA to see the elevation colors and their legend. Hide Known
+   locations or Landing sites if extra labels distract from the route.
+   The Chariot reach circle is an ideal resource estimate, not the route
+   itself or a terrain-validated area that is safe to drive.
+
+8. EXPLORE THE 3D VIEW
+   After calculation, open 3D route view from the route/results section.
+   Drag the terrain to rotate it and scroll to zoom. Use Fly the route to
+   start the animation, Pause to stop it and Overview to return to the
+   full route. Drag the progress slider to inspect another position.
+   In View settings, try Color by slope, contours, place names, vertical
+   exaggeration and light direction. Orbital image is disabled when imagery
+   is unavailable. Open Sources and model limits for the terrain details.
+   Vertical exaggeration is visual: it does not change calculated slopes.
+   On a narrow screen, scroll inside the panel to reach all settings.
+
+9. DEMONSTRATE AN OBSERVATION UPDATE
+   In Weather, first compare Mission day 1 and Mission day 2. In English,
+   sol is also the scientific name for a Martian day. Index 1003 follows
+   the last observed sol, 1002; it is not the first mission day's number.
+   Add this synthetic astronaut observation:
+     Observation sol: 1003; local hour: 12; temperature: -20 C;
+     pressure: 728 Pa; wind: 4 m/s; optical depth: 3.2;
+     radiation: 9.5 microSv/h; source: DEMO astronaut.
+   Click Save and update prediction. Compare the projected environmental
+   curves before and after saving. This refits the model; it is not a
+   validated storm forecast. Re-import file 03 before repeating the same
+   sol/hour, to restore the baseline observations.
+
+10. FINISH OR RESTART
+   Re-import files 01, 02 and 03 in their respective sections to restore
+   the demo, then recalculate. Close the 3D panel with its X or Escape.
+   To stop a local server, press Ctrl+C in its terminal.
+
+TROUBLESHOOTING
+- Empty 3D view: calculate a mission first and check elevation connectivity.
+- No orbital image: terrain colors still work; imagery needs online coverage.
+- Missing oxygen/battery results: follow OPTIONAL GUIDE INPUTS below and
+  review the equipment confirmation; Chariot stock and suit stock differ.
+- Old interface after deployment: reload after the deployment finishes.
+- Import rejected: select the JSON file for that section, not this text file.
+- This demo is one-way: a missing-return warning can be expected. Do not
+  present this as an approved crewed mission or certified vehicle model.
+
+ADDITIONAL REFERENCE AND OPTIONAL EXERCISES
+
 ONLY THREE FILES TO IMPORT
 1. MISSION: open 01-mission-five-points.json.
 2. CHARIOT: Open pack > 02-chariot-and-support.json. This replaces the local support pack.
