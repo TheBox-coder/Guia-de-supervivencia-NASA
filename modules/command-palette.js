@@ -4,7 +4,7 @@
   const enabled=id=>Boolean($(id))&&!$(id).disabled;
   const area=name=>document.querySelector(`.moduleRail [data-module-target="${name}"]`);
   const goTo=name=>window.JEZERO_MODULES.activate(name);
-  const areas=[['home','Inicio','Home','H'],['survival','Guía de supervivencia','Survival guide'],['operations','Chariot y recursos','Chariot and resources'],['dashboard','Control del Chariot','Chariot control'],['weather','Clima','Weather'],['explorer','Mapa y capas','Map and layers','M'],['planner','Misión','Mission'],['eva','Recorrido EVA','EVA traverse'],['analysis','Resultados','Results','R'],['settings','Ajustes','Settings']];
+  const areas=[['home','Inicio','Home','H'],['survival','Guía de supervivencia','Survival guide','G'],['operations','Chariot y recursos','Chariot and resources','C'],['dashboard','Control del Chariot','Chariot control','D'],['weather','Clima','Weather','W'],['explorer','Mapa y capas','Map and layers','M'],['planner','Misión','Mission','P'],['eva','Recorrido EVA','EVA traverse','E'],['analysis','Resultados','Results','R'],['settings','Ajustes','Settings','S']];
   const commands=()=>[
     ...areas.map(([name,es,en,key])=>({group:ui('Ir a','Go to'),label:ui(es,en),key,run:()=>goTo(name),available:()=>Boolean(area(name))})),
     {group:ui('Misión','Mission'),label:ui('Nueva misión','New mission'),key:'N',run:()=>$('planMode').click(),available:()=>enabled('planMode')},
@@ -70,8 +70,8 @@
     if(event.defaultPrevented)return;
     if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){event.preventDefault();dialog.open?dialog.close():open();return;}
     if(event.ctrlKey||event.metaKey||event.altKey||typing(event.target)||document.querySelector('dialog[open]'))return;
-    const shortcut={h:'home',m:'explorer',r:'analysis'}[event.key.toLowerCase()];
-    if(shortcut){event.preventDefault();goTo(shortcut);}
+    const shortcut=areas.find(([, , ,key])=>key.toLowerCase()===event.key.toLowerCase());
+    if(shortcut&&area(shortcut[0])){event.preventDefault();goTo(shortcut[0]);}
     else if(event.key.toLowerCase()==='n'&&enabled('planMode')){event.preventDefault();$('planMode').click();}
   });
 

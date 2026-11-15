@@ -46,3 +46,15 @@ test('global shortcuts open sections but leave text fields and modifiers alone',
  s.document.fire('keydown',{target:s.body,key:'k',ctrlKey:true});assert.equal(s.dialog.open,true);
  s.document.fire('keydown',{target:s.input,key:'k',ctrlKey:true});assert.equal(s.dialog.open,false);
 });
+
+const areaShortcuts=[['H','home'],['G','survival'],['C','operations'],['D','dashboard'],['W','weather'],['M','explorer'],['P','planner'],['E','eva'],['R','analysis'],['S','settings']];
+test('every section displays a unique shortcut and supports it globally and in search',()=>{
+ const s=setup();s.window.JEZERO_COMMANDS.open();
+ const badges=s.list.children.slice(0,10).map(row=>row.children.find(el=>el.tagName==='KBD')?.textContent);
+ assert.deepEqual(badges,areaShortcuts.map(([key])=>key));assert.equal(new Set(badges).size,10);s.dialog.close();
+ for(const [key,module] of areaShortcuts){
+  s.document.fire('keydown',{target:s.body,key:key.toLowerCase()});assert.equal(s.calls.at(-1),module);
+  s.window.JEZERO_COMMANDS.open();s.input.value=key;s.input.fire('input');assert.equal(s.list.children.length,1);
+  s.input.fire('keydown',{key:'Enter'});assert.equal(s.calls.at(-1),module);
+ }
+});
