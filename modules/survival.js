@@ -141,7 +141,7 @@
   }
   function change(event){
     const eventEquipmentChange=Object.entries(fields).some(([key,id])=>key!=='startHour'&&id===event?.target?.id);
-    try{const raw={...settings};for(const [key,id] of Object.entries(fields))raw[key]=$(id).value;raw.dustIndex=Number($('survivalDust').value)/100;raw.surface=$('survivalSurface').value;settings=engine.config(raw);settingsInvalid=false;if(eventEquipmentChange){$('guideEquipmentConfirmed').checked=false;persistConfirmation();}error();save();render();}
+    try{const raw={...settings};for(const [key,id] of Object.entries(fields))raw[key]=$(id).value;raw.dustIndex=Number($('survivalDust').value)/100;raw.surface=$('survivalSurface').value;settings=engine.config(raw);settingsInvalid=false;if(eventEquipmentChange){$('guideEquipmentConfirmed').checked=false;}error();save();render();}
     catch(e){settingsInvalid=true;render();error(e.message);}
   }
   [...Object.values(fields),'survivalDust','survivalSurface'].forEach(id=>$(id)?.addEventListener('input',change));
@@ -151,12 +151,10 @@
   $('guideRouteStep').addEventListener('click',()=>window.JEZERO_MODULES.activate('planner'));
   ['survivalGoData','guideDataStep'].forEach(id=>$(id).addEventListener('click',()=>focusCard('guideDataCard')));
   $('guideEquipmentStep').addEventListener('click',()=>{focusCard('guideEquipmentCard');$('guideEquipmentCard').querySelector('details').open=true;});
-  // La confirmación se conserva junto a una huella de los valores confirmados: si cambian, deja de valer.
-  const CONFIRM_KEY=KEY+'-equipment-confirmed';
-  const eqFingerprint=()=>JSON.stringify(['crew','oxygenKg','oxygenRateKgH','batteryKWh','powerKW','reservePct'].map(k=>settings[k]));
-  function persistConfirmation(){try{if($('guideEquipmentConfirmed').checked)localStorage.setItem(CONFIRM_KEY,eqFingerprint());else localStorage.removeItem(CONFIRM_KEY);}catch{}}
-  try{if(localStorage.getItem(CONFIRM_KEY)===eqFingerprint())$('guideEquipmentConfirmed').checked=true;}catch{}
-  $('guideEquipmentConfirmed').addEventListener('change',()=>{persistConfirmation();render();});
+  // Each visit requires a fresh equipment review; saved capacities remain available.
+  $('guideEquipmentConfirmed').checked=false;
+  try{localStorage.removeItem(KEY+'-equipment-confirmed');}catch{}
+  $('guideEquipmentConfirmed').addEventListener('change',render);
   $('guideDetails').addEventListener('click',()=>{const open=$('survivalWorkspace').classList.toggle('guideDetailed');$('guideDetails').setAttribute('aria-expanded',String(open));$('guideDetails').textContent=open?'Ocultar detalles técnicos':'Ver detalles técnicos y escenarios';});
   $('survivalQuickExport').addEventListener('click',()=>$('survivalExport').click());
   function download(name,data){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
