@@ -1,6 +1,7 @@
 /* Copy added after the original ES/EN release. Numeric patterns preserve values and declared source names. */
 (() => {
  const pairs=[
+ ['Día marciano de misión','Martian mission day'],
  ['Elevación MOLA + HRSC','MOLA + HRSC elevation'],
  ['Más bajo','Lower'],['Más alto','Higher'],
  ['Violeta y azul: zonas bajas.','Purple and blue: low elevations.'],

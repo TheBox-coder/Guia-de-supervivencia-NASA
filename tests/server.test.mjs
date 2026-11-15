@@ -9,6 +9,8 @@ test('HTTP publication, input validation, PDF and rate limit',async t=>{
  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('server timeout')),7000);child.stdout.once('data',()=>{clearTimeout(timer);resolve();});child.once('error',reject);});
  const origin='http://127.0.0.1:18766';
  const html=await(await fetch(origin+'/')).text();
+ const assets=[...html.matchAll(/<(?:script|link)\b[^>]*(?:src|href)="([^"]+\.(?:js|cjs|css)(?:\?[^"]*)?)"/g)].map(m=>m[1]);
+ for(const asset of assets){const response=await fetch(new URL(asset,origin));assert.equal(response.status,200,'Linked asset must be published: '+asset);}
  const logo=html.match(/class="brandLogo"[^>]*src="([^"]+)"/)[1];
  assert.match(logo,/dust-rider-logo\.png/);
  const logoResponse=await fetch(new URL(logo,origin));assert.equal(logoResponse.status,200);assert.equal(logoResponse.headers.get('content-type'),'image/png');
