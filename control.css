@@ -923,3 +923,25 @@ body[data-module="dashboard"] :is(.sidebar, .details, .panelEdgeToggle, .mapTool
 .liveMissing button { margin-left: 8px; padding: 6px 12px; border: 2px solid var(--theme-accent-2, #59cbe8); background: transparent; color: inherit; font-weight: 700; border-radius: 4px; cursor: pointer; }
 .liveMissing button:hover { background: color-mix(in srgb, var(--theme-accent-2, #59cbe8) 25%, transparent); }
 .liveMissing button:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
+/* Keep the mission summary and controls in separate grid tracks. */
+@media (min-width: 761px) {
+  .topbar { grid-template-columns: minmax(140px, 1fr) auto auto; gap: 0 16px; }
+  .topMeta { min-width: 0; gap: 8px; }
+  .topMeta > * { flex-shrink: 0; }
+  #statusText { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+}
+@media (max-width: 1800px) {
+  .topMeta .liveDot, #statusText { display: none; }
+}
+@media (min-width: 761px) and (max-width: 1200px) {
+  :root { --topbar-height: 112px; }
+  .topbar { grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 56px 56px; }
+  .missionHeaderStrip { grid-column: 1 / -1; grid-row: 2; }
+  .topMeta { grid-column: 2; grid-row: 1; }
+}
+@media (max-width: 760px) {
+  :root { --topbar-height: 104px; }
+  .topbar { grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: 48px 56px; }
+  .topMeta { justify-content: space-between; gap: 6px; min-width: 0; }
+  .quickLanguage select { width: 100px; }
+}
