@@ -32,7 +32,8 @@
   label(chariotNote,declared?'Valores tomados del Chariot declarado en esta sección.':'Valores de la propuesta del equipo (batería de 42 kWh y generador continuo de 1,2 kW). Edítalos si tu Chariot es distinto.',declared?'Values taken from the Chariot declared in this section.':'Values from the team proposal (42 kWh battery and continuous 1.2 kW generator). Edit them if your Chariot differs.');
   update();
  }
- const options=()=>({capacityKWh:capacityInput.value,generationKW:generationInput.value});
+ const lifeSupportSols=()=>window.JEZERO_OPERATIONS_ENGINE?.CHARIOT_PROPOSAL?.lifeSupportSols??calc.DEFAULTS.lifeSupportSols;
+ const options=()=>({capacityKWh:capacityInput.value,generationKW:generationInput.value,lifeSupportSols:lifeSupportSols()});
  // Misión
  const missionForm=document.createElement('form');missionForm.noValidate=true;missionForm.addEventListener('submit',e=>e.preventDefault());
  const missionTitle=make('h4',null,'Parámetros de la misión','Mission parameters'),missionGrid=make('div','opsInputs');
@@ -55,9 +56,32 @@
  const emergencyOut=make('div','opsReadout');
  [['stormUse','Espera por tormenta','Storm standby'],['returnUse','Energía neta de regreso','Net return energy'],['extra','Margen adicional','Additional margin'],['emergencyTotal','Reserva de emergencia requerida','Required emergency reserve']].forEach(([k,es,en])=>metric(emergencyOut,k,es,en));
  const emergencyStatus=make('p','opsNotice');emergencyStatus.setAttribute('role','status');emergencyStatus.setAttribute('aria-live','polite');
- emergency.append(summary,emergencyHint,emergencyForm,emergencyOut,emergencyStatus);
+ // Límite de espera: no se predice la tormenta, se calcula cuánto puede esperar el Chariot con la configuración actual.
+ const enduranceTitle=make('h4',null,'Cuánto puede esperar el Chariot','How long the Chariot can wait');
+ const enduranceOut=make('div','opsReadout');
+ [['maxWait','Espera máxima','Maximum wait'],['limit','Factor limitante','Limiting factor'],['returnReserve','Reserva solo para regresar','Reserve to return only']].forEach(([k,es,en])=>metric(enduranceOut,k,es,en));
+ const enduranceNote=make('p','opsNotice');enduranceNote.setAttribute('role','status');
+ // Escenarios: comparan duraciones hipotéticas; no son pronósticos.
+ const scenarioTitle=make('h4',null,'Escenarios de duración (no son pronósticos)','Duration scenarios (not forecasts)');
+ const scenarioIntro=make('p','opsNotice','Nadie puede predecir cuánto durará una tormenta concreta. Estos valores redondos sirven para ver qué pasaría: la literatura describe tormentas de gran escala de semanas a meses. Pulsa uno para cargarlo en la duración de la simulación.','Nobody can predict how long a specific storm will last. These round values show what would happen: the literature describes large-scale storms lasting weeks to months. Press one to load it as the simulation duration.');
+ const scenarioList=make('div','opsReadout chariotScenarios');
+ emergency.append(summary,emergencyHint,emergencyForm,emergencyOut,emergencyStatus,enduranceTitle,enduranceOut,enduranceNote,scenarioTitle,scenarioIntro,scenarioList);
  const actions=make('div','chariotCalcActions');actions.append(useChariot);
- card.append(title,intro,chariotGrid,actions,chariotNote,missionForm,missionOut,missionStatus,emergency);
+ // Vínculo con el módulo Clima: muestra el polvo (τ) observado en la zona. No estima la duración de la tormenta: ese dato lo define el usuario.
+ const dustLink=make('p','opsNotice');dustLink.setAttribute('role','status');dustLink.id='chariotCalcDust';
+ const DUST_NAMES={clear:['bajo','low'],elevated:['elevado','elevated'],storm:['compatible con tormenta','storm-level'],severe:['de tormenta severa','severe-storm']};
+ function updateDust(){
+  let c=null;
+  try{const engine=window.JEZERO_SURVIVAL_ENGINE,survival=window.JEZERO_SURVIVAL,data=survival?.getApplicableDataset?.();if(engine&&data){const f=engine.observationForecast(data,survival.getWeatherOrigin());if(f.status==='projection')c=f.conditions;}}catch{c=null;}
+  const d=c?.dust;
+  if(!d){label(dustLink,'Polvo: sin observaciones de opacidad (τ) para esta zona en el módulo Clima. Ausencia de datos no significa cielo despejado. La duración de la tormenta es un dato que defines tú; la app no la estima.','Dust: no optical-depth (τ) observations for this region in the Weather module. Missing data does not mean clear sky. Storm duration is a value you set; the app does not estimate it.');state(dustLink,null);return;}
+  const [nes,nen]=DUST_NAMES[d.level],tau=d.median.toFixed(2),rising=d.rising?` Sube ${d.slopePerSol.toFixed(2)} τ por sol.`:'',risingEn=d.rising?` Rising ${d.slopePerSol.toFixed(2)} τ per sol.`:'';
+  const concern=d.level!=='clear'||d.rising;
+  label(dustLink,`Polvo observado (módulo Clima): τ ${tau}, nivel ${nes}.${rising} ${concern?'Conviene revisar la simulación de emergencia con una duración prudente. ':''}La app no predice cuánto durará una tormenta: la duración de la simulación es tu supuesto.`,`Observed dust (Weather module): τ ${tau}, ${nen} level.${risingEn} ${concern?'Consider checking the emergency simulation with a cautious duration. ':''}The app does not predict how long a storm will last: the simulation duration is your assumption.`);
+  state(dustLink,!concern);
+ }
+ ['jezero:weatherchange','jezero:supportchange','jezero:languagechange'].forEach(name=>window.addEventListener?.(name,updateDust));
+ card.append(title,intro,chariotGrid,actions,chariotNote,missionForm,missionOut,missionStatus,dustLink,emergency);
  const read=key=>inputs[key].value;
  function state(el,ok){el.dataset.state=ok===null?'error':ok?'ok':'warn';}
  function updateMission(){
@@ -69,12 +93,32 @@
   label(missionStatus,r.sufficient?`✓ Capacidad suficiente según el modelo${r.netKWh<0?' (la generación cubre el consumo)':''}.`:'⚠ Demanda superior a la capacidad utilizable.',r.sufficient?`✓ Sufficient capacity according to the model${r.netKWh<0?' (generation covers the load)':''}.`:'⚠ Demand exceeds usable capacity.');state(missionStatus,r.sufficient);return r;
  }
  function updateEmergency(){
-  const r=calc.emergency({stormHours:read('stormHours'),essentialKW:read('essential'),returnDistanceKm:read('returnDistance'),returnSpeedKmH:read('returnSpeed'),returnTractionKW:read('returnTraction'),marginPct:read('margin'),generatorOn:generatorInput.checked},options());
+  const emergencyInput={stormHours:read('stormHours'),essentialKW:read('essential'),returnDistanceKm:read('returnDistance'),returnSpeedKmH:read('returnSpeed'),returnTractionKW:read('returnTraction'),marginPct:read('margin'),generatorOn:generatorInput.checked};
+  const r=calc.emergency(emergencyInput,options());
   label(generatorText,`Generador operativo (${Number(generationInput.value||0).toLocaleString('es')} kW)`,`Generator operating (${Number(generationInput.value||0).toLocaleString('en')} kW)`);
-  if(!r.ok){const [es,en]=r.error.split(' / ');label(emergencyStatus,es,en);state(emergencyStatus,null);for(const k of ['stormUse','returnUse','extra','emergencyTotal'])articles[k].querySelector('strong').textContent='—';return null;}
+  if(!r.ok){const [es,en]=r.error.split(' / ');label(emergencyStatus,es,en);state(emergencyStatus,null);for(const k of ['stormUse','returnUse','extra','emergencyTotal','maxWait','limit','returnReserve'])articles[k].querySelector('strong').textContent='—';label(enduranceNote,es,en);state(enduranceNote,null);scenarioList.replaceChildren();return null;}
   articles.stormUse.querySelector('strong').textContent=fmt(r.waitKWh,'kWh');articles.returnUse.querySelector('strong').textContent=fmt(r.returnKWh,'kWh');articles.extra.querySelector('strong').textContent=fmt(r.extraKWh,'kWh');articles.emergencyTotal.querySelector('strong').textContent=fmt(r.requiredKWh,'kWh');
   articles.emergencyTotal.dataset.deficit=String(!r.withinCapacity);
-  label(emergencyStatus,r.withinCapacity?`✓ Reserva dentro de la capacidad nominal de ${r.capacityKWh} kWh.`:`⚠ Reserva superior a la batería nominal de ${r.capacityKWh} kWh.`,r.withinCapacity?`✓ Reserve within the nominal ${r.capacityKWh} kWh capacity.`:`⚠ Reserve exceeds the nominal ${r.capacityKWh} kWh battery.`);state(emergencyStatus,r.withinCapacity);return r;
+  label(emergencyStatus,r.withinCapacity?`✓ Reserva dentro de la capacidad nominal de ${r.capacityKWh} kWh.`:`⚠ Reserva superior a la batería nominal de ${r.capacityKWh} kWh.`,r.withinCapacity?`✓ Reserve within the nominal ${r.capacityKWh} kWh capacity.`:`⚠ Reserve exceeds the nominal ${r.capacityKWh} kWh battery.`);state(emergencyStatus,r.withinCapacity);
+  renderEndurance(emergencyInput);return r;
+ }
+ const hoursText=h=>Number.isFinite(h)?`${h.toFixed(1)} h (${(h/calc.SOL_HOURS).toFixed(2)} ${ui('soles','sols')})`:ui('Sin límite de energía','No energy limit');
+ const LIMITS={'energy':['La batería','The battery'],'life-support':['El soporte vital','Life support'],'energy-return':['La batería no alcanza ni para regresar','The battery cannot even cover the return']};
+ const VERDICT={ok:['✓ Se puede esperar','✓ Can be waited out'],energy:['⚠ Supera la batería','⚠ Exceeds the battery'],'life-support':['⚠ Supera el soporte vital','⚠ Exceeds life support'],both:['⚠ Supera batería y soporte vital','⚠ Exceeds battery and life support']};
+ function renderEndurance(input){
+  const e=calc.endurance(input,options()),sc=calc.scenarios(input,options());
+  if(!e.ok||!sc.ok){scenarioList.replaceChildren();return;}
+  articles.maxWait.querySelector('strong').textContent=hoursText(e.maxStormHours);
+  articles.limit.querySelector('strong').textContent=ui(...LIMITS[e.limitingFactor]);
+  articles.returnReserve.querySelector('strong').textContent=fmt(e.returnReserveKWh,'kWh');
+  articles.maxWait.dataset.deficit=String(e.maxStormHours<=0);
+  label(enduranceNote,e.canReturn?`Con esta configuración el Chariot puede esperar hasta ${hoursText(e.maxStormHours)} y aún regresar con el margen indicado. Si el polvo sube, decide la salida antes de que se cumpla ese plazo. Supone batería al 100 % al empezar la tormenta y un techo de soporte vital de ${e.lifeSupportSols.toFixed(0)} soles.`:'La reserva para el regreso supera la batería: no hay espera posible con estos parámetros.',e.canReturn?`With this setup the Chariot can wait up to ${hoursText(e.maxStormHours)} and still return with the stated margin. If dust is rising, decide on departure before that deadline. Assumes a full battery when the storm starts and a ${e.lifeSupportSols.toFixed(0)}-sol life-support ceiling.`:'The return reserve exceeds the battery: no waiting is possible with these parameters.');
+  state(enduranceNote,e.canReturn&&e.maxStormHours>0);
+  scenarioList.replaceChildren(...sc.scenarios.map(row=>{
+   const a=document.createElement('article'),b=make('b',null,`${row.es} · ${row.sols} soles`,`${row.en} · ${row.sols} sols`),strong=make('strong',null,...VERDICT[row.verdict]),small=make('small',null,`Reserva requerida ${row.requiredKWh.toFixed(1)} kWh. ${row.basisEs}`,`Required reserve ${row.requiredKWh.toFixed(1)} kWh. ${row.basisEn}`),use=make('button','secondary','Usar esta duración','Use this duration');
+   use.type='button';use.addEventListener('click',()=>{inputs.stormHours.value=String(Number(row.stormHours.toFixed(1)));updateEmergency();});
+   a.dataset.deficit=String(row.verdict!=='ok');a.append(b,strong,small,use);return a;
+  }));
  }
  function update(){updateMission();updateEmergency();}
  // Al abrir la emergencia se copian los datos de la misión como punto de partida (el usuario puede cambiarlos).
@@ -83,6 +127,6 @@
  generatorInput.addEventListener('change',updateEmergency);useChariot.addEventListener('click',loadChariot);
  const openCalculator=make('button','opsPrimary','Abrir calculadora de misión y emergencia','Open mission and emergency calculator');openCalculator.type='button';openCalculator.id='openChariotCalculator';openCalculator.setAttribute('aria-controls','chariotCalculator');title.tabIndex=-1;
  openCalculator.addEventListener('click',()=>{card.scrollIntoView({behavior:'smooth',block:'start'});title.focus({preventScroll:true});});
- host.prepend(openCalculator);host.append(card);loadChariot();
- window.JEZERO_CHARIOT_CALCULATOR=Object.freeze({update,reload:loadChariot});
+ host.prepend(openCalculator);host.append(card);loadChariot();updateDust();
+ window.JEZERO_CHARIOT_CALCULATOR=Object.freeze({update,reload:loadChariot,updateDust});
 })();

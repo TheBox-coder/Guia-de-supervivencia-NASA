@@ -513,3 +513,7 @@ body.jezero-ui[data-interface-open="false"] .mapToolbar {
 .chariotSwitch{display:flex;align-items:center;gap:10px;margin-top:12px}
 .chariotSwitch input{width:18px;height:18px}
 
+
+/* Escenarios de duración de tormenta de la calculadora del Chariot. */
+.chariotScenarios{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.chariotScenarios article button{margin-top:10px}
