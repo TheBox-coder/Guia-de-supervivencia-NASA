@@ -114,8 +114,8 @@ test('weather UI renders the conditions panel with alerts and trend charts',asyn
  const context=vm.createContext({document:{getElementById:node,querySelectorAll:()=>[],createElement:()=>({dataset:{},children:[],append(...c){this.children.push(...c);},setAttribute(){},addEventListener(){},textContent:'',innerHTML:''}),addEventListener(){}},window:{JEZERO_I18N:{ui:es=>es,getLanguage:()=>'es',translateText:s=>s},JEZERO_SURVIVAL_ENGINE:engine,JEZERO_SURVIVAL:{getDataset:()=>dataset,getWeatherOrigin:()=>origin},addEventListener:(name,fn)=>{events[name]=fn;}}});
  vm.runInContext(fs.readFileSync(new URL('../modules/forecast.js',import.meta.url),'utf8'),context);
  const alerts=node('forecastAlerts').children;assert.ok(alerts.length>=3);assert.equal(alerts[0].dataset.level,'alert');
- assert.match(alerts[0].children.at(-1).textContent,/Polvo/);assert.equal(node('forecastTrends').children.length,4);
+ assert.match(alerts[0].children.at(-1).textContent,/Polvo/);assert.equal(node('forecastTrends').children.length,6);
  assert.match(node('forecastConditionsBasis').textContent,/No son predicciones/);
  const facts=node('forecastConditionFacts').children.map(a=>a.children.map(c=>c.textContent).join(' '));
- assert.ok(facts.some(f=>/Polvo · opacidad/.test(f)&&/2\.40/.test(f)));assert.ok(facts.some(f=>/sin blindaje/.test(f)));
+ assert.ok(facts.some(f=>/Polvo · opacidad/.test(f)&&/2\.40/.test(f)));assert.ok(facts.some(f=>/sin blindaje/.test(f)));assert.ok(facts.some(f=>/Polvo proyectado/.test(f)&&/2\.40/.test(f)));assert.ok(facts.some(f=>/Radiación proyectada/.test(f)));assert.ok(facts.some(f=>/Exposición ambiental proyectada/.test(f)));
 });

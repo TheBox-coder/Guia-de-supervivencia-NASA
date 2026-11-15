@@ -84,3 +84,6 @@ Reglas de honestidad: un campo sin observaciones genera una alerta «SIN DATOS»
 4. Transformar al contrato, conservar el archivo fuente y registrar la transformación.
 5. Comprobar con casos de referencia y separar observaciones de inferencias.
 6. Medir si el dato cambia una decisión y con qué incertidumbre.
+
+
+El modelo ambiental ajusta regresiones armónicas independientes para temperatura, opacidad del polvo (τ) y tasa de dosis (µSv/h). Cada variable requiere 12 muestras de los últimos 3 soles en al menos 6 franjas de 3 horas. CLIMA muestra curvas horarias de polvo y radiación para el sol seleccionado y exposición ambiental integrada en el horizonte completo, convirtiendo hora local marciana a horas terrestres. Cada sol repite el patrón; no se predicen tormentas, eventos solares ni cambios entre soles. El ajuste no supone un efecto causal del polvo o la radiación sobre la temperatura, ni modifica automáticamente los escenarios de consumo. La exposición no incluye blindaje ni es una dosis personal. Los datos insuficientes permanecen sin proyección; nuevas observaciones reajustan los canales disponibles.

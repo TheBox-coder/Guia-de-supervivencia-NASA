@@ -500,3 +500,16 @@ body.jezero-ui[data-interface-open="false"] .mapToolbar {
     grid-template-columns: 1fr;
   }
 }
+
+/* Calculadora de misión y emergencia del Chariot (sección «Chariot y escenario»). */
+.chariotCalculator{margin-top:22px;display:grid;gap:14px;padding:18px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--surface-card)}
+.chariotCalculator h3,.chariotCalculator h4{margin:0}
+.chariotCalculator .chariotCalcActions{display:flex;flex-wrap:wrap;gap:10px}
+.chariotCalculator .opsNotice[data-state="ok"]{border-color:color-mix(in srgb,var(--color-success,#3fa66b) 60%,transparent)}
+.chariotCalculator .opsNotice[data-state="warn"],.chariotCalculator .opsNotice[data-state="error"]{border-color:color-mix(in srgb,var(--color-danger) 60%,transparent)}
+.chariotEmergency{border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:12px 14px;display:grid;gap:12px}
+.chariotEmergency>summary{cursor:pointer;font-weight:650}
+.chariotEmergency[open]>summary{margin-bottom:6px}
+.chariotSwitch{display:flex;align-items:center;gap:10px;margin-top:12px}
+.chariotSwitch input{width:18px;height:18px}
+

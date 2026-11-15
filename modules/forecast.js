@@ -32,17 +32,17 @@
   }
   return '';
  }
- function spark(daily,key,title,unit,digits){
+ function spark(daily,key,title,unit,digits,axisLabel='Sol'){
   const pts=daily.filter(d=>Number.isFinite(d[key]));
   const box=document.createElement('div');box.className='forecastTrend';
   const b=document.createElement('b');b.textContent=title;box.append(b);
   if(pts.length<2){const small=document.createElement('small');small.textContent=pts.length?ui('Un solo sol con datos; sin tendencia.','Only one sol with data; no trend.'):ui('Sin observaciones.','No observations.');box.append(small);return box;}
   const lo=Math.min(...pts.map(p=>p[key])),hi=Math.max(...pts.map(p=>p[key])),span=hi-lo||1,s0=pts[0].sol,s1=pts[pts.length-1].sol||s0+1;
   const x=sol=>6+(sol-s0)/Math.max(1,s1-s0)*288,y=v=>6+(hi-v)/span*44;
-  const holder=document.createElement('div');holder.innerHTML=`<svg viewBox="0 0 300 56" role="img" aria-label="${title}: ${fmt(lo,digits)}–${fmt(hi,digits)} ${unit}, sol ${s0}–${s1}"><polyline points="${pts.map(p=>x(p.sol).toFixed(1)+','+y(p[key]).toFixed(1)).join(' ')}" fill="none" stroke="var(--theme-accent-2)" stroke-width="2"/>${pts.map(p=>`<circle cx="${x(p.sol).toFixed(1)}" cy="${y(p[key]).toFixed(1)}" r="2.5" fill="var(--theme-accent-2)"/>`).join('')}</svg>`;box.append(holder);
-  const small=document.createElement('small');small.textContent=`Sol ${s0}–${s1} · ${fmt(lo,digits)}–${fmt(hi,digits)} ${unit}`;box.append(small);return box;
+  const holder=document.createElement('div');holder.innerHTML=`<svg viewBox="0 0 300 56" role="img" aria-label="${title}: ${fmt(lo,digits)}–${fmt(hi,digits)} ${unit}, ${axisLabel} ${s0}–${s1}"><polyline points="${pts.map(p=>x(p.sol).toFixed(1)+','+y(p[key]).toFixed(1)).join(' ')}" fill="none" stroke="var(--theme-accent-2)" stroke-width="2"/>${pts.map(p=>`<circle cx="${x(p.sol).toFixed(1)}" cy="${y(p[key]).toFixed(1)}" r="2.5" fill="var(--theme-accent-2)"/>`).join('')}</svg>`;box.append(holder);
+  const small=document.createElement('small');small.textContent=`${axisLabel} ${s0}–${s1} · ${fmt(lo,digits)}–${fmt(hi,digits)} ${unit}`;box.append(small);return box;
  }
- function renderConditions(c,hz){
+ function renderConditions(c,hz,projection,point,series){
   if(!c)return;
   $('forecastConditionsBasis').textContent=ui(`Resumen de las observaciones importadas de los últimos 3 sols (${c.sampleCount} muestras). No son predicciones. Umbrales de alerta orientativos: no son límites operativos ni médicos.`,`Summary of imported observations from the last 3 sols (${c.sampleCount} samples). Not predictions. Alert thresholds are indicative: not operational or medical limits.`);
   const order={alert:0,warning:1,unknown:2,info:3};
@@ -56,8 +56,12 @@
   add('Viento máximo reciente','Recent peak wind',c.wind?fmt(c.wind.max,1)+' m/s':ui('Sin observaciones','No observations'));
   add('Humedad relativa · mediana','Relative humidity · median',c.humidity?fmt(c.humidity.median,0)+' %':ui('Sin observaciones','No observations'));
   add('Temperatura observada · mín / máx','Observed temperature · min / max',c.temperature?`${fmt(c.temperature.min,1)} / ${fmt(c.temperature.max,1)} °C`:'—');
+  add('Polvo proyectado a la hora seleccionada','Projected dust at selected hour',Number.isFinite(point.opticalDepth)?fmt(point.opticalDepth,2)+' τ':ui('Se necesitan 12 muestras de polvo en 6 franjas horarias','Needs 12 dust samples across 6 time bins'));
+  add('Radiación proyectada a la hora seleccionada','Projected radiation at selected hour',Number.isFinite(point.doseRateUSvH)?fmt(point.doseRateUSvH,2)+' µSv/h':ui('Se necesitan 12 muestras de radiación en 6 franjas horarias','Needs 12 radiation samples across 6 time bins'));
+  add('Exposición ambiental proyectada para el horizonte','Projected ambient exposure over the horizon',projection.exposureMSv===null?ui('Sin modelo de radiación suficiente','Insufficient radiation model'):fmt(projection.exposureMSv,3)+' mSv · '+ui('patrón integrado, sin blindaje','integrated pattern, unshielded'));
   $('forecastConditionFacts').replaceChildren(...facts.map(([label,value])=>{const a=document.createElement('article'),b=document.createElement('b'),st=document.createElement('strong');b.textContent=label;st.textContent=value;a.append(b,st);return a;}));
   $('forecastTrends').replaceChildren(spark(c.daily,'opticalDepth',ui('Polvo τ por sol (mediana)','Dust τ per sol (median)'),'τ',2),spark(c.daily,'doseRateUSvH',ui('Radiación por sol (mediana)','Radiation per sol (median)'),'µSv/h',1),spark(c.daily,'pressurePa',ui('Presión por sol (mediana)','Pressure per sol (median)'),'Pa',0),spark(c.daily,'windMps',ui('Viento por sol (mediana)','Wind per sol (median)'),'m/s',1));
+  const hourly=series.map(p=>({...p,sol:p.hour}));$('forecastTrends').append(spark(hourly,'opticalDepth',ui('Polvo proyectado por hora · sol seleccionado','Projected hourly dust · selected sol'),'τ',2,ui('Hora','Hour')),spark(hourly,'doseRateUSvH',ui('Radiación proyectada por hora · sol seleccionado','Projected hourly radiation · selected sol'),'µSv/h',2,ui('Hora','Hour')));
  }
  function render(){
   document.querySelectorAll('[data-weather-es]').forEach(el=>{const copy=window.JEZERO_I18N?.getLanguage()==='en'?el.dataset.weatherEn:el.dataset.weatherEs;if(el.textContent!==copy)el.textContent=copy;});
@@ -82,7 +86,7 @@
   $('forecastHorizon').textContent=hz.hours==null?ui('Sin duración del Chariot configurada: se muestra 1 sol. Define la duración total en CHARIOT para ver toda la misión.','No Chariot duration configured: 1 sol shown. Set the total duration in CHARIOT to see the whole mission.'):ui(`Horizonte: ${hz.hours.toFixed(1)} h (${(hz.hours/solHours).toFixed(2)} soles) = ${forecast.horizonSols} sol(es) a explorar${hz.source==='scenario'?', incluido el retraso del escenario':''}. Soles ${days[0].sol}–${days[days.length-1].sol} (índice de sol, no fecha UTC).`,`Horizon: ${hz.hours.toFixed(1)} h (${(hz.hours/solHours).toFixed(2)} sols) = ${forecast.horizonSols} sol(s) to explore${hz.source==='scenario'?', including the scenario delay':''}. Sols ${days[0].sol}–${days[days.length-1].sol} (sol index, not a UTC date).`);
   const alertHost=$('forecastLifeAlert');alertHost.hidden=!(hz.life&&hz.life.exceeded);
   if(!alertHost.hidden)alertHost.textContent=ui(`ALERTA: el horizonte (${hz.life.durationSols.toFixed(2)} soles) supera el límite de soporte vital de 14 soles.`,`ALERT: the horizon (${hz.life.durationSols.toFixed(2)} sols) exceeds the 14-sol life-support limit.`);
-  $('forecastMethod').textContent=ui('Extrapolación del patrón diario: cada sol repite la misma curva ajustada a las últimas muestras; no es una predicción independiente por sol. La variación entre soles, las tormentas de polvo y la estacionalidad no se proyectan (el polvo y la radiación se resumen abajo solo como observaciones). La banda es el error residual, no un intervalo de confianza calibrado.','Daily-pattern extrapolation: every sol repeats the same curve fitted to the latest samples; it is not an independent forecast per sol. Day-to-day variation, dust storms and seasonality are not projected (dust and radiation are summarized below as observations only). The band is the residual error, not a calibrated confidence interval.');
+  $('forecastMethod').textContent=ui('Regresión supervisada: ajustes diarios independientes para temperatura, polvo (τ) y radiación (µSv/h). Cada variable necesita al menos 12 muestras recientes en 6 franjas horarias. Cada sol repite el patrón aprendido; no se predicen tormentas, eventos solares ni variación entre soles. Polvo y radiación no se usan para inventar una relación causal con la temperatura. Los errores de ajuste no son intervalos de confianza calibrados.','Supervised regression: independent daily fits for temperature, dust (τ) and radiation (µSv/h). Each variable needs at least 12 recent samples across 6 time bins. Every sol repeats the learned pattern; storms, solar events and day-to-day changes are not predicted. Dust and radiation do not impose an invented causal relationship on temperature. Fit errors are not calibrated confidence intervals.');
   const select=$('forecastSolSelect');
   if(!select.options||select.options.length!==days.length||select.dataset.first!==String(days[0].sol)){select.replaceChildren(...days.map(d=>{const o=document.createElement('option');o.value=String(d.offsetSols);o.textContent=ui(`Sol ${d.sol} · día ${d.offsetSols+1} de la misión`,`Sol ${d.sol} · mission day ${d.offsetSols+1}`);return o;}));select.dataset.first=String(days[0].sol);}
   select.value=String(selectedOffset);
@@ -94,7 +98,7 @@
   $('forecastBand').textContent=ui(`Error de ajuste mostrado: ±${model.errorC.toFixed(1)} °C. No es un intervalo de confianza calibrado.`,`Displayed fit error: ±${model.errorC.toFixed(1)} °C. Not a calibrated confidence interval.`);
   $('forecastPressure').textContent=model.pressurePa===null?ui('Sin observaciones','No observations'):Math.round(model.pressurePa)+' Pa';
   $('forecastWind').textContent=model.windMps===null?ui('Sin observaciones','No observations'):model.windMps.toFixed(1)+' m/s';
-  renderConditions(forecast.conditions,hz);
+  renderConditions(forecast.conditions,hz,forecast.environment,point,series);
   const warm=series.slice(0,24).reduce((a,b)=>b.temperatureC>a.temperatureC?b:a);
   $('forecastWarm').textContent=String(warm.hour).padStart(2,'0')+':00 · '+warm.temperatureC.toFixed(1)+' °C';
   $('forecastCoverage').textContent=ui(`${model.recordCount} observaciones · regresión supervisada entrenada con las últimas muestras. Fuente declarada; vigencia no verificada.`,`${model.recordCount} observations · supervised regression trained on recent samples. Declared source; freshness not verified.`);

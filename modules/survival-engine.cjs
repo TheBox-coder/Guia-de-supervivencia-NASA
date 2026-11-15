@@ -3,7 +3,7 @@
   if(typeof module==='object'&&module.exports)module.exports=factory(require('./validation.cjs'));
   else root.JEZERO_SURVIVAL_ENGINE=factory(root.JEZERO_VALIDATION);
 })(typeof globalThis!=='undefined'?globalThis:this,function(validation){
-  const MODEL_VERSION='2.0.0',SOL_HOURS=24.6597,WEATHER_RADIUS_KM=50;
+  const MODEL_VERSION='2.1.0',SOL_HOURS=24.6597,WEATHER_RADIUS_KM=50;
   const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
   const median=values=>{const a=values.filter(Number.isFinite).sort((a,b)=>a-b);return a.length?a[Math.floor(a.length/2)]:null;};
   // Fuentes y razonamiento: docs/PROPUESTA-MODELO-METABOLICO.md.
@@ -63,25 +63,35 @@
     }
     return a.map(row=>row[3]);
   }
+  function fitPattern(records,key,errorFloor=0){
+    const samples=records.filter(r=>Number.isFinite(r[key]));
+    if(samples.length<12||new Set(samples.map(r=>Math.floor(r.localHour/3))).size<6)return {status:'insufficient-data',trainedRecords:samples.length,coefficients:null,error:null};
+    const m=Array.from({length:3},()=>[0,0,0]),v=[0,0,0];
+    for(const r of samples){const a=2*Math.PI*r.localHour/24,x=[1,Math.cos(a),Math.sin(a)];for(let i=0;i<3;i++){v[i]+=x[i]*r[key];for(let j=0;j<3;j++)m[i][j]+=x[i]*x[j];}}
+    const coefficients=solve(m,v),model={coefficients};
+    const error=Math.max(errorFloor,Math.sqrt(samples.reduce((sum,r)=>sum+(r[key]-temperature(model,r.localHour))**2,0)/samples.length));
+    return {status:'fitted',algorithm:'supervised-harmonic-regression',trainedRecords:samples.length,coefficients,error};
+  }
   function weatherModel(dataset=null){
     if(!dataset)return {kind:'historical-scenario',name:'Referencia MEDA 2021 + ciclo ilustrativo',coefficients:[-52.5,-21.5667568,-21.5667568],errorC:8,pressurePa:718,windMps:null,baseSol:null,
       note:'Extremos históricos de Jezero: −83 / −22 °C, 3–4 abril 2021. El ciclo horario y su banda son simulados, no un pronóstico NASA.',location:{lat:18.44463,lon:77.45088}};
-    const d=weatherData(dataset),m=Array.from({length:3},()=>[0,0,0]),v=[0,0,0];
-    const basis=hour=>[1,Math.cos(2*Math.PI*hour/24),Math.sin(2*Math.PI*hour/24)];
-    for(const r of d.recent){const x=basis(r.localHour);for(let i=0;i<3;i++){v[i]+=x[i]*r.temperatureC;for(let j=0;j<3;j++)m[i][j]+=x[i]*x[j];}}
-    const coefficients=solve(m,v);
-    const errorC=Math.max(5,Math.sqrt(d.recent.reduce((sum,r)=>{const x=basis(r.localHour),estimate=x.reduce((n,b,i)=>n+b*coefficients[i],0);return sum+(r.temperatureC-estimate)**2;},0)/d.recent.length));
+    const d=weatherData(dataset),thermal=fitPattern(d.recent,'temperatureC',5),coefficients=thermal.coefficients,errorC=thermal.error;
+    const environmentalModels={opticalDepth:fitPattern(d.recent,'opticalDepth'),doseRateUSvH:fitPattern(d.recent,'doseRateUSvH')};
     const unusedFields=[...new Set(dataset.records.flatMap(r=>Object.keys(r)))].filter(k=>!['sol','localHour','temperatureC',...Object.keys(OPTIONAL_FIELDS),'observerSource','recordedAt','location'].includes(k)).slice(0,12);
-    return {kind:'imported-pattern',algorithm:'supervised-harmonic-regression',trainedRecords:d.recent.length,name:d.source.name,coefficients,errorC,pressurePa:median(d.recent.map(r=>r.pressurePa)),windMps:median(d.recent.map(r=>r.windMps)),baseSol:d.lastSol+1,location:d.location,recordCount:d.records.length,unusedFields,
+    return {kind:'imported-pattern',algorithm:'supervised-harmonic-regression',trainedRecords:d.recent.length,environmentalModels,name:d.source.name,coefficients,errorC,pressurePa:median(d.recent.map(r=>r.pressurePa)),windMps:median(d.recent.map(r=>r.windMps)),baseSol:d.lastSol+1,location:d.location,recordCount:d.records.length,unusedFields,
       fieldCoverage:{temperature:d.records.length,pressure:d.records.filter(r=>Number.isFinite(r.pressurePa)).length,wind:d.records.filter(r=>Number.isFinite(r.windMps)).length,dust:d.records.filter(r=>Number.isFinite(r.opticalDepth)).length,radiation:d.records.filter(r=>Number.isFinite(r.doseRateUSvH)).length,humidity:d.records.filter(r=>Number.isFinite(r.humidityPct)).length},
-      note:'Extrapolación del patrón diario ajustado (armónico) a las últimas muestras; cada sol repite la misma curva. La banda es error residual, no intervalo de confianza calibrado. No predice tormentas; polvo y radiación se resumen solo si hay observaciones.'};
+      note:'Extrapolación del patrón diario ajustado (armónico) a las últimas muestras; cada sol repite la misma curva. La banda es error residual, no intervalo de confianza calibrado. Ajustes independientes para temperatura, polvo y radiación cuando hay cobertura suficiente. No predice tormentas ni eventos solares.'};
   }
   function temperature(model,hour){const h=((hour%24)+24)%24,a=2*Math.PI*h/24;return model.coefficients[0]+model.coefficients[1]*Math.cos(a)+model.coefficients[2]*Math.sin(a);}
   function forecast(raw={},dataset=null){
     const p=config(raw),model=weatherModel(dataset),dust=p.scenario==='dust'?Math.max(.85,p.dustIndex):p.dustIndex;
     return {model,scenario:p.scenario,dustIndex:dust,series:Array.from({length:25},(_,i)=>{
       const hour=i===24?24:i,t=temperature(model,hour);
-      return {hour,temperatureC:t,lowerC:t-model.errorC,upperC:t+model.errorC,pressurePa:model.pressurePa,windMps:model.windMps,dustIndex:dust};
+      const environment={};for(const key of ['opticalDepth','doseRateUSvH']){
+        const learned=model.environmentalModels?.[key];
+        environment[key]=learned?.status==='fitted'?clamp(temperature(learned,hour),...OPTIONAL_FIELDS[key]):null;
+      }
+      return {hour,temperatureC:t,lowerC:t-model.errorC,upperC:t+model.errorC,pressurePa:model.pressurePa,windMps:model.windMps,dustIndex:dust,...environment};
     })};
   }
   // ── Condiciones ambientales observadas (polvo, radiación, viento, presión, humedad) ──────────────────────────
@@ -134,6 +144,18 @@
   const MAX_HORIZON_SOLS=60,HORIZON_EPS=1e-4;
   // Sols completos que cubre una duración en horas. 14 sols exactos no deben redondearse a 15.
   function horizonSolsFor(hours){const h=Number(hours);if(!Number.isFinite(h)||h<=0)return 1;return Math.min(MAX_HORIZON_SOLS,Math.max(1,Math.ceil(h/SOL_HOURS-HORIZON_EPS)));}
+  function projectedExposure(series,hours){
+    if(series.some(p=>!Number.isFinite(p.doseRateUSvH)))return null;
+    const duration=Number.isFinite(Number(hours))&&Number(hours)>0?Number(hours):SOL_HOURS;
+    const fullSols=Math.floor(duration/SOL_HOURS),partialHours=(duration/SOL_HOURS-fullSols)*24;
+    let daily=0,partial=0;
+    for(let h=0;h<24;h++){
+      const a=series[h].doseRateUSvH,b=series[h+1].doseRateUSvH;
+      daily+=(a+b)/2;
+      const fraction=clamp(partialHours-h,0,1);partial+=a*fraction+(b-a)*fraction*fraction/2;
+    }
+    return (daily*fullSols+partial)*SOL_HOURS/24/1000;
+  }
   function observationForecast(dataset,origin,options={}){
     if(origin!==undefined){
       if(!origin)return {status:'missing-location',model:null,series:[]};
@@ -148,6 +170,7 @@
     const days=Array.from({length:horizonSols},(_,i)=>({offsetSols:i,sol:baseSol+i,series:result.series}));
     return {status:'projection',horizonSols,horizonHours:Number.isFinite(Number(options.horizonHours))?Number(options.horizonHours):null,truncated:Number.isFinite(Number(options.horizonHours))&&Math.ceil(Number(options.horizonHours)/SOL_HOURS-HORIZON_EPS)>MAX_HORIZON_SOLS,
       radiusKm:WEATHER_RADIUS_KM,model:result.model,series:result.series,days,conditions:conditionsFor(weatherData(dataset),options.horizonHours),
+      environment:{models:result.model.environmentalModels,exposureMSv:projectedExposure(result.series,options.horizonHours),doseAssumption:'integrated-daily-pattern-unshielded',affectsTemperature:false},
       method:{kind:'daily-pattern-extrapolation',independentPerSol:false,dayToDayVariationEstimated:false,
         note:'Cada sol repite la curva diaria ajustada a las últimas muestras. No es una predicción independiente por sol; la variación entre soles, las tormentas de polvo y el cambio estacional no se estiman. La banda es el error residual del ajuste, no un intervalo de confianza calibrado.'}};
   }
