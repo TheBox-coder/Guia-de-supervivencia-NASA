@@ -49,6 +49,22 @@ window.addEventListener('jezero:themechange',()=>{
 });
 
 
+let currentBaseMode='viking';
+const tileHealth={viking:{ok:0,err:0},mola:{ok:0,err:0}};
+function trackTileHealth(layer,key){
+  const src=layer.getSource();
+  src.on('tileloadend',()=>{tileHealth[key].ok++;scheduleBaseStatus();});
+  src.on('tileloaderror',()=>{tileHealth[key].err++;scheduleBaseStatus();});
+}
+let baseStatusTimer=0;
+function scheduleBaseStatus(){clearTimeout(baseStatusTimer);baseStatusTimer=setTimeout(()=>updateBaseMapStatus(currentBaseMode),150);}
+function layerState(key,wanted){
+  const h=tileHealth[key];
+  if(h.ok>0&&h.err>0&&wanted) return ['PARCIAL','loading'];
+  if(h.ok>0) return [wanted?'ACTIVA':'CARGADA','live'];
+  if(h.err>0) return ['ERROR','error'];
+  return wanted?['CARGANDO…','loading']:['SIN COMPROBAR','ready'];
+}
 function buildLayers(){
   const projection = ol.proj.get('EPSG:4326');
   const globalExtent = [-180,-90,180,90];
@@ -68,7 +84,13 @@ function buildLayers(){
   imageryLayer.setZIndex(1);
   imageryLayer.setVisible(true);
 
-  molaLayer = xyz(D.map.globalTile, 12, 'jezero-topography-map-layer');
+  // El servicio MOLA/HRSC de Trek solo publica los niveles 0–8; más allá se amplía el nivel 8 (no se piden teselas inexistentes).
+  molaLayer = xyz(D.map.globalTile, Number(D.map.molaMaxZoom||8), 'jezero-topography-map-layer');
+  trackTileHealth(imageryLayer,'viking');
+  trackTileHealth(molaLayer,'mola');
+  // En Híbrido el relieve modula la imagen (multiplicación) en lugar de quedar como un velo casi invisible.
+  molaLayer.on('prerender',e=>{ if(currentBaseMode==='hybrid'&&e.context) e.context.globalCompositeOperation='multiply'; });
+  molaLayer.on('postrender',e=>{ if(e.context) e.context.globalCompositeOperation='source-over'; });
   molaLayer.set('layerId','mola-global');
   molaLayer.setZIndex(2);
   molaLayer.setOpacity(1);
@@ -95,8 +117,13 @@ function buildLayers(){
   landingLayer.set('layerId','landing-sites');
   markerLayer = new ol.layer.Vector({
     source:new ol.source.Vector(),
-    style: feature => pointStyle(feature.get('kind'), feature.get('label'), feature),
-    zIndex:10
+    style: (feature,resolution) => { const styles=[].concat(pointStyle(feature.get('kind'), feature.get('label'), feature)); const prio=feature.get('kind')==='base'?100:60;
+      // "+N": elementos (Chariot, refugios, enlaces, otros puntos) que comparten este sitio y quedan ocultos por prioridad; se abren al pulsar.
+      try{const g=feature.getGeometry()?.getCoordinates?.();const n=g&&window.JEZERO_SUPPORT_MAP?.countNear?window.JEZERO_SUPPORT_MAP.countNear(g[0],g[1],resolution)-1:0;
+        if(n>0){const c=themeColors();styles.push(new ol.style.Style({text:new ol.style.Text({text:`+${n}`,offsetX:62,offsetY:-29,fill:new ol.style.Fill({color:c.warning||'#ffc857'}),stroke:new ol.style.Stroke({color:c.bg||'#020611',width:5}),font:'900 11px "DM Mono",Consolas,monospace'})}));}}catch{}
+      styles.forEach(s=>s.setZIndex(prio)); return styles; },
+    zIndex:16,
+    declutter:true
   });
   routeLayer = new ol.layer.Vector({ source:new ol.source.Vector(), zIndex:11 });
   routeLayer.setStyle(feature => routeStyle(feature));
@@ -110,7 +137,7 @@ function markLayerError(name){ setLayerStatus(name,'ERROR','error'); }
 function markLayerLoading(name){ setLayerStatus(name,'CARGANDO…','loading'); }
 
 async function prepareLayerSources(){
-  setLayerStatus('mola','ACTIVA','live');
+  updateBaseMapStatus(currentBaseMode);
   setLayerStatus('slope','ACERCA PARA ANALIZAR','ready');
   setLayerStatus('roughness','ACERCA PARA ANALIZAR','ready');
   setLayerStatus('route','ACTIVA','live');
@@ -435,6 +462,7 @@ function showReferencePopup(feature){
   $('mapInfoDescription').textContent=feature.get('description')||'';
   $('mapInfoSource').textContent=`Fuente: ${feature.get('source')}`;
   $('mapInfoSource').href=feature.get('sourceUrl')||'#';
+  $('mapInfoSource').style.display='';
   $('mapInfoUseBase').style.display=kind==='landing'?'inline-flex':'none';
   $('mapInfoAdd').style.display=kind==='landing'?'inline-flex':'inline-flex';
   $('mapInfoAdd').textContent=kind==='landing'?'Agregar este sitio a la misión':'Agregar ubicación a la misión';
@@ -475,6 +503,7 @@ function updateMapScale(){
 }
 
 function onMapClick(evt){
+  if(window.JEZERO_SUPPORT_MAP?.handleClick?.(evt)) return;
   const hit=map.forEachFeatureAtPixel(evt.pixel,feature=>feature.get('refKind')?feature:null,{hitTolerance:8});
   if(hit){ showReferencePopup(hit); return; }
   if(!selecting) return;
@@ -792,7 +821,7 @@ function syncAnalyticsCursor(point,{pin=false,highlightMap=true}={}){
     const x=L+clamp(point.km/maxKm,0,1)*(W-L-R); const line=svg.querySelector('.analyticsSyncCursor');
     if(line){line.setAttribute('x1',x);line.setAttribute('x2',x);line.setAttribute('visibility','visible');}
   });
-  if($('analyticsSelectionReadout')) $('analyticsSelectionReadout').textContent=`KM ${point.km.toFixed(2)} · ${formatLat(point.lat)} · ${formatLon(point.lon)} · pendiente ${Number.isFinite(point.slope)?point.slope.toFixed(1)+'°':'—'} · transit. ${Number.isFinite(point.transit)?Math.round(point.transit)+'/100':'—'} · calidad de muestreo ${Number.isFinite(point.confidence)?Math.round(point.confidence)+'%':'—'}`;
+  if($('analyticsSelectionReadout')) $('analyticsSelectionReadout').textContent=`KM ${point.km.toFixed(2)} · ${formatLat(point.lat)} · ${formatLon(point.lon)} · ${ui('pendiente','slope')} ${Number.isFinite(point.slope)?point.slope.toFixed(1)+'°':'—'} · ${ui('transit.','traversab.')} ${Number.isFinite(point.transit)?Math.round(point.transit)+'/100':'—'} · ${ui('calidad de muestreo','sampling quality')} ${Number.isFinite(point.confidence)?Math.round(point.confidence)+'%':'—'}`;
   updateAnalyticsMiniCursor(point);
   if(highlightMap&&analysisLayer){
     const src=analysisLayer.getSource();src.clear();src.addFeature(new ol.Feature({geometry:new ol.geom.Point([point.lon,point.lat]),analysisKind:'point',label:`${point.km.toFixed(2)} km`}));
@@ -998,19 +1027,20 @@ function strategiesEquivalent(all=currentMission){
   return Math.max(...distances)-Math.min(...distances)<.03 && Math.max(...transits)-Math.min(...transits)<1 && Math.max(...slopes)-Math.min(...slopes)<.4;
 }
 
+function riskText(score){const label=riskLabel(score);return window.JEZERO_I18N?.translateText?window.JEZERO_I18N.translateText(label,uiLang()):label;}
 function renderMission(mission){
   const m=mission.metrics,score=mission.score,available=mission.availableHours??availableMissionHours(mission.params||normalizeParams()),margin=available-mission.duration;
-  const selectedLabel=mission.mode==='distance'?'Misión más directa':mission.mode==='risk'?'Misión de menor exposición':'Misión equilibrada';
+  const selectedLabel=mission.mode==='distance'?ui('Misión más directa','Most direct mission'):mission.mode==='risk'?ui('Misión de menor exposición','Lowest-exposure mission'):ui('Misión equilibrada','Balanced mission');
   $('routeName').textContent=selectedLabel;
-  $('routeStatus').textContent=mission.overBudget?'FUERA DE LÍMITE':Number.isFinite(score)?`${riskLabel(score).toUpperCase()} · ${score}/100`:'SIN EVALUACIÓN';
+  $('routeStatus').textContent=mission.overBudget?'FUERA DE LÍMITE':Number.isFinite(score)?`${riskText(score).toUpperCase()} · ${score}/100`:'SIN EVALUACIÓN';
   $('routeStatus').className=`pill ${mission.overBudget?'warning':''}`;
   const order=(mission.orderOptimization?.optimizedOrder||[]).join(' → ');
-  $('routeDescription').textContent=`${mission.targetCount??Math.max(0,(mission.sequence?.length||1)-1)} punto(s) · ${mission.legs.length} tramo(s) · ${mission.orderOptimization?.enabled?'orden optimizado automáticamente':'orden manual'}${order?` · ${order}`:''}. ${mission.strategyDescription}`;
+  $('routeDescription').textContent=`${mission.targetCount??Math.max(0,(mission.sequence?.length||1)-1)} ${ui('punto(s)','point(s)')} · ${mission.legs.length} ${ui('tramo(s)','leg(s)')} · ${mission.orderOptimization?.enabled?ui('orden optimizado automáticamente','automatically optimized order'):ui('orden manual','manual order')}${order?` · ${order}`:''}. ${window.JEZERO_I18N?.translateText(mission.strategyDescription,uiLang())??mission.strategyDescription}`;
   $('distance').textContent=Number.isFinite(m.distanceKm)?`${m.distanceKm.toFixed(2)} km`:'—';
   $('duration').textContent=formatHours(mission.duration);
   $('maxSlope').textContent=Number.isFinite(m.maxSlopeDeg)?`${m.maxSlopeDeg.toFixed(1)}°`:'—';
   $('gain').textContent=Number.isFinite(m.elevationChangeM)?`${Math.round(m.elevationChangeM)} m`:'—';
-  $('riskNumber').textContent=Number.isFinite(score)?score:'—';$('riskLabel').textContent=Number.isFinite(score)?riskLabel(score):'Sin evaluación';$('riskBar').style.width=`${Number.isFinite(score)?score:0}%`;
+  $('riskNumber').textContent=Number.isFinite(score)?score:'—';$('riskLabel').textContent=Number.isFinite(score)?riskText(score):ui('Sin evaluación','Not evaluated');$('riskBar').style.width=`${Number.isFinite(score)?score:0}%`;
   $('avgSlope').textContent=Number.isFinite(m.avgSlopeDeg)?`${m.avgSlopeDeg.toFixed(1)}°`:'—';$('segments').textContent=m.segments;$('legsCount').textContent=mission.legs.length;$('dwellTotal').textContent=`${Number.isFinite(mission.dwellMinutes)?mission.dwellMinutes:0} min`;$('missionMargin').textContent=formatSignedMargin(margin);
   if($('avgTransitability'))$('avgTransitability').textContent=Number.isFinite(m.avgTransitability)?`${m.avgTransitability.toFixed(0)}/100`:'—';if($('minTransitabilityMetric'))$('minTransitabilityMetric').textContent=Number.isFinite(m.minTransitability)?`${m.minTransitability.toFixed(0)}/100`:'—';if($('avgConfidence'))$('avgConfidence').textContent=Number.isFinite(m.avgConfidence)?`${m.avgConfidence.toFixed(0)}%`:'—';if($('minConfidenceMetric'))$('minConfidenceMetric').textContent=Number.isFinite(m.minConfidence)?`${m.minConfidence.toFixed(0)}%`:'—';if($('avgRoughnessDisplay'))$('avgRoughnessDisplay').textContent=Number.isFinite(m.avgRoughnessDeg)?`${m.avgRoughnessDeg.toFixed(1)}°`:'—';
   if($('maxRadialMetric')){
@@ -1018,7 +1048,7 @@ function renderMission(mission){
     radial.textContent=Number.isFinite(m.maxRadialKm)?`${m.maxRadialKm.toFixed(2)} / ${Number(m.walkRadiusLimitKm).toFixed(0)} km`:'—';
     radial.dataset.state=m.walkbackExceeded?'over-walkback':m.radiusExceeded?'over-radius':'ok';
   }
-  $('calcParams').textContent=`${mission.params.speed.toFixed(1)} km/h · EVA ${mission.params.evaTime.toFixed(1)} h · margen ${mission.params.returnMargin}% · pendiente ≤${mission.params.maxSlopeLimit.toFixed(0)}° · transit. ≥${mission.params.minTransitability.toFixed(0)} · calidad de muestreo ≥${mission.params.minConfidence.toFixed(0)}%`;
+  $('calcParams').textContent=`${mission.params.speed.toFixed(1)} km/h · EVA ${mission.params.evaTime.toFixed(1)} h · ${ui('margen','margin')} ${mission.params.returnMargin}% · ${ui('pendiente','slope')} ≤${mission.params.maxSlopeLimit.toFixed(0)}° · ${ui('transit.','traversab.')} ≥${mission.params.minTransitability.toFixed(0)} · ${ui('calidad de muestreo','sampling quality')} ≥${mission.params.minConfidence.toFixed(0)}%`;
   if($('calcParams')&&Number.isFinite(mission.metrics?.maxRadialKm)){
     const over=mission.metrics.radiusExceeded?ui(` · EXCEDE el radio de caminata de ${Number(mission.metrics.walkRadiusLimitKm).toFixed(0)} km`,` · EXCEEDS the ${Number(mission.metrics.walkRadiusLimitKm).toFixed(0)} km walking radius`):'';
     $('calcParams').textContent+=` · ${ui('radio','radius')} ${mission.metrics.maxRadialKm.toFixed(2)} km${over}`;
@@ -1030,7 +1060,7 @@ function renderMission(mission){
     $('dataQualitySummary').textContent=ui(`DEM solicitado: 200 m · resolución recibida: ${resolutions.length?Math.max(...resolutions).toFixed(0)+' m':'no informada'} · espaciamiento máximo de malla por tramo: ${spacing.toFixed(0)} m · cobertura: ${valid}/${samples} muestras. Calidad = completitud y densidad; no probabilidad de seguridad.`,`Requested DEM: 200 m · reported resolution: ${resolutions.length?Math.max(...resolutions).toFixed(0)+' m':'not reported'} · maximum median grid spacing across legs: ${spacing.toFixed(0)} m · coverage: ${valid}/${samples} samples. Quality = completeness and density; not a safety probability.`);
   }
   renderMissionTimeline(mission);updateRouteSequenceStrip(mission);renderTerrainProfile(mission);renderMissionAnalytics(mission);updateMissionHud(mission);updateHeaderStatus();updateStrategyCards(currentMission);drawPointMarkers();
-  $('recalculate').disabled=false;$('saveMission').disabled=false;if($('lastCalculated'))$('lastCalculated').textContent=lastCalculatedAt?`Último cálculo: ${lastCalculatedAt.toLocaleString(uiLang()==='en'?'en-US':'es-GT',{dateStyle:'short',timeStyle:'short'})}`:'Último cálculo: —';
+  $('recalculate').disabled=false;$('saveMission').disabled=false;try{queuePdfUpdate();}catch{}if($('lastCalculated'))$('lastCalculated').textContent=lastCalculatedAt?`Último cálculo: ${lastCalculatedAt.toLocaleString(uiLang()==='en'?'en-US':'es-GT',{dateStyle:'short',timeStyle:'short'})}`:'Último cálculo: —';
 }
 
 function renderMissionList(){
@@ -1039,7 +1069,7 @@ function renderMissionList(){
     const row=document.createElement('div');row.className='waypoint';const base=p.type==='base'||i===0,finalVisit=visit.get(pointCoordKey(p));
     const title=base?'BASE':finalVisit?`#${String(finalVisit).padStart(2,'0')}`:`P${i}`;
     const orderTag=base?'INICIO':finalVisit?'ORDEN CALCULADO':auto?'PENDIENTE DE CÁLCULO':'ORDEN MANUAL';
-    row.innerHTML=`<div class="wpIndex">${title}</div><div class="wpMain"><input class="wpName" value="${escapeHtml(p.name)}" aria-label="Nombre del punto ${i+1}"><div class="wpMeta"><span>${formatLat(p.lat)} · ${formatLon(p.lon)}</span><span class="tag required">${orderTag}</span>${base?'':`<label class="dwellEdit">PARADA <input class="wpDwell" data-i="${i}" type="number" min="0" max="1440" step="1" value="${Math.max(0,Number(p.dwellMin)||0)}"> min</label>`}</div></div><div class="wpActions">${!base&&!auto?`<button title="Subir" data-action="up" data-i="${i}" ${i<=1?'disabled':''}>↑</button><button title="Bajar" data-action="down" data-i="${i}" ${i===missionPoints.length-1?'disabled':''}>↓</button>`:''}<button title="Eliminar" data-action="delete" data-i="${i}" ${base?'disabled':''}>×</button></div>`;
+    row.innerHTML=`<div class="wpIndex">${title}</div><div class="wpMain"><input class="wpName" value="${escapeHtml(p.name)}" aria-label="${escapeHtml(ui(`Nombre del punto ${i+1}`,`Name of point ${i+1}`))}"><div class="wpMeta"><span>${formatLat(p.lat)} · ${formatLon(p.lon)}</span><span class="tag required">${orderTag}</span>${base?'':`<label class="dwellEdit">PARADA <input class="wpDwell" data-i="${i}" type="number" min="0" max="1440" step="1" value="${Math.max(0,Number(p.dwellMin)||0)}"> min</label>`}</div></div><div class="wpActions">${!base&&!auto?`<button title="Subir" data-action="up" data-i="${i}" ${i<=1?'disabled':''}>↑</button><button title="Bajar" data-action="down" data-i="${i}" ${i===missionPoints.length-1?'disabled':''}>↓</button>`:''}<button title="Eliminar" data-action="delete" data-i="${i}" ${base?'disabled':''}>×</button></div>`;
     list.appendChild(row);
   });
   list.querySelectorAll('.wpName').forEach((input,i)=>input.onchange=()=>{missionPoints[i].name=input.value.trim()||`Punto ${i}`;currentMission=null;updatePlanningUI();});
@@ -1055,7 +1085,7 @@ function handleWaypointAction(action,i){
 }
 function updatePlanningUI(){
   if(!currentMission){lastCalculatedAt=null;routeLayer?.getSource()?.clear();resetMetrics();}
-  $('pointCount').textContent=missionPoints.length;$('calculate').disabled=busy||missionPoints.length<2;$('saveMission').disabled=busy||!currentMission;
+  $('pointCount').textContent=missionPoints.length;$('calculate').disabled=busy||missionPoints.length<2;$('saveMission').disabled=busy||!currentMission;try{queuePdfUpdate();}catch{}
   const hint=$('selectionHint'),hintBox=$('mapMissionHint');
   if(hint) hint.textContent=selecting?`Toca Marte para agregar el punto ${missionPoints.length+1}`:'';
   if(hintBox) hintBox.classList.toggle('is-visible',Boolean(selecting));
@@ -1093,11 +1123,11 @@ function resetMetrics(){
   if($('calcParams'))$('calcParams').textContent='—';
   if($('lastCalculated'))$('lastCalculated').textContent=ui('Último cálculo: —','Last calculation: —');
   if($('recalculate'))$('recalculate').disabled=true;
-  if($('saveMission'))$('saveMission').disabled=true;
+  if($('saveMission'))$('saveMission').disabled=true;try{queuePdfUpdate();}catch{}
   renderTerrainProfile(null); renderMissionAnalytics(null); renderMissionTimeline(null); updateRouteSequenceStrip(null); updateMissionHud(null); updateHeaderStatus(); updateStrategyCards(null);
 }
 function clearMission(){if(missionPoints.length&&!window.confirm(ui('¿Vaciar el plan actual? Guarda una copia antes de continuar.','Clear the current plan? Save a copy before continuing.')))return;missionPoints=[];currentMission=null;selecting=false;routeLayer.getSource().clear();drawPointMarkers();renderMissionList();resetMetrics();updatePlanningUI();}
-function setBusy(b,msg){busy=b;$('calculate').disabled=b||missionPoints.length<2;$('recalculate').disabled=b||!currentMission;$('saveMission').disabled=b||!currentMission;if(msg)$('statusText').textContent=msg;else $('statusText').textContent='DATOS CARTOGRÁFICOS · NASA / USGS';}
+function setBusy(b,msg){busy=b;try{queuePdfUpdate();}catch{}$('calculate').disabled=b||missionPoints.length<2;$('recalculate').disabled=b||!currentMission;$('saveMission').disabled=b||!currentMission;if(msg)$('statusText').textContent=msg;else $('statusText').textContent='DATOS CARTOGRÁFICOS · NASA / USGS';}
 
 function getHistory(){ try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch{return[];} }
 function setHistory(items){localStorage.setItem(HISTORY_KEY,JSON.stringify(items.slice(0,12))); updateSettingsSummary();}
@@ -1191,6 +1221,39 @@ async function exportMissionPdf(mode){
   return true;
 }
 
+function queuePdfUpdate(){try{if(typeof setTimeout==='function')setTimeout(updatePdfButtons,0);}catch{}}
+function pdfBlockedReason(){
+  if(busy) return ui('Hay un cálculo en curso; espera a que termine.','A calculation is in progress; wait for it to finish.');
+  if(missionPoints.length<2) return ui('Crea una base y al menos un destino para poder generar el informe.','Create a base and at least one destination to generate the report.');
+  if(!currentMission) return ui('Calcula la misión primero: el PDF refleja la misión calculada, no entradas sin calcular.','Calculate the mission first: the PDF reflects the calculated mission, not uncalculated inputs.');
+  return '';
+}
+function updatePdfButtons(){
+  const reason=pdfBlockedReason();
+  document.querySelectorAll('[data-export-pdf]').forEach(btn=>{
+    btn.disabled=Boolean(reason);
+    btn.setAttribute('aria-disabled',String(Boolean(reason)));
+    btn.title=reason||ui('Descargar el informe PDF de la misión calculada','Download the PDF report of the calculated mission');
+  });
+  document.querySelectorAll('[data-export-pdf-hint]').forEach(el=>{el.textContent=reason||ui('Genera el informe con la misión, el escenario y los resultados actuales.','Generates the report with the current mission, scenario and results.');el.dataset.state=reason?'blocked':'ready';});
+}
+async function exportPdfOnly(){
+  const reason=pdfBlockedReason();
+  if(reason){showToast(reason);return;}
+  const mode=document.querySelector('input[name="mode"]:checked')?.value||'balanced';
+  try{
+    window.JEZERO_SURVIVAL?.refresh?.();
+    setBusy(true,ui('Generando informe PDF…','Generating PDF report…'));
+    await exportMissionPdf(mode);
+    setBusy(false,ui('INFORME PDF DESCARGADO · NASA / USGS','PDF REPORT DOWNLOADED · NASA / USGS'));
+    showToast(ui('Informe PDF generado con la misión actual.','PDF report generated from the current mission.'));
+  }catch(err){
+    setBusy(false,ui('DATOS CARTOGRÁFICOS · NASA / USGS','MAP DATA · NASA / USGS'));
+    showToast(err.message||ui('No se pudo generar el PDF.','The PDF could not be generated.'));
+  }
+}
+document.addEventListener('click',e=>{const b=e.target.closest?.('[data-export-pdf]');if(b){e.preventDefault();exportPdfOnly();}});
+window.addEventListener('jezero:languagechange',()=>{queuePdfUpdate();try{updateBaseMapStatus(currentBaseMode);}catch{}});
 function saveHistoryEntry(mode){
   const items=getHistory(),now=new Date(),selected=currentMission?.[mode];
   const fingerprint=JSON.stringify({mode,returnBase:$('returnBase').checked,optimizeOrder:$('optimizeOrder')?.checked!==false,speed:Number($('speed').value),eva:Number($('evaTime').value),margin:Number($('returnMargin').value),maxSlope:Number($('maxSlopeLimit')?.value),minTransit:Number($('minTransitability')?.value),minConfidence:Number($('minConfidence')?.value),points:missionPoints.map(p=>[p.lat,p.lon,p.name,p.dwellMin])});
@@ -1433,7 +1496,7 @@ if(hudEl&&hudToggle){
   hudToggle.addEventListener('click',()=>{const compact=hudEl.classList.toggle('is-compact');hudToggle.setAttribute('aria-expanded',String(!compact));hudToggle.textContent=compact?'⌄':'⌃';localStorage.setItem(hudPrefKey,compact?'compact':'expanded');});
 }
 window.addEventListener('jezero:themechange',()=>renderMissionAnalytics(selectedMission()));
-window.addEventListener('jezero:languagechange',()=>{renderMissionAnalytics(selectedMission());renderTerrainProfile(selectedMission());markerLayer?.changed?.();knownLayer?.changed?.();landingLayer?.changed?.();});
+window.addEventListener('jezero:languagechange',()=>{try{renderMissionList();}catch{}const sm=selectedMission();if(sm){try{renderMission(sm);renderMissionTimeline(sm);}catch(e){console.error(e);}}renderMissionAnalytics(selectedMission());renderTerrainProfile(selectedMission());markerLayer?.changed?.();knownLayer?.changed?.();landingLayer?.changed?.();});
 $('analyticsStrategySelect')?.addEventListener('change',e=>activateStrategyFromAnalytics(e.target.value));
 $('analyticsClearSelection')?.addEventListener('click',clearAnalyticsSelection);
 window.addEventListener('jezero:modulechange',e=>{if(e.detail?.module!=='analysis')clearAnalyticsSelection();});
@@ -1510,20 +1573,27 @@ function showToast(msg){$('toast').textContent=msg;$('toast').classList.remove('
 
 const BASE_MAP_MODES = new Set(['viking','mola','hybrid']);
 function updateBaseMapStatus(mode){
+  currentBaseMode=mode;
+  const wantViking=mode==='viking'||mode==='hybrid',wantMola=mode==='mola'||mode==='hybrid';
+  const states={viking:layerState('viking',wantViking),mola:layerState('mola',wantMola)};
+  states.hybrid=!(wantViking&&wantMola)?(states.viking[1]==='live'&&states.mola[1]==='live'?['CARGADA','live']:['SIN COMPROBAR','ready']):(states.viking[1]==='error'||states.mola[1]==='error'?['ERROR','error']:states.viking[1]==='live'&&states.mola[1]==='live'&&states.viking[0]==='ACTIVA'&&states.mola[0]==='ACTIVA'?['ACTIVA','live']:['CARGANDO…','loading']);
   document.querySelectorAll('[data-base-status]').forEach(el=>{
-    const active = el.dataset.baseStatus===mode || (mode==='hybrid' && el.dataset.baseStatus==='hybrid');
-    el.textContent=active?'ACTIVA':'DISPONIBLE';
-    el.className=`layerStatus ${active?'live':'ready'}`;
+    const [label,cls]=states[el.dataset.baseStatus]||['—','ready'];
+    el.textContent=ui(label,{'ACTIVA':'ACTIVE','CARGADA':'LOADED','SIN COMPROBAR':'NOT CHECKED','CARGANDO…':'LOADING…','ERROR':'ERROR','PARCIAL':'PARTIAL'}[label]||label);
+    el.className=`layerStatus ${cls}`;
+    el.title=label==='ERROR'?ui('El servicio de teselas no respondió. No se simula la capa.','The tile service did not respond. The layer is not simulated.'):'';
   });
+  const [molaLabel,molaClass]=states.mola;setLayerStatus('mola',ui(molaLabel,{'ACTIVA':'ACTIVE','CARGADA':'LOADED','SIN COMPROBAR':'NOT CHECKED','CARGANDO…':'LOADING…','ERROR':'ERROR','PARCIAL':'PARTIAL'}[molaLabel]||molaLabel),molaClass);
   document.querySelectorAll('[data-base-map]').forEach(el=>{el.checked=el.dataset.baseMap===mode;});
   if($('baseMapMode') && $('baseMapMode').value!==mode) $('baseMapMode').value=mode;
 }
 function setBaseMapMode(mode,{persist=true}={}){
   if(!BASE_MAP_MODES.has(mode)) mode='viking';
+  currentBaseMode=mode;
   imageryLayer?.setVisible(mode==='viking'||mode==='hybrid');
   molaLayer?.setVisible(mode==='mola'||mode==='hybrid');
   imageryLayer?.setOpacity(1);
-  molaLayer?.setOpacity(mode==='hybrid'?0.34:1);
+  molaLayer?.setOpacity(mode==='hybrid'?0.62:1);
   updateBaseMapStatus(mode);
   document.querySelector('.mapPanel')?.setAttribute('data-base-map',mode);
   if(persist) localStorage.setItem(BASE_MAP_KEY,mode);

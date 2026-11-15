@@ -24,6 +24,8 @@ Solo shell/entradas almacenadas funcionan offline tras una primera carga complet
 
 > V51: abre SOPORTE para usar refugios, soporte vital, radiación, comunicaciones, equipo, contingencias, cancelación y bitácora. Consulta OPERACIONES.md y la nueva sección de ayuda.
 
+> Revisión de correcciones: la X vuelve al área anterior (pila propia, también con Esc); CLIMA cubre toda la duración configurada del Chariot como extrapolación del patrón diario (no una predicción independiente por sol); CONTROL indica qué campo o confirmación falta con un botón que lleva a él; MOLA solo pide los niveles 0–8 que publica Trek; las etiquetas del mapa se priorizan y agrupan sin mover coordenadas; los escenarios se comparan con la operación nominal; el informe PDF es accesible desde RESULTADOS y CONTROL.
+
 > V50: el botón CLIMA abre la proyección térmica del próximo sol basada en tus observaciones. Todos los botones de navegación cierran su interfaz al repetir el toque.
 
 > V49: correcciones de EVA, secuencia e iconos; detalle regional real CTX/HiRISE de NASA Trek; biblioteca local, recuperación de borradores y presupuesto explicable. Tutorial y manual completos en inglés y español. La resolución del DEM de cálculo permanece en ~200 m.

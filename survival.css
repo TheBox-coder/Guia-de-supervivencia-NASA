@@ -742,3 +742,10 @@ body.jezero-ui[data-module="survival"] :is(.mapToolbar, .missionHud, .mapMission
     gap: 10px;
   }
 }
+
+.scenarioCompare { margin: 12px 0; padding: 12px; border: 1px solid var(--theme-line, #3b4a63); border-radius: 4px; }
+.scenarioCompare h3 { margin: 0 0 6px; font-size: 14px; }
+.scenarioCompare .scenarioNote { font-size: 12px; opacity: .9; }
+.scenarioTable { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+.scenarioTable th, .scenarioTable td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--theme-line, #3b4a63); }
+.scenarioCompare button { padding: 5px 10px; border: 2px solid var(--theme-accent-2, #59cbe8); background: transparent; color: inherit; border-radius: 4px; font-weight: 700; cursor: pointer; }

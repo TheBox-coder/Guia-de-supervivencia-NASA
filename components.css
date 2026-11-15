@@ -1564,3 +1564,33 @@ body.jezero-ui :is(.opsNotice, .settingsHelp, .survivalNote, .safetyNote, .param
 .opsFormStatus { padding: 12px; margin-top: 12px; border: 1px solid var(--theme-success); color: var(--text-primary); border-radius: 4px; }
 .opsFormStatus[data-state="error"] { border-color: var(--theme-danger); }
 .opsFormStatus[hidden] { display: none; }
+
+/* Botones de guardado: contraste, borde, hover, foco y estado deshabilitado visibles en todos los temas. */
+.weatherObservationFields button[type="submit"],
+#forecastObservationForm button[type="submit"] {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 40px; padding: 9px 18px; border-radius: 4px; cursor: pointer;
+  border: 2px solid var(--theme-accent-2, #59cbe8);
+  background: var(--theme-accent-2, #59cbe8); color: #07101c;
+  font-weight: 700; font-size: 13px; letter-spacing: .01em; grid-column: 1 / -1; justify-self: start;
+}
+.weatherObservationFields button[type="submit"]:hover:not(:disabled) { background: color-mix(in srgb, var(--theme-accent-2, #59cbe8) 82%, #ffffff); }
+.weatherObservationFields button[type="submit"]:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; box-shadow: 0 0 0 5px color-mix(in srgb, var(--theme-accent-2, #59cbe8) 60%, transparent); }
+.weatherObservationFields button[type="submit"]:disabled { cursor: not-allowed; background: transparent; color: var(--text-secondary, #9aa7b8); border: 2px dashed var(--theme-line, #4a5568); }
+.formFeedback { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--theme-success, #54e0a6); border-radius: 4px; font-size: 13px; }
+.formFeedback[data-state="error"] { border-color: var(--theme-danger, #ff6b5b); }
+.formFeedback[hidden] { display: none; }
+.forecastSolPicker { display: flex; flex-wrap: wrap; gap: 12px; margin: 10px 0; }
+.forecastSolPicker label { display: grid; gap: 4px; font-size: 13px; }
+.forecastSolPicker select { padding: 8px; background: var(--surface-card); color: var(--text-primary); border: 1px solid var(--theme-line); border-radius: 4px; min-width: 160px; }
+.forecastDays { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 14px; }
+.forecastDays button { padding: 6px 10px; font-size: 12px; border: 1px solid var(--theme-line); border-radius: 4px; background: transparent; color: var(--text-primary); cursor: pointer; }
+.forecastDays button[aria-pressed="true"] { border-color: var(--theme-accent-2, #59cbe8); background: color-mix(in srgb, var(--theme-accent-2, #59cbe8) 22%, transparent); font-weight: 700; }
+.forecastDays button[data-over="true"] { border-color: var(--theme-danger, #ff6b5b); }
+.analyticsPdfButton { margin-top: 8px; min-height: 38px; padding: 8px 16px; border: 2px solid var(--theme-accent-2, #59cbe8); background: var(--theme-accent-2, #59cbe8); color: #07101c; font-weight: 700; border-radius: 4px; cursor: pointer; }
+.analyticsPdfButton:hover:not(:disabled) { background: color-mix(in srgb, var(--theme-accent-2, #59cbe8) 82%, #ffffff); }
+.analyticsPdfButton:focus-visible, #controlPdf:focus-visible, .resultsPdf:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
+.analyticsPdfButton:disabled { background: transparent; color: var(--text-secondary, #9aa7b8); border: 2px dashed var(--theme-line, #4a5568); cursor: not-allowed; }
+.analyticsHeaderMeta .pdfHint { display: block; margin-top: 4px; max-width: 340px; font-size: 11px; opacity: .85; }
+.analyticsHeaderMeta .pdfHint[data-state="blocked"] { color: var(--theme-warning, #ffc857); opacity: 1; }
+#controlPdf:disabled { opacity: .55; cursor: not-allowed; border-style: dashed; }

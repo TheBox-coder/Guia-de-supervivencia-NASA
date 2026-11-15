@@ -71,7 +71,7 @@
     const unusedFields=[...new Set(dataset.records.flatMap(r=>Object.keys(r)))].filter(k=>!['sol','localHour','temperatureC','pressurePa','windMps','observerSource','recordedAt','location'].includes(k)).slice(0,12);
     return {kind:'imported-pattern',algorithm:'supervised-harmonic-regression',trainedRecords:d.recent.length,name:d.source.name,coefficients,errorC,pressurePa:median(d.recent.map(r=>r.pressurePa)),windMps:median(d.recent.map(r=>r.windMps)),baseSol:d.lastSol+1,location:d.location,recordCount:d.records.length,unusedFields,
       fieldCoverage:{temperature:d.records.length,pressure:d.records.filter(r=>Number.isFinite(r.pressurePa)).length,wind:d.records.filter(r=>Number.isFinite(r.windMps)).length},
-      note:'Proyección de un sol mediante ajuste armónico a las últimas muestras. La banda es error residual, no intervalo de confianza calibrado. No predice tormentas.'};
+      note:'Extrapolación del patrón diario ajustado (armónico) a las últimas muestras; cada sol repite la misma curva. La banda es error residual, no intervalo de confianza calibrado. No predice tormentas.'};
   }
   function temperature(model,hour){const h=((hour%24)+24)%24,a=2*Math.PI*h/24;return model.coefficients[0]+model.coefficients[1]*Math.cos(a)+model.coefficients[2]*Math.sin(a);}
   function forecast(raw={},dataset=null){
@@ -81,7 +81,10 @@
       return {hour,temperatureC:t,lowerC:t-model.errorC,upperC:t+model.errorC,pressurePa:model.pressurePa,windMps:model.windMps,dustIndex:dust};
     })};
   }
-  function observationForecast(dataset,origin){
+  const MAX_HORIZON_SOLS=60,HORIZON_EPS=1e-4;
+  // Sols completos que cubre una duración en horas. 14 sols exactos no deben redondearse a 15.
+  function horizonSolsFor(hours){const h=Number(hours);if(!Number.isFinite(h)||h<=0)return 1;return Math.min(MAX_HORIZON_SOLS,Math.max(1,Math.ceil(h/SOL_HOURS-HORIZON_EPS)));}
+  function observationForecast(dataset,origin,options={}){
     if(origin!==undefined){
       if(!origin)return {status:'missing-location',model:null,series:[]};
       origin=validation.point(origin);
@@ -89,7 +92,14 @@
     }
     if(!dataset)return {status:'missing-data',model:null,series:[]};
     const result=forecast({},dataset);
-    return {status:'projection',horizonSols:1,radiusKm:WEATHER_RADIUS_KM,model:result.model,series:result.series};
+    const horizonSols=horizonSolsFor(options.horizonHours);
+    const baseSol=result.model.baseSol;
+    // Un solo ajuste armónico diario: cada sol repite la misma curva. No es una predicción independiente por sol.
+    const days=Array.from({length:horizonSols},(_,i)=>({offsetSols:i,sol:baseSol+i,series:result.series}));
+    return {status:'projection',horizonSols,horizonHours:Number.isFinite(Number(options.horizonHours))?Number(options.horizonHours):null,truncated:Number.isFinite(Number(options.horizonHours))&&Math.ceil(Number(options.horizonHours)/SOL_HOURS-HORIZON_EPS)>MAX_HORIZON_SOLS,
+      radiusKm:WEATHER_RADIUS_KM,model:result.model,series:result.series,days,
+      method:{kind:'daily-pattern-extrapolation',independentPerSol:false,dayToDayVariationEstimated:false,
+        note:'Cada sol repite la curva diaria ajustada a las últimas muestras. No es una predicción independiente por sol; la variación entre soles, las tormentas de polvo y el cambio estacional no se estiman. La banda es el error residual del ajuste, no un intervalo de confianza calibrado.'}};
   }
   function appendWeatherObservation(dataset,origin,record,observerSource,now=Date.now()){
     origin=validation.point(origin);
@@ -170,5 +180,5 @@
     const recommended=(feasible.length?feasible:rows).sort((a,b)=>b.timeMarginHours-a.timeMarginHours)[0];
     return {rows,recommendedMode:recommended?.mode||null,hasFeasible:feasible.length>0};
   }
-  return Object.freeze({MODEL_VERSION,SOL_HOURS,WEATHER_RADIUS_KM,DEFAULTS,METABOLIC,TERRAIN_FACTOR,O2_KG_PER_KCAL,pandolf,metabolism,config,weatherData,weatherModel,forecast,observationForecast,appendWeatherObservation,temperature,terrain,evaluate,compare});
+  return Object.freeze({MODEL_VERSION,SOL_HOURS,horizonSolsFor,MAX_HORIZON_SOLS,WEATHER_RADIUS_KM,DEFAULTS,METABOLIC,TERRAIN_FACTOR,O2_KG_PER_KCAL,pandolf,metabolism,config,weatherData,weatherModel,forecast,observationForecast,appendWeatherObservation,temperature,terrain,evaluate,compare});
 });

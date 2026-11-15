@@ -93,6 +93,7 @@
       $('survivalComparison').querySelectorAll('[data-use-survival-mode]').forEach(b=>b.addEventListener('click',()=>window.JEZERO_UI_ACTIONS?.selectMode?.(b.dataset.useSurvivalMode)));
       $('survivalAssumptionsText').innerHTML=has?'<ul>'+snapshot.assumptions.map(a=>'<li>'+esc(a)+'</li>').join('')+'</ul>':'';
       $('resourceChart').innerHTML=has?chart(snapshot.timeline.map(p=>({...p,remainingPct:p.batteryKWh/snapshot.battery.capacityKWh*100,oxygenPct:p.oxygenKg/snapshot.oxygen.capacityKg*100,windowPct:p.remainingWindowHours/m.availableHours*100})),'remainingPct',{percent:true,overlays:[{key:'oxygenPct',color:'var(--theme-success)'},{key:'windowPct',color:'var(--theme-warning)',dash:'5 3'}]}):'<div class="chartEmpty">La autonomía aparece después de calcular una misión.</div>';
+      try{renderScenarioCompare(selected,dataset);}catch(e){console.warn('scenario comparison',e);}
       document.querySelectorAll('[data-survival-scenario]').forEach(b=>{b.classList.toggle('is-active',b.dataset.survivalScenario===settings.scenario);b.setAttribute('aria-pressed',String(b.dataset.survivalScenario===settings.scenario));});
       const brief=$('decisionBrief');if(brief){brief.hidden=!has;brief.innerHTML=has?[
         {label:'Ventana de tiempo',value:snapshot.timeMarginHours*60,unit:'min',hint:'Reduce destinos o paradas y vuelve a calcular.'},
@@ -103,6 +104,36 @@
       window.dispatchEvent(new CustomEvent('jezero:weatherchange'));
     }catch(e){error(e.message);}
   }
+  // Comparación del escenario elegido frente a la operación nominal con las MISMAS entradas. Es hipotético: no son observaciones.
+  function renderScenarioCompare(selected,dataset){
+    const host=$('scenarioCompare');if(!host)return;
+    const lang=window.JEZERO_I18N?.getLanguage?.()==='en'?'en':'es',t=(es,en)=>lang==='en'?en:es;
+    const names={nominal:t('Operación nominal','Nominal operation'),dust:t('Polvo denso','Dense dust'),power:t('Fallo de batería','Battery failure')};
+    const effects={nominal:t('Sin cambios: condiciones de referencia.','No changes: reference conditions.'),dust:t('Hipótesis: demora ×(1 + 0,25·polvo), O₂ +10 %·polvo y energía +25 %·polvo (coeficientes sin fuente publicada).','Hypothesis: delay ×(1 + 0.25·dust), O₂ +10 %·dust and energy +25 %·dust (coefficients without a published source).'),power:t('Hipótesis: capacidad efectiva de la batería al 45 %.','Hypothesis: effective battery capacity at 45 %.')};
+    host.replaceChildren();
+    const title=document.createElement('h3');title.textContent=t('Comparación con la operación nominal','Comparison with nominal operation');host.append(title);
+    const note=document.createElement('p');note.className='scenarioNote';note.textContent=t('Escenario hipotético: no son mediciones ni se mezcla con las observaciones meteorológicas. ','Hypothetical scenario: not measurements, and never mixed with weather observations. ')+effects[settings.scenario];host.append(note);
+    const need=[];
+    if(!selected)need.push([t('Calcula una ruta en MISIÓN.','Calculate a route in MISSION.'),t('Ir a MISIÓN','Go to MISSION'),()=>window.JEZERO_MODULES.activate('planner')]);
+    if(!dataset)need.push([t('Faltan observaciones meteorológicas de esta zona.','Regional weather observations are missing.'),t('Añadir observaciones','Add observations'),()=>focusCard('guideDataCard')]);
+    if(!$('guideEquipmentConfirmed').checked||settingsInvalid)need.push([settingsInvalid?t('Hay campos del equipo inválidos.','Some equipment fields are invalid.'):t('Falta confirmar el equipo (oxígeno, batería y consumos).','Equipment (oxygen, battery, rates) still needs confirmation.'),t('Revisar equipo','Review equipment'),()=>{focusCard('guideEquipmentCard');$('guideEquipmentCard').querySelector('details').open=true;}]);
+    if(need.length){
+      const p=document.createElement('p');p.textContent=t('El escenario se calculará cuando estén completos estos requisitos:','The scenario will be calculated once these requirements are complete:');host.append(p);
+      for(const [msg,label,action] of need){const row=document.createElement('p');row.textContent=msg+' ';const b=document.createElement('button');b.type='button';b.textContent=label;b.addEventListener('click',action);row.append(b);host.append(row);}
+      return;
+    }
+    let nominal,chosen;
+    try{nominal=engine.evaluate(selected,{...settings,scenario:'nominal'},dataset);chosen=engine.evaluate(selected,settings,dataset);}catch(e){const p=document.createElement('p');p.textContent=t('No se pudo calcular la comparación: ','The comparison could not be calculated: ')+e.message;host.append(p);return;}
+    const fmt=(v,u,d=2)=>Number.isFinite(v)?`${v.toFixed(d)} ${u}`:'—';
+    const rows=[[t('Duración','Duration'),nominal.durationHours,chosen.durationHours,'h'],[t('Oxígeno restante (por persona)','Oxygen remaining (per person)'),nominal.oxygen.remainingKg,chosen.oxygen.remainingKg,'kg'],[t('Batería restante (por persona)','Battery remaining (per person)'),nominal.battery.remainingKWh,chosen.battery.remainingKWh,'kWh'],[t('Margen de tiempo','Time margin'),nominal.timeMarginHours,chosen.timeMarginHours,'h'],[t('Reserva de O₂ exigida','Required O₂ reserve'),nominal.oxygen.reserveKg,chosen.oxygen.reserveKg,'kg'],[t('Reserva de batería exigida','Required battery reserve'),nominal.battery.reserveKWh,chosen.battery.reserveKWh,'kWh'],[t('Avisos','Alerts'),nominal.alerts.length,chosen.alerts.length,'']];
+    const table=document.createElement('table');table.className='scenarioTable';
+    const head=table.createTHead().insertRow();for(const h of [t('Indicador','Indicator'),names.nominal,names[settings.scenario],t('Diferencia','Difference')]){const th=document.createElement('th');th.textContent=h;head.append(th);}
+    const body=table.createTBody();
+    for(const [label,a,b,u] of rows){const tr=body.insertRow();tr.insertCell().textContent=label;tr.insertCell().textContent=u?fmt(a,u):String(a);tr.insertCell().textContent=u?fmt(b,u):String(b);const diff=b-a;tr.insertCell().textContent=u?(Math.abs(diff)<1e-9?t('sin cambio','no change'):(diff>0?'+':'')+diff.toFixed(2)+' '+u):(diff===0?t('sin cambio','no change'):(diff>0?'+':'')+diff);}
+    host.append(table);
+    if(settings.scenario==='nominal'){const p=document.createElement('p');p.className='scenarioNote';p.textContent=t('Estás viendo la operación nominal. Elige «Polvo denso» o «Fallo de batería» para ver cuánto cambian los indicadores.','You are viewing nominal operation. Choose “Dense dust” or “Battery failure” to see how the indicators change.');host.append(p);}
+    else{const added=chosen.alerts.filter(a=>!nominal.alerts.some(n=>n.code===a.code&&n.text===a.text));if(added.length){const ul=document.createElement('ul');for(const a of added){const li=document.createElement('li');li.textContent='['+a.level+'] '+(lang==='en'&&window.JEZERO_I18N?.translateText?window.JEZERO_I18N.translateText(a.text,'en'):a.text);ul.append(li);}const h=document.createElement('p');h.textContent=t('Avisos nuevos frente al nominal:','New alerts versus nominal:');host.append(h,ul);}}
+  }
   function updateProgress(){
     const p=snapshot?.timeline?.[Number($('survivalProgress').value)];
     set('survivalTimelineTime',p?hours(p.elapsedHours):'—');set('progressOxygen',p?`O₂ ${p.oxygenKg.toFixed(2)} kg`:'O₂ —');set('progressBattery',p?`Batería ${p.batteryKWh.toFixed(2)} kWh`:'Batería —');set('progressWindow',p?`${p.remainingWindowHours<0?'Exceso':'Ventana'} ${hours(p.remainingWindowHours)}`:'Ventana —');
@@ -110,7 +141,7 @@
   }
   function change(event){
     const eventEquipmentChange=Object.entries(fields).some(([key,id])=>key!=='startHour'&&id===event?.target?.id);
-    try{const raw={...settings};for(const [key,id] of Object.entries(fields))raw[key]=$(id).value;raw.dustIndex=Number($('survivalDust').value)/100;raw.surface=$('survivalSurface').value;settings=engine.config(raw);settingsInvalid=false;if(eventEquipmentChange)$('guideEquipmentConfirmed').checked=false;error();save();render();}
+    try{const raw={...settings};for(const [key,id] of Object.entries(fields))raw[key]=$(id).value;raw.dustIndex=Number($('survivalDust').value)/100;raw.surface=$('survivalSurface').value;settings=engine.config(raw);settingsInvalid=false;if(eventEquipmentChange){$('guideEquipmentConfirmed').checked=false;persistConfirmation();}error();save();render();}
     catch(e){settingsInvalid=true;render();error(e.message);}
   }
   [...Object.values(fields),'survivalDust','survivalSurface'].forEach(id=>$(id)?.addEventListener('input',change));
@@ -120,7 +151,12 @@
   $('guideRouteStep').addEventListener('click',()=>window.JEZERO_MODULES.activate('planner'));
   ['survivalGoData','guideDataStep'].forEach(id=>$(id).addEventListener('click',()=>focusCard('guideDataCard')));
   $('guideEquipmentStep').addEventListener('click',()=>{focusCard('guideEquipmentCard');$('guideEquipmentCard').querySelector('details').open=true;});
-  $('guideEquipmentConfirmed').addEventListener('change',render);
+  // La confirmación se conserva junto a una huella de los valores confirmados: si cambian, deja de valer.
+  const CONFIRM_KEY=KEY+'-equipment-confirmed';
+  const eqFingerprint=()=>JSON.stringify(['crew','oxygenKg','oxygenRateKgH','batteryKWh','powerKW','reservePct'].map(k=>settings[k]));
+  function persistConfirmation(){try{if($('guideEquipmentConfirmed').checked)localStorage.setItem(CONFIRM_KEY,eqFingerprint());else localStorage.removeItem(CONFIRM_KEY);}catch{}}
+  try{if(localStorage.getItem(CONFIRM_KEY)===eqFingerprint())$('guideEquipmentConfirmed').checked=true;}catch{}
+  $('guideEquipmentConfirmed').addEventListener('change',()=>{persistConfirmation();render();});
   $('guideDetails').addEventListener('click',()=>{const open=$('survivalWorkspace').classList.toggle('guideDetailed');$('guideDetails').setAttribute('aria-expanded',String(open));$('guideDetails').textContent=open?'Ocultar detalles técnicos':'Ver detalles técnicos y escenarios';});
   $('survivalQuickExport').addEventListener('click',()=>$('survivalExport').click());
   function download(name,data){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
@@ -149,10 +185,11 @@
   document.querySelectorAll('[data-survival-check]').forEach(el=>el.addEventListener('change',checklist));checklist();
   const observer=new MutationObserver(render);['routeStatus','pointCount','distance','duration'].forEach(id=>{if($(id))observer.observe($(id),{childList:true,subtree:true,characterData:true});});
   window.addEventListener('jezero:supportchange',()=>{if(JSON.stringify(weatherOrigin())!==weatherOriginKey)render();});
-  window.addEventListener('jezero:themechange',render);window.addEventListener('jezero:modulechange',render);
+  window.addEventListener('jezero:themechange',render);window.addEventListener('jezero:modulechange',render);window.addEventListener('jezero:languagechange',render);
   function addWeatherObservation(record,origin,source){
     const next=engine.appendWeatherObservation(dataset,origin,record,source);
-    localStorage.setItem(KEY+'-weather',JSON.stringify(next));dataset=next;error();render();
+    try{localStorage.setItem(KEY+'-weather',JSON.stringify(next));}catch{throw Error('El navegador no pudo guardar la observación; no se añadió al modelo. Exporta tus datos y libera espacio / The browser could not store the observation; it was not added to the model. Export your data and free up space');}
+    dataset=next;error();render();return next;
   }
   window.JEZERO_SURVIVAL=Object.freeze({addWeatherObservation,getSnapshot:()=>snapshot,getConfig:()=>({...settings}),getDataset:()=>dataset,getApplicableDataset:applicableDataset,getWeatherOrigin:weatherOrigin,refresh:render,parseCsv:csvRecords});
   render();

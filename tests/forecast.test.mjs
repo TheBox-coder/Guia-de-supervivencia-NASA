@@ -36,7 +36,7 @@ test('a storage failure does not replace the current weather history with an uns
  const fs=await import('node:fs'),vm=await import('node:vm');const source=fs.readFileSync(new URL('../modules/survival.js',import.meta.url),'utf8'),start=source.indexOf('  function addWeatherObservation('),end=source.indexOf('  window.JEZERO_SURVIVAL=',start),data=observations();
  const ctx=vm.createContext({dataset:data,engine,KEY:'test',localStorage:{setItem(){throw Error('Storage unavailable');}},render(){assert.fail('must not render unsaved history');},error(){}});
  vm.runInContext(source.slice(start,end),ctx);
- assert.throws(()=>ctx.addWeatherObservation({sol:301,localHour:1,temperatureC:-20},data.location,'Astronaut'),/Storage/);assert.equal(ctx.dataset,data);
+ assert.throws(()=>ctx.addWeatherObservation({sol:301,localHour:1,temperatureC:-20},data.location,'Astronaut'),/could not store/);assert.equal(ctx.dataset,data);
 });
 
 test('weather UI disables observations for another region and updates its chart after a new measurement',async()=>{

@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Dust Rider — Centro de misión</title>
-  <link rel="icon" type="image/png" href="assets/dust-rider-logo.png?v=4p18">
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=4p18">
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=4p18">
-  <link rel="manifest" href="manifest.webmanifest?v=4p18">
+  <link rel="icon" type="image/svg+xml" href="assets/jezero-mark.svg?v=4p3">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=4p5">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=4p5">
+  <link rel="manifest" href="manifest.webmanifest?v=4p5">
   <meta name="theme-color" content="#0b1322">
   <link rel="stylesheet" href="assets/vendor/ol.css">
-  <link rel="stylesheet" href="style.css?v=4p18">
+  <link rel="stylesheet" href="style.css?v=4p0">
   <link rel="stylesheet" href="interface.css?v=4p0">
   <link rel="stylesheet" href="survival.css?v=4p0">
   <link rel="stylesheet" href="professional.css?v=4p0">
@@ -24,7 +24,7 @@
 <a class="controlSkip" href="#appContent">Ir al contenido</a>
 <header class="topbar">
   <div class="brand">
-    <img class="brandLogo" src="assets/dust-rider-logo.png?v=4p18" alt="Dust Rider">
+    <img class="brandLogo" src="assets/jezero-mark.svg?v=4p3" alt="Dust Rider">
     <div class="brandText">
       <b>Dust Rider</b>
       <small>Guía de supervivencia en Marte</small>
@@ -239,6 +239,8 @@
           <div><span>DIFICULTAD</span><b data-mirror="riskLabel">—</b></div>
         </div>
       </section>
+      <button class="action primaryAction resultsPdf" id="exportPdfResults" data-export-pdf type="button" disabled><span>⇩</span> <span data-pdf-label>Exportar informe PDF</span></button>
+      <p class="sideNote pdfHint" data-export-pdf-hint role="status"></p>
       <button class="action saveAction resultsSave" id="saveMission" disabled><span>▣</span> Guardar misión y generar PDF completo</button>
       <section class="historyPanel"><div class="sectionTitle">HISTORIAL DE MISIONES</div><div id="historyList" class="historyList"></div><p class="sideNote">El historial se conserva localmente en este navegador.</p></section>
     </div></div>
@@ -329,9 +331,12 @@
  <div class="operationsLayout"><label class="opsSectionPicker"><span data-ops-es="Sección de soporte" data-ops-en="Support section">Sección de soporte</span><select id="opsSectionSelect" aria-controls="opsPanels"></select></label><nav id="opsTabs" aria-label="Módulos de supervivencia"></nav><div class="operationsContent"><div id="opsError" role="alert" hidden></div><div class="opsContext"><label><span data-ops-es="Origen para refugios" data-ops-en="Shelter reference location">Origen para refugios</span><select id="opsOrigin"></select></label><span><b data-ops-es="Duración estimada" data-ops-en="Estimated duration">Duración estimada</b> <span id="opsDuration">—</span></span><span><b data-ops-es="Tripulación del escenario" data-ops-en="Scenario crew">Tripulación del escenario</b> <span id="opsCrew"></span></span><b id="opsStatus" role="status"></b></div><div id="opsPanels"></div><p class="operationsFootnote" data-ops-es="Datos declarados y cálculos bajo supuestos. Sin inspección de hardware, protocolos certificados o telemetría automática. Guarda también tu misión JSON; importar este paquete no reemplaza su ruta." data-ops-en="Declared data and calculations under assumptions. No hardware inspection, certified protocols or automatic telemetry. Also save mission JSON; importing this pack does not replace its route.">Datos declarados y cálculos bajo supuestos. Sin inspección de hardware, protocolos certificados o telemetría automática. Guarda también tu misión JSON; importar este paquete no reemplaza su ruta.</p></div></div>
 </section>
     <section id="forecastWorkspace" class="forecastWorkspace" aria-label="Predicción meteorológica">
- <header class="workspaceHeading"><div><small>Dust Rider / CLIMA</small><h2 data-weather-es="Predicción del próximo sol" data-weather-en="Next-sol forecast">Predicción del próximo sol</h2></div><button data-close-interface type="button" aria-label="Cerrar predicción">×</button></header>
+ <header class="workspaceHeading"><div><small>Dust Rider / CLIMA</small><h2 data-weather-es="Predicción meteorológica de la misión" data-weather-en="Mission weather forecast">Predicción meteorológica de la misión</h2></div><button data-close-interface type="button" aria-label="Cerrar predicción">×</button></header>
  <p id="forecastRegion" class="opsNotice" role="status"></p>
  <p id="forecastError" class="opsNotice" role="alert" hidden></p>
+ <p id="forecastFeedback" class="formFeedback" role="status" aria-live="polite" hidden></p>
+ <p id="forecastHorizon" class="opsNotice" role="status"></p>
+ <p id="forecastLifeAlert" class="opsNotice" role="alert" data-deficit="true" hidden></p>
  <details class="weatherObservation"><summary data-weather-es="Registrar una observación del astronauta" data-weather-en="Record an astronaut observation">Registrar una observación del astronauta</summary><p data-weather-es="Carga primero históricos de esta zona. Cada medición nueva se guarda con su fuente y vuelve a entrenar la regresión de temperatura. La hora solar local va de 0 a menos de 24." data-weather-en="Load this region’s historical observations first. Each new measurement is saved with its source and retrains the temperature regression. Local solar time runs from 0 to less than 24.">Carga primero históricos de esta zona. Cada medición nueva se guarda con su fuente y vuelve a entrenar la regresión de temperatura. La hora solar local va de 0 a menos de 24.</p>
  <form id="forecastObservationForm"><fieldset id="forecastObservationFields" disabled class="weatherObservationFields"><legend data-weather-es="Medición en la zona del Chariot" data-weather-en="Measurement in the Chariot region">Medición en la zona del Chariot</legend>
  <label><span data-weather-es="Sol de la observación" data-weather-en="Observation sol">Sol de la observación</span><input id="observationSol" type="number" min="0" step="1" required></label>
@@ -342,7 +347,7 @@
  <label><span data-weather-es="Fuente o responsable" data-weather-en="Source or observer">Fuente o responsable</span><input id="observationSource" type="text" maxlength="160" required></label>
  <button type="submit" data-weather-es="Guardar y actualizar predicción" data-weather-en="Save and update prediction">Guardar y actualizar predicción</button></fieldset></form></details>
  <div id="forecastEmpty" class="forecastEmpty"><h3 data-weather-es="Añade observaciones para predecir" data-weather-en="Add observations for a projection">Añade observaciones para predecir</h3><p data-weather-es="No hay mediciones cargadas. Importa tu archivo para proyectar la temperatura del próximo sol; no se genera clima ficticio." data-weather-en="No observations loaded. Import your file to project temperature for the next sol; fictional weather is not generated.">No hay mediciones cargadas. Importa tu archivo para proyectar la temperatura del próximo sol; no se genera clima ficticio.</p><button data-forecast-import type="button" data-weather-es="Añadir observaciones →" data-weather-en="Add observations →">Añadir observaciones →</button></div>
- <div id="forecastResults" hidden><div class="forecastSummary"><div><span id="forecastSol"></span><strong id="forecastTemp"></strong><small id="forecastHourValue"></small></div><div><b data-weather-es="Fuente de observaciones" data-weather-en="Observation source">Fuente de observaciones</b><p id="forecastSource"></p><p id="forecastCoverage"></p></div></div><div id="forecastChart"></div><label class="forecastHourLabel"><span data-weather-es="Explora la hora local" data-weather-en="Explore local time">Explora la hora local</span><input id="forecastHour" type="range" min="0" max="23" value="12"></label><div id="forecastHours"></div><p id="forecastBand"></p><div class="forecastFacts"><article><b data-weather-es="Hora más templada del modelo" data-weather-en="Warmest modeled hour">Hora más templada del modelo</b><strong id="forecastWarm"></strong></article><article><b data-weather-es="Presión observada · mediana" data-weather-en="Observed pressure · median">Presión observada · mediana</b><strong id="forecastPressure"></strong></article><article><b data-weather-es="Viento observado · mediana" data-weather-en="Observed wind · median">Viento observado · mediana</b><strong id="forecastWind"></strong></article></div><p data-weather-es="Proyección térmica por patrón diario. No predice tormentas ni garantiza condiciones seguras. Presión y viento son observaciones, no predicciones." data-weather-en="Temperature projection from a daily pattern. It does not predict storms or guarantee safe conditions. Pressure and wind are observations, not predictions.">Proyección térmica por patrón diario. No predice tormentas ni garantiza condiciones seguras. Presión y viento son observaciones, no predicciones.</p><button data-forecast-import type="button" data-weather-es="Cambiar observaciones" data-weather-en="Change observations">Cambiar observaciones</button></div>
+ <div id="forecastResults" hidden><p id="forecastMethod" class="opsNotice" role="note"></p><div class="forecastSolPicker"><label><span data-weather-es="Sol de la misión" data-weather-en="Mission sol">Sol de la misión</span><select id="forecastSolSelect"></select></label><label id="forecastHorizonModeLabel" hidden><span data-weather-es="Horizonte" data-weather-en="Horizon">Horizonte</span><select id="forecastHorizonMode"><option value="base" data-weather-es="Duración configurada" data-weather-en="Configured duration">Duración configurada</option><option value="scenario" data-weather-es="Con retraso del escenario" data-weather-en="With scenario delay">Con retraso del escenario</option></select></label></div><div id="forecastDays" class="forecastDays"></div><div class="forecastSummary"><div><span id="forecastSol"></span><strong id="forecastTemp"></strong><small id="forecastHourValue"></small></div><div><b data-weather-es="Fuente de observaciones" data-weather-en="Observation source">Fuente de observaciones</b><p id="forecastSource"></p><p id="forecastCoverage"></p></div></div><div id="forecastChart"></div><label class="forecastHourLabel"><span data-weather-es="Explora la hora local" data-weather-en="Explore local time">Explora la hora local</span><input id="forecastHour" type="range" min="0" max="23" value="12"></label><div id="forecastHours"></div><p id="forecastBand"></p><div class="forecastFacts"><article><b data-weather-es="Hora más templada del modelo" data-weather-en="Warmest modeled hour">Hora más templada del modelo</b><strong id="forecastWarm"></strong></article><article><b data-weather-es="Presión observada · mediana" data-weather-en="Observed pressure · median">Presión observada · mediana</b><strong id="forecastPressure"></strong></article><article><b data-weather-es="Viento observado · mediana" data-weather-en="Observed wind · median">Viento observado · mediana</b><strong id="forecastWind"></strong></article></div><p data-weather-es="Proyección térmica por patrón diario. No predice tormentas ni garantiza condiciones seguras. Presión y viento son observaciones, no predicciones." data-weather-en="Temperature projection from a daily pattern. It does not predict storms or guarantee safe conditions. Pressure and wind are observations, not predictions.">Proyección térmica por patrón diario. No predice tormentas ni garantiza condiciones seguras. Presión y viento son observaciones, no predicciones.</p><button data-forecast-import type="button" data-weather-es="Cambiar observaciones" data-weather-en="Change observations">Cambiar observaciones</button></div>
 </section>
     <div id="demoModeBadge" class="demoModeBadge" hidden>DEMO · TERRENO SINTÉTICO, NO NASA</div>
 <section id="survivalWorkspace" class="survivalWorkspace" aria-label="Guía de supervivencia en Marte">
@@ -359,6 +364,7 @@
     </header>
     <div class="guideSteps" aria-label="Pasos de preparación"><button id="guideRouteStep" type="button"><b>1 · Elige tu recorrido</b><span id="guideRouteState">Base, destino y regreso</span></button><button id="guideDataStep" type="button"><b>2 · Añade el clima</b><span id="guideDataState">Observaciones de tu región</span></button><button id="guideEquipmentStep" type="button"><b>3 · Revisa tu equipo</b><span id="guideEquipmentState">Oxígeno, batería y reserva</span></button></div><div class="guideView"><button id="openOperations" type="button">Centro de supervivencia ↗</button><button id="guideDetails" type="button" aria-expanded="false">Ver detalles técnicos y escenarios</button><button id="survivalQuickExport" type="button">Guardar evaluación ↓</button></div><div class="survivalProvenance"><span id="terrainSourceBadge">TERRENO: SIN RUTA</span><span id="weatherSourceBadge">CLIMA: PENDIENTE</span><span>RECURSOS: MODELO EDITABLE</span><span id="connectionState">CONEXIÓN DISPONIBLE</span><span>RADIACIÓN: SIN MEDICIÓN</span></div>
     <div class="survivalTabs" role="group" aria-label="Escenario ambiental"><span>¿Qué pasa si…?</span><button data-survival-scenario="nominal" class="is-active" type="button">Operación nominal</button><button data-survival-scenario="dust" type="button">Polvo denso</button><button data-survival-scenario="power" type="button">Fallo de batería</button><button id="survivalExport" type="button">↓ Exportar evaluación</button></div>
+    <section id="scenarioCompare" class="scenarioCompare" aria-live="polite" data-i18n-skip></section>
     <div id="survivalError" class="survivalError" role="alert" hidden></div>
     <div class="onboardingStrip"><div><b>Una misión, paso a paso.</b><p>Aprende a usar tus datos, revisar recursos y leer las alertas.</p></div><button type="button" data-open-tutorial="resume">Abrir tutorial →</button></div>
     <div class="survivalGrid">
@@ -366,7 +372,7 @@
         <div class="weatherMetrics"><div><small>TEMPERATURA / EVA</small><strong id="weatherTemperature">—</strong></div><div><small>PRESIÓN OBSERVADA</small><strong id="weatherPressure">—</strong></div><div><small>VIENTO OBSERVADO</small><strong id="weatherWind">Sin datos</strong></div></div>
         <div id="weatherChart" class="weatherChart" aria-label="Proyección horaria de temperatura"></div>
         <div class="weatherLegend"><span><i></i>Temperatura modelada</span><span><i></i>Banda ilustrativa / error de ajuste</span><span>Hora local marciana</span></div>
-        <p class="survivalNote" id="weatherModelNote"></p><button id="openWeatherForecast" type="button">Ver predicción del próximo sol ↗</button>
+        <p class="survivalNote" id="weatherModelNote"></p><button id="openWeatherForecast" type="button">Ver predicción meteorológica ↗</button>
         <div class="survivalInlineControls"><label>Hora local de salida <input id="survivalStartHour" type="number" min="0" max="23" step="1" value="10"></label><label>Polvo supuesto <input id="survivalDust" type="range" min="0" max="100" step="5" value="10"><output id="survivalDustValue">10/100</output></label></div>
       </article>
       <article class="survivalCard resourceCard" id="guideEquipmentCard"><div class="survivalCardHeading"><div><span>02 / AUTONOMÍA</span><h2>Recursos para regresar</h2></div><span class="survivalTag">POR PERSONA</span></div>
@@ -470,7 +476,7 @@
     <section class="analyticsWorkspace" id="analyticsWorkspace" aria-label="Centro de análisis de la misión">
       <header class="analyticsHeader">
         <div><span>Dust Rider / ANÁLISIS DE MISIÓN</span><h2>Resultados de la misión</h2><p>Compara las alternativas y explora cómo cambia el terreno a lo largo del recorrido.</p></div>
-        <div class="analyticsHeaderMeta"><b id="analyticsRouteName">SIN MISIÓN</b><span id="analyticsGeneratedAt">CALCULA UNA RUTA</span></div>
+        <div class="analyticsHeaderMeta"><b id="analyticsRouteName">SIN MISIÓN</b><span id="analyticsGeneratedAt">CALCULA UNA RUTA</span><button id="analyticsExportPdf" class="analyticsPdfButton" data-export-pdf type="button" disabled>Exportar informe PDF</button><small class="pdfHint" data-export-pdf-hint role="status"></small></div>
       </header>
       <div class="analyticsToolbar">
         <label>ESTRATEGIA<select id="analyticsStrategySelect"><option value="balanced">Equilibrada</option><option value="distance">Más directa</option><option value="risk">Menor exposición</option></select></label>

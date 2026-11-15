@@ -46,8 +46,22 @@
     });
   }
 
-  function activateModule(name, {save=true, openMobile=true, open=true}={}){
+  // Pila de navegación propia: la X vuelve al área desde la que se llegó (sin usar el historial del navegador).
+  const NAV_KEY = 'jezero-nav-stack-v1';
+  let navStack = [];
+  try { navStack = JSON.parse(sessionStorage.getItem(NAV_KEY) || '[]').filter(validModuleName); } catch { navStack = []; }
+  function validModuleName(name){ return typeof name === 'string' && Object.prototype.hasOwnProperty.call(labels, name); }
+  function saveStack(){ try { sessionStorage.setItem(NAV_KEY, JSON.stringify(navStack.slice(-12))); } catch {} }
+
+  function activateModule(name, {save=true, openMobile=true, open=true, record=true}={}){
     if (!validModule(name)) name = 'planner';
+    const previous = document.body.dataset.module;
+    if (record && open && previous && previous !== name && document.body.dataset.interfaceOpen !== 'false' && validModuleName(previous)) {
+      const seen = navStack.lastIndexOf(name); if (seen >= 0) navStack = navStack.slice(0, seen);
+      if (navStack[navStack.length-1] !== previous) navStack.push(previous);
+      if (navStack.length > 12) navStack = navStack.slice(-12);
+      saveStack();
+    }
     document.body.dataset.module = name;
     document.body.dataset.interfaceOpen=String(open);
 
@@ -85,6 +99,30 @@
     window.dispatchEvent(new Event('resize'));
     window.dispatchEvent(new CustomEvent('jezero:modulevisibility',{detail:{open:false}}));
   }
+  // X / Cerrar: vuelve al área anterior; si no hay, cierra el panel y deja el mapa con la misión intacta.
+  function backModule(){
+    const current = document.body.dataset.module;
+    while (navStack.length) {
+      const target = navStack.pop();
+      if (target && target !== current && validModuleName(target)) {
+        saveStack();
+        activateModule(target, {record:false});
+        return target;
+      }
+    }
+    saveStack();
+    closeModule();
+    return null;
+  }
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || event.defaultPrevented) return;
+    if (document.body.dataset.interfaceOpen === 'false') return;
+    if (document.querySelector('dialog[open]')) return;
+    const overlay = ['home','survival','analysis','weather','operations','dashboard'].includes(document.body.dataset.module);
+    const t = event.target;
+    if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    if (overlay) { event.preventDefault(); backModule(); }
+  });
   qsa('[data-module-target]').forEach(btn=>btn.addEventListener('click',()=>{
     const name=btn.dataset.moduleTarget,same=document.body.dataset.module===name;
     const overlay=['home','survival','analysis','weather','operations','dashboard'].includes(name);
@@ -136,5 +174,5 @@
 
   window.addEventListener('jezero:languagechange',()=>activateModule(document.body.dataset.module||'planner',{save:false,openMobile:false,open:document.body.dataset.interfaceOpen!=='false'}));
 
-  window.JEZERO_MODULES = Object.freeze({ activate: activateModule, close:closeModule, labels:{...labels} });
+  window.JEZERO_MODULES = Object.freeze({ activate: activateModule, close:backModule, hide:closeModule, back:backModule, canGoBack:()=>navStack.some(n=>n!==document.body.dataset.module), labels:{...labels} });
 })();

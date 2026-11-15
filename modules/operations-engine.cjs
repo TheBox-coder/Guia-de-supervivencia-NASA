@@ -24,7 +24,8 @@
  }
  function lifeSupportLimit(hours){
   const duration=n(hours,0,Number.MAX_VALUE),limitHours=LIFE_SUPPORT_SOLS*SOL_HOURS;
-  return {limitSols:LIFE_SUPPORT_SOLS,limitHours,durationHours:duration,durationSols:duration===null?null:duration/SOL_HOURS,exceeded:duration!==null&&duration>limitHours};
+  // Tolerancia de 0,001 h (3,6 s): 14 soles exactos no deben superar el límite por redondeo de coma flotante.
+  return {limitSols:LIFE_SUPPORT_SOLS,limitHours,durationHours:duration,durationSols:duration===null?null:Number((duration/SOL_HOURS).toFixed(9)),exceeded:duration!==null&&duration>limitHours+0.001};
  }
  function assessBase(raw={},context={},now=Date.now()){
   if(!Number.isFinite(now))throw Error('Invalid evaluation time');

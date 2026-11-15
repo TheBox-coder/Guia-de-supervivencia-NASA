@@ -913,3 +913,13 @@ body[data-module="dashboard"] :is(.sidebar, .details, .panelEdgeToggle, .mapTool
     inset: 8px 8px 56px 8px;
   }
 }
+
+.controlMetric .metricMissing { display: block; margin-top: 6px; }
+.controlMetric .metricMissingAction { margin: 6px 8px 0 0; padding: 7px 12px; font-size: 12px; font-weight: 700; border: 2px solid var(--theme-accent-2, #59cbe8); background: transparent; color: var(--text-primary); border-radius: 4px; cursor: pointer; }
+.controlMetric .metricMissingAction:hover { background: color-mix(in srgb, var(--theme-accent-2, #59cbe8) 25%, transparent); }
+.controlMetric .metricMissingAction:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
+
+.liveMissing { margin: 10px 0; padding: 10px 12px; border: 1px solid var(--theme-warning, #ffc857); border-radius: 4px; font-size: 13px; }
+.liveMissing button { margin-left: 8px; padding: 6px 12px; border: 2px solid var(--theme-accent-2, #59cbe8); background: transparent; color: inherit; font-weight: 700; border-radius: 4px; cursor: pointer; }
+.liveMissing button:hover { background: color-mix(in srgb, var(--theme-accent-2, #59cbe8) 25%, transparent); }
+.liveMissing button:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
