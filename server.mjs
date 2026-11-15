@@ -17,7 +17,7 @@ const PUBLIC_FILES = new Set([
   '/modules/forecast.js',
   '/polish.css','/modules/map-detail.js','/modules/regional-mosaics.js','/modules/workspace.js','/modules/locale.js','/modules/help-english.js','/MANUAL-HELP-EN.md',
   '/professional.css','/modules/help.js','/MANUAL-DE-AYUDA.md',
-  '/assets/dust-rider-logo.jpeg','/assets/chariot-proposal.jpeg',
+  '/assets/dust-rider-logo.png','/assets/chariot-proposal.jpeg',
   '/service-worker.js','/modules/offline.js',
   '/survival.css','/modules/survival-engine.cjs','/modules/survival.js','/modules/demo.js','/examples/survival-demo.json','/assets/vendor/ol.js','/assets/vendor/ol.css',
   '/interface.css','/modules/interface.js','/examples/01-jezero-corto.json','/examples/02-jezero-varios-objetivos.json','/examples/03-presupuesto-ajustado.json','/examples/04-eva-01-jezero.json','/index.html','/style.css','/script.js','/mars-elevation.js','/mars-data.json',
