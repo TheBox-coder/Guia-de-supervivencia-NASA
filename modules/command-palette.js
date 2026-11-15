@@ -27,7 +27,8 @@
   const normalize=value=>value.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
   function render(){
     const query=normalize(input.value.trim());
-    visible=commands().filter(command=>!query||normalize(`${command.group} ${command.label}`).includes(query));
+    const all=commands(), shortcut=all.find(command=>command.key?.toLowerCase()===query);
+    visible=shortcut?[shortcut]:all.filter(command=>!query||normalize(`${command.group} ${command.label}`).includes(query));
     active=Math.min(active,Math.max(visible.length-1,0));
     list.replaceChildren(...visible.map((command,i)=>{
       const item=document.createElement('li');item.id=`command-${i}`;item.setAttribute('role','option');item.setAttribute('aria-selected',String(i===active));
@@ -35,13 +36,17 @@
       const label=document.createElement('span');label.textContent=command.label;
       item.append(group,label);
       if(command.key){const key=document.createElement('kbd');key.textContent=command.key;item.append(key);}
-      item.addEventListener('mousemove',()=>{if(active!==i){active=i;render();}});
+      item.addEventListener('mousemove',()=>{if(active!==i){active=i;selectActive(false);}});
       item.addEventListener('click',()=>run(i));
       return item;
     }));
     if(!visible.length){const empty=document.createElement('li');empty.className='commandEmpty';empty.textContent=ui('Sin resultados','No results');list.append(empty);}
+    selectActive();
+  }
+  function selectActive(scroll=true){
+    [...list.children].forEach((item,i)=>item.setAttribute('aria-selected',String(visible.length>0&&i===active)));
     input.setAttribute('aria-activedescendant',visible.length?`command-${active}`:'');
-    list.querySelector('[aria-selected="true"]')?.scrollIntoView({block:'nearest'});
+    if(scroll)list.querySelector('[aria-selected="true"]')?.scrollIntoView({block:'nearest'});
   }
   function open(){
     if(dialog.open)return;
@@ -55,13 +60,14 @@
 
   input.addEventListener('input',()=>{active=0;render();});
   input.addEventListener('keydown',event=>{
-    if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();if(visible.length){active=(active+(event.key==='ArrowDown'?1:-1)+visible.length)%visible.length;render();}}
+    if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();if(visible.length){active=(active+(event.key==='ArrowDown'?1:-1)+visible.length)%visible.length;selectActive();}}
     else if(event.key==='Enter'){event.preventDefault();run(active);}
   });
   dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close();});
 
   const typing=target=>['INPUT','TEXTAREA','SELECT'].includes(target.tagName)||target.isContentEditable;
   document.addEventListener('keydown',event=>{
+    if(event.defaultPrevented)return;
     if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){event.preventDefault();dialog.open?dialog.close():open();return;}
     if(event.ctrlKey||event.metaKey||event.altKey||typing(event.target)||document.querySelector('dialog[open]'))return;
     const shortcut={h:'home',m:'explorer',r:'analysis'}[event.key.toLowerCase()];
