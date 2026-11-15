@@ -63,3 +63,59 @@ test('changing the Chariot region clears the Guide forecast without a weather/su
  origin={lat:-20,lon:-100};events.get('jezero:supportchange')();assert.equal(weatherEvents,2);assert.equal(ctx.window.JEZERO_SURVIVAL.getApplicableDataset(),null);assert.equal(ctx.window.JEZERO_SURVIVAL.getSnapshot().environment.series.length,0);
  assert.equal(ctx.window.JEZERO_SURVIVAL.getDataset().records.length,24);
 });
+
+const richObservations=({tau=i=>.5,dose=()=>28,wind=()=>6,sols=[298,299,300]}={})=>{const d=observations();d.records=sols.flatMap((sol,s)=>Array.from({length:24},(_,hour)=>({sol,localHour:hour,temperatureC:-55+20*Math.cos(2*Math.PI*hour/24),pressurePa:700+s,windMps:wind(sol,hour),opticalDepth:tau(sol,hour),doseRateUSvH:dose(sol,hour),humidityPct:5})));return d;};
+
+test('environmental conditions summarize dust, radiation, wind and humidity from observations only',()=>{
+ const f=engine.observationForecast(richObservations(),{lat:18.44463,lon:77.45088},{horizonHours:engine.SOL_HOURS*2}),c=f.conditions;
+ assert.equal(c.dust.level,'clear');assert.equal(c.dust.median,.5);assert.equal(c.radiation.median,28);assert.equal(c.radiation.spike,false);
+ assert.ok(Math.abs(c.radiation.exposureMSv-28*engine.SOL_HOURS*2/1000)<1e-9);assert.equal(c.radiation.exposureAssumption,'constant-median-rate');
+ assert.equal(c.wind.max,6);assert.equal(c.humidity.median,5);assert.equal(c.daily.length,3);assert.equal(f.model.fieldCoverage.dust,72);assert.equal(f.model.fieldCoverage.radiation,72);
+ assert.deepEqual(c.alerts.filter(a=>a.level!=='info'),[]);assert.equal(c.thresholds.heuristic,true);
+});
+
+test('missing dust and radiation produce NO-DATA alerts instead of a normal reading',()=>{
+ const c=engine.observationForecast(observations(),{lat:18.44463,lon:77.45088}).conditions;
+ assert.equal(c.dust,null);assert.equal(c.radiation,null);assert.equal(c.wind,null);
+ for(const code of ['dust','radiation','wind','pressure'])assert.equal(c.alerts.find(a=>a.code===code).level,'unknown',code);
+ assert.equal(c.alerts.some(a=>a.level==='info'),false);
+});
+
+test('rising dust optical depth raises caution and a storm-level reading raises an alert',()=>{
+ const rising=engine.observationForecast(richObservations({tau:(sol,h)=>.6+(sol-298)*.5+h/24*.5}),{lat:18.44463,lon:77.45088}).conditions;
+ assert.equal(rising.dust.rising,true);assert.ok(rising.dust.slopePerSol>=.15);assert.ok(rising.alerts.some(a=>a.code==='dust-rising'&&a.level==='warning'));
+ const storm=engine.observationForecast(richObservations({tau:()=>2.4}),{lat:18.44463,lon:77.45088}).conditions;
+ assert.equal(storm.dust.level,'storm');assert.equal(storm.alerts.find(a=>a.code==='dust').level,'alert');assert.equal(storm.dust.rising,false);
+ assert.equal(engine.observationForecast(richObservations({tau:()=>3.5}),{lat:18.44463,lon:77.45088}).conditions.dust.level,'severe');
+ assert.equal(engine.observationForecast(richObservations({tau:()=>1.4}),{lat:18.44463,lon:77.45088}).conditions.alerts.find(a=>a.code==='dust').level,'warning');
+});
+
+test('a radiation spike over the historical median raises an alert and strong wind raises caution',()=>{
+ const spike=richObservations({dose:(sol,h)=>sol===300&&h===12?90:28,wind:(sol,h)=>sol===300&&h===3?16:6}),c=engine.observationForecast(spike,{lat:18.44463,lon:77.45088}).conditions;
+ assert.equal(c.radiation.spike,true);assert.equal(c.radiation.max,90);assert.equal(c.alerts.find(a=>a.code==='radiation').level,'alert');
+ assert.equal(c.alerts.find(a=>a.code==='wind').level,'warning');
+ const gale=engine.observationForecast(richObservations({wind:()=>26}),{lat:18.44463,lon:77.45088}).conditions;assert.equal(gale.alerts.find(a=>a.code==='wind').level,'alert');
+});
+
+test('new observation fields are range-checked, kept as null when absent and carried by astronaut observations',()=>{
+ const base=richObservations();
+ for(const [field,value] of [['opticalDepth',11],['opticalDepth',-1],['doseRateUSvH',6000],['humidityPct',101]]){const bad=JSON.parse(JSON.stringify(base));bad.records[0][field]=value;assert.throws(()=>engine.weatherModel(bad),/fuera de rango/,field+value);}
+ const plain=engine.weatherData(observations());for(const r of plain.records){assert.equal(r.opticalDepth,null);assert.equal(r.doseRateUSvH,null);assert.equal(r.humidityPct,null);}
+ const next=engine.appendWeatherObservation(base,base.location,{sol:301,localHour:1,temperatureC:-40,opticalDepth:.9,doseRateUSvH:30,humidityPct:4},'Astronaut B',Date.parse('2026-11-14T20:00:00Z'));
+ const last=next.records.at(-1);assert.equal(last.opticalDepth,.9);assert.equal(last.doseRateUSvH,30);assert.equal(last.humidityPct,4);
+ const without=engine.appendWeatherObservation(base,base.location,{sol:301,localHour:2,temperatureC:-40},'Astronaut B');assert.equal(without.records.at(-1).opticalDepth,null);
+ assert.deepEqual(engine.weatherModel(base).unusedFields,[]);
+ assert.throws(()=>engine.appendWeatherObservation(base,base.location,{sol:301,localHour:3,temperatureC:-40,doseRateUSvH:99999},'A'),/fuera de rango/);
+});
+
+test('weather UI renders the conditions panel with alerts and trend charts',async()=>{
+ const fs=await import('node:fs'),vm=await import('node:vm'),nodes=new Map(),events={};const dataset=richObservations({tau:()=>2.4}),origin={...dataset.location};
+ const node=id=>{if(!nodes.has(id))nodes.set(id,{value:id==='forecastHour'?'12':'',hidden:false,disabled:false,dataset:{},textContent:'',innerHTML:'',children:[],addEventListener(){},setAttribute(){},append(...c){this.children.push(...c);},replaceChildren(...c){this.innerHTML='';this.children=c;},querySelector:tag=>node('empty-'+tag)});return nodes.get(id);};
+ const context=vm.createContext({document:{getElementById:node,querySelectorAll:()=>[],createElement:()=>({dataset:{},children:[],append(...c){this.children.push(...c);},setAttribute(){},addEventListener(){},textContent:'',innerHTML:''}),addEventListener(){}},window:{JEZERO_I18N:{ui:es=>es,getLanguage:()=>'es',translateText:s=>s},JEZERO_SURVIVAL_ENGINE:engine,JEZERO_SURVIVAL:{getDataset:()=>dataset,getWeatherOrigin:()=>origin},addEventListener:(name,fn)=>{events[name]=fn;}}});
+ vm.runInContext(fs.readFileSync(new URL('../modules/forecast.js',import.meta.url),'utf8'),context);
+ const alerts=node('forecastAlerts').children;assert.ok(alerts.length>=3);assert.equal(alerts[0].dataset.level,'alert');
+ assert.match(alerts[0].children.at(-1).textContent,/Polvo/);assert.equal(node('forecastTrends').children.length,4);
+ assert.match(node('forecastConditionsBasis').textContent,/No son predicciones/);
+ const facts=node('forecastConditionFacts').children.map(a=>a.children.map(c=>c.textContent).join(' '));
+ assert.ok(facts.some(f=>/Polvo · opacidad/.test(f)&&/2\.40/.test(f)));assert.ok(facts.some(f=>/sin blindaje/.test(f)));
+});

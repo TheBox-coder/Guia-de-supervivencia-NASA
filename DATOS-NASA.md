@@ -29,18 +29,21 @@ La importación muestra campos utilizados, cobertura de temperatura/presión/vie
   "location": {"lat": 18.44463, "lon": 77.45088},
   "units": {"temperature": "C", "pressure": "Pa", "wind": "m/s"},
   "records": [
-    {"sol": 100, "localHour": 0, "temperatureC": -80, "pressurePa": 718, "windMps": null}
+    {"sol": 100, "localHour": 0, "temperatureC": -80, "pressurePa": 718, "windMps": null,
+     "opticalDepth": null, "doseRateUSvH": null, "humidityPct": null}
   ]
 }
 ```
+
+Campos opcionales (rango admitido): `pressurePa` (100–2000 Pa), `windMps` (0–150 m/s), `opticalDepth` (τ del polvo, 0–10, adimensional), `doseRateUSvH` (tasa de dosis ambiental, 0–5000 µSv/h) y `humidityPct` (0–100 %). Un campo vacío se conserva como `null`; nunca se rellena.
 
 El ejemplo anterior muestra una fila, no un archivo suficiente para ajustar el modelo. Se requieren 12–5000 observaciones y al menos 12 muestras de los últimos tres sols que cubran seis franjas distintas de tres horas.
 
 También se admite CSV con encabezado:
 
 ```csv
-sol,localHour,temperatureC,pressurePa,windMps
-100,0,-80,718,
+sol,localHour,temperatureC,pressurePa,windMps,opticalDepth,doseRateUSvH,humidityPct
+100,0,-80,718,,,,
 ```
 
 La ubicación del CSV debe declararse en los campos de importación. El nombre del archivo no demuestra que sus datos sean NASA. La procedencia es declarada, no verificada por la aplicación.
@@ -52,6 +55,19 @@ Se ajusta `T(h) = a + b cos(2πh/24) + c sin(2πh/24)` por mínimos cuadrados a 
 La presión y el viento se resumen mediante la mediana de muestras recientes. Se conserva la ausencia de datos. Una referencia a más de 50 km de la base genera una advertencia de ubicación: no se atribuyen observaciones de un sitio a todo Marte.
 
 La hora de los gráficos es hora local marciana de 0 a 24; los presupuestos de EVA usan horas terrestres. El modelo usa 24,6597 horas terrestres por sol como aproximación de planificación.
+
+## Condiciones ambientales observadas
+
+Además de la proyección de temperatura, el módulo Clima resume las observaciones de los últimos 3 sols (sin predecir):
+
+| Variable | Qué se muestra | Alerta orientativa |
+|---|---|---|
+| Polvo (τ) | Mediana, pico, pendiente por sol y serie diaria | τ ≥ 1 elevado (precaución); τ ≥ 2 compatible con tormenta; τ ≥ 3 tormenta severa (alerta); subida ≥ 0,15 τ/sol (precaución) |
+| Radiación (µSv/h) | Mediana, máximo, serie diaria y exposición ambiental estimada durante el horizonte | Máximo ≥ 2× la mediana histórica del mismo conjunto de datos (alerta; requiere ≥ 6 muestras de dosis) |
+| Viento (m/s) | Máximo reciente y serie diaria | ≥ 15 m/s precaución; ≥ 25 m/s alerta (umbral orientativo de levantamiento de polvo) |
+| Presión, humedad | Mediana y serie diaria | Sin umbral |
+
+Reglas de honestidad: un campo sin observaciones genera una alerta «SIN DATOS», nunca «normal». La exposición ambiental multiplica la mediana de dosis por las horas del horizonte (tasa constante, sin blindaje de traje ni hábitat) y **no es una dosis personal**. Los umbrales son heurísticos de planificación, no límites operativos ni médicos; conviene sustituirlos por criterios validados antes de cualquier uso real.
 
 ## Fuentes de contexto
 

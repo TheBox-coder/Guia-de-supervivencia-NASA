@@ -19,8 +19,27 @@
   const crew=n(x.crew,0,2);if(crew!==null&&!Number.isInteger(crew))throw Error('Tripulación entera requerida / Whole crew count required');
   const lat=n(x.lat,-90,90),lon=n(x.lon,-180,180);if((lat===null)!==(lon===null))throw Error('Latitud y longitud del Chariot requeridas juntas / Chariot latitude and longitude must be provided together');
   const energyKWh=n(x.energyKWh),batteryCapacityKWh=n(x.batteryCapacityKWh);if(energyKWh!==null&&batteryCapacityKWh!==null&&energyKWh>batteryCapacityKWh)throw Error('La carga supera la capacidad de batería / Charge exceeds battery capacity');
-  return {lat,lon,mobility:choice(x.mobility,['unknown','parked','moving'],'unknown'),crew,hours:n(x.hours,0,10000),delayHours:n(x.delayHours,0,10000)??0,energyLossPct:n(x.energyLossPct,0,100)??0,
+  return {speedKmh:n(x.speedKmh,0,100),driveHoursPerSol:n(x.driveHoursPerSol,0,SOL_HOURS),elapsedSols:n(x.elapsedSols,0,10000),lat,lon,mobility:choice(x.mobility,['unknown','parked','moving'],'unknown'),crew,hours:n(x.hours,0,10000),delayHours:n(x.delayHours,0,10000)??0,energyLossPct:n(x.energyLossPct,0,100)??0,
    oxygenKg:n(x.oxygenKg),oxygenRateKgH:n(x.oxygenRateKgH,0,10),waterL:n(x.waterL),waterRateLH:n(x.waterRateLH,0,20),energyKWh,batteryCapacityKWh,generationKW:n(x.generationKW,0,10000),powerKW:n(x.powerKW,0,10000),co2CapacityKg:n(x.co2CapacityKg),co2RateKgH:n(x.co2RateKgH,0,10),source:text(x.source,500),updatedAt:date(x.updatedAt)};
+ }
+ function chariotRange(raw={},now=Date.now()){
+  const input=state(raw),b=input.base,assessment=assessBase(input,{},now),missing=[];
+  if(!assessment.positionDeclared)missing.push('position');
+  if(!assessment.usable)missing.push('provenance');
+  if(b.speedKmh===null||b.speedKmh<=0)missing.push('speed');
+  if(b.driveHoursPerSol===null)missing.push('driving');
+  if(b.elapsedSols===null)missing.push('elapsed');
+  if(b.crew===null||b.crew<1)missing.push('crew');
+  for(const budget of assessment.baseline)if(budget.capacity===null||budget.rate===null)missing.push(budget.id);
+  if(missing.length)return {status:'missing-inputs',radiusKm:null,missing};
+  const limits=[{id:'lifeSupport',hours:Math.max(0,(LIFE_SUPPORT_SOLS-b.elapsedSols)*SOL_HOURS)}];
+  for(const budget of assessment.baseline){
+   const capacity=budget.capacity*(budget.id==='energy'?1-b.energyLossPct/100:1);
+   if(budget.rate>0)limits.push({id:budget.id,hours:capacity/budget.rate});
+  }
+  const limiting=limits.reduce((a,b)=>b.hours<a.hours?b:a),remainingHours=Math.max(0,limiting.hours-b.delayHours);
+  const drivingHours=remainingHours/SOL_HOURS*b.driveHoursPerSol;
+  return {status:'estimated',radiusKm:b.speedKmh*drivingHours,remainingHours,drivingHours,limitingResource:limiting.id,limitSols:LIFE_SUPPORT_SOLS,missing:[]};
  }
  function lifeSupportLimit(hours){
   const duration=n(hours,0,Number.MAX_VALUE),limitHours=LIFE_SUPPORT_SOLS*SOL_HOURS;
@@ -94,5 +113,5 @@
   const unknown=[];if(duration===null)unknown.push('route');if(!s.shelters.length)unknown.push('shelters');if(!water.provenance||water.remaining===null)unknown.push('water');if(!co2.provenance||co2.remaining===null)unknown.push('co2');if(!thermal.provenance||thermal.remaining===null)unknown.push('thermal');if(dose===null)unknown.push('radiation');if(!linkFresh||s.communications.status==='unknown')unknown.push('link');if(!s.equipment.length||equipmentUnknown.length)unknown.push('equipment');if(!s.procedures.some(p=>p.reviewed&&p.source&&p.steps))unknown.push('procedures');if(!rules.length||!s.criteria.source)unknown.push('criteria');
   return {durationHours:duration,durationSource:duration===null?'missing':scenarioMatches?'scenario':'route',crew,water,co2,thermal,radiation:{totalMSv:dose,ageHours:age,usable:measurementUsable},communications:{status:s.communications.status,recorded:linkFresh,declaredCoverageFraction:coverage},equipment:{faults,unknown:equipmentUnknown,maintenance},shelters,rules,unknown,status:rules.some(x=>x.status==='fail')?'criterion-exceeded':unknown.length||rules.some(x=>x.status==='unknown')?'incomplete':'reviewed-inputs'};
  }
- return Object.freeze({VERSION,SOL_HOURS,LIFE_SUPPORT_SOLS,lifeSupportLimit,CHARIOT_PROPOSAL,state,imported,assess,assessBase,evaFromChariot,distance,shelter,relay,equipment,procedure});
+ return Object.freeze({VERSION,SOL_HOURS,LIFE_SUPPORT_SOLS,chariotRange,lifeSupportLimit,CHARIOT_PROPOSAL,state,imported,assess,assessBase,evaFromChariot,distance,shelter,relay,equipment,procedure});
 });

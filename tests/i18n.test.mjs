@@ -38,7 +38,7 @@ test('new elements and dynamic accessible labels follow the language without tra
 
 test('static interface copy has English translations except shared names, units and data-field identifiers',()=>{
  const {api}=locale(),html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8').replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/g,'');
- const shared=new Set(['Dust Rider','Base','English','Control','Ctrl K','CONTROL','CHARIOT','EVA','Artemis Lunar','Aurora Teal','Dust Rider / CHARIOT','4.0 P0','O₂','O₂ —','sol, localHour, temperatureC, pressurePa, windMps','Jezero','PLAN','06 / EVA','18.44463° N · 77.45088° E','Perseverance / Jezero','DEM MDEM200M','~200 m · NASA / ESA / HRSC / USGS / Esri','km/h','18.44463','77.45088','EVA-04','EV1, EV2']);
+ const shared=new Set(['Dust Rider','Base','English','Control','Ctrl K','CONTROL','CHARIOT','EVA','Artemis Lunar','Aurora Teal','Dust Rider / CHARIOT','4.0 P0','O₂','O₂ —','sol, localHour, temperatureC, pressurePa, windMps','sol, localHour, temperatureC, pressurePa, windMps, opticalDepth, doseRateUSvH, humidityPct','Jezero','PLAN','06 / EVA','18.44463° N · 77.45088° E','Perseverance / Jezero','DEM MDEM200M','~200 m · NASA / ESA / HRSC / USGS / Esri','km/h','18.44463','77.45088','EVA-04','EV1, EV2']);
  const values=new Set([...html.matchAll(/>([^<>]+)</g)].map(m=>m[1].trim()).filter(s=>/[a-záéíóúñ]/i.test(s)&&s.length>1));
  for(const m of html.matchAll(/(?:title|placeholder|aria-label|alt)="([^"]+)"/g))values.add(m[1]);
  assert.deepEqual([...values].filter(s=>!shared.has(s)&&api.translateText(s,'en')===s),[]);

@@ -31,6 +31,9 @@
     if(raw.surface!==undefined&&!['unknown','firm','loose'].includes(raw.surface))throw new Error('Superficie no reconocida.');
     out.scenario=raw.scenario||out.scenario;out.surface=raw.surface||out.surface;return out;
   }
+  // Campos opcionales de las observaciones y su rango físico admitido. Un campo ausente se conserva como null: no se rellena.
+  // opticalDepth = opacidad óptica del polvo (τ, adimensional); doseRateUSvH = tasa de dosis ambiental (µSv/h); humidityPct = humedad relativa (%).
+  const OPTIONAL_FIELDS=Object.freeze({pressurePa:[100,2000],windMps:[0,150],opticalDepth:[0,10],doseRateUSvH:[0,5000],humidityPct:[0,100]});
   function weatherData(data){
     if(!data||data.format!=='JEZERO-WEATHER'||data.version!==1)throw new Error('Usa el formato JEZERO-WEATHER versión 1.');
     if(!data.source||typeof data.source.name!=='string'||!data.source.name.trim()||data.source.name.length>160)throw new Error('Falta la procedencia de las observaciones.');
@@ -42,8 +45,8 @@
       const sol=validation.numeric(r.sol),hour=validation.numeric(r.localHour),temperatureC=validation.numeric(r.temperatureC);
       if(sol===null||sol<0||!Number.isInteger(sol)||hour===null||hour<0||hour>=24||temperatureC===null||temperatureC< -160||temperatureC>50)throw new Error(`Observación ${i+1} inválida.`);
       const key=`${sol}|${hour}`;if(seen.has(key))throw new Error(`Observación ${i+1} duplicada.`);seen.add(key);
-      const optional={pressurePa:[100,2000],windMps:[0,150]};const out={sol,localHour:hour,temperatureC};
-      for(const [k,[min,max]] of Object.entries(optional)){const n=validation.numeric(r[k]);if(r[k]!=null&&(n===null||n<min||n>max))throw new Error(`Observación ${i+1}: ${k} fuera de rango.`);out[k]=n;}
+      const out={sol,localHour:hour,temperatureC};
+      for(const [k,[min,max]] of Object.entries(OPTIONAL_FIELDS)){const n=validation.numeric(r[k]);if(r[k]!=null&&(n===null||n<min||n>max))throw new Error(`Observación ${i+1}: ${k} fuera de rango.`);out[k]=n;}
       return out;
     }).sort((a,b)=>a.sol-b.sol||a.localHour-b.localHour);
     const lastSol=records.at(-1).sol,recent=records.filter(r=>r.sol>=lastSol-2);
@@ -68,10 +71,10 @@
     for(const r of d.recent){const x=basis(r.localHour);for(let i=0;i<3;i++){v[i]+=x[i]*r.temperatureC;for(let j=0;j<3;j++)m[i][j]+=x[i]*x[j];}}
     const coefficients=solve(m,v);
     const errorC=Math.max(5,Math.sqrt(d.recent.reduce((sum,r)=>{const x=basis(r.localHour),estimate=x.reduce((n,b,i)=>n+b*coefficients[i],0);return sum+(r.temperatureC-estimate)**2;},0)/d.recent.length));
-    const unusedFields=[...new Set(dataset.records.flatMap(r=>Object.keys(r)))].filter(k=>!['sol','localHour','temperatureC','pressurePa','windMps','observerSource','recordedAt','location'].includes(k)).slice(0,12);
+    const unusedFields=[...new Set(dataset.records.flatMap(r=>Object.keys(r)))].filter(k=>!['sol','localHour','temperatureC',...Object.keys(OPTIONAL_FIELDS),'observerSource','recordedAt','location'].includes(k)).slice(0,12);
     return {kind:'imported-pattern',algorithm:'supervised-harmonic-regression',trainedRecords:d.recent.length,name:d.source.name,coefficients,errorC,pressurePa:median(d.recent.map(r=>r.pressurePa)),windMps:median(d.recent.map(r=>r.windMps)),baseSol:d.lastSol+1,location:d.location,recordCount:d.records.length,unusedFields,
-      fieldCoverage:{temperature:d.records.length,pressure:d.records.filter(r=>Number.isFinite(r.pressurePa)).length,wind:d.records.filter(r=>Number.isFinite(r.windMps)).length},
-      note:'Extrapolación del patrón diario ajustado (armónico) a las últimas muestras; cada sol repite la misma curva. La banda es error residual, no intervalo de confianza calibrado. No predice tormentas.'};
+      fieldCoverage:{temperature:d.records.length,pressure:d.records.filter(r=>Number.isFinite(r.pressurePa)).length,wind:d.records.filter(r=>Number.isFinite(r.windMps)).length,dust:d.records.filter(r=>Number.isFinite(r.opticalDepth)).length,radiation:d.records.filter(r=>Number.isFinite(r.doseRateUSvH)).length,humidity:d.records.filter(r=>Number.isFinite(r.humidityPct)).length},
+      note:'Extrapolación del patrón diario ajustado (armónico) a las últimas muestras; cada sol repite la misma curva. La banda es error residual, no intervalo de confianza calibrado. No predice tormentas; polvo y radiación se resumen solo si hay observaciones.'};
   }
   function temperature(model,hour){const h=((hour%24)+24)%24,a=2*Math.PI*h/24;return model.coefficients[0]+model.coefficients[1]*Math.cos(a)+model.coefficients[2]*Math.sin(a);}
   function forecast(raw={},dataset=null){
@@ -80,6 +83,53 @@
       const hour=i===24?24:i,t=temperature(model,hour);
       return {hour,temperatureC:t,lowerC:t-model.errorC,upperC:t+model.errorC,pressurePa:model.pressurePa,windMps:model.windMps,dustIndex:dust};
     })};
+  }
+  // ── Condiciones ambientales observadas (polvo, radiación, viento, presión, humedad) ──────────────────────────
+  // Todo se resume a partir de las observaciones importadas de los últimos 3 sols. No se predice ni se rellena nada:
+  // un campo sin datos genera una alerta 'unknown' (ausencia de dato ≠ condición segura).
+  // Los umbrales son heurísticos de planificación, no límites operativos ni médicos de NASA.
+  const DUST_TAU_LEVELS=Object.freeze({elevated:1,storm:2,severe:3});
+  const DUST_RISING_PER_SOL=.15,RADIATION_SPIKE_FACTOR=2,WIND_WARNING_MPS=15,WIND_ALERT_MPS=25;
+  const stats=values=>{const a=values.filter(Number.isFinite);return a.length?{count:a.length,median:median(a),min:Math.min(...a),max:Math.max(...a)}:null;};
+  function slopePerSol(records,key){
+    const pts=records.filter(r=>Number.isFinite(r[key])).map(r=>[r.sol+r.localHour/24,r[key]]);
+    if(pts.length<4)return null;
+    const xs=pts.map(p=>p[0]);if(Math.max(...xs)-Math.min(...xs)<1)return null;
+    const mx=xs.reduce((a,b)=>a+b,0)/pts.length,my=pts.reduce((a,p)=>a+p[1],0)/pts.length;
+    let sxx=0,sxy=0;for(const [x,y] of pts){sxx+=(x-mx)**2;sxy+=(x-mx)*(y-my);}
+    return sxx>0?sxy/sxx:null;
+  }
+  function dustLevel(tau){return tau>=DUST_TAU_LEVELS.severe?'severe':tau>=DUST_TAU_LEVELS.storm?'storm':tau>=DUST_TAU_LEVELS.elevated?'elevated':'clear';}
+  function conditionsFor(d,horizonHours=null){
+    const recent=d.recent,hours=Number.isFinite(Number(horizonHours))&&Number(horizonHours)>0?Number(horizonHours):SOL_HOURS;
+    const temp=stats(recent.map(r=>r.temperatureC)),pressure=stats(recent.map(r=>r.pressurePa)),wind=stats(recent.map(r=>r.windMps)),humidity=stats(recent.map(r=>r.humidityPct));
+    const tau=stats(recent.map(r=>r.opticalDepth)),dose=stats(recent.map(r=>r.doseRateUSvH));
+    const alerts=[];
+    // Polvo
+    let dust=null;
+    if(tau){
+      const slope=slopePerSol(recent,'opticalDepth'),level=dustLevel(tau.median),peakLevel=dustLevel(tau.max),rising=slope!==null&&slope>=DUST_RISING_PER_SOL;
+      dust={...tau,level,peakLevel,slopePerSol:slope,rising};
+      alerts.push({code:'dust',level:level==='clear'?'info':level==='elevated'?'warning':'alert',value:tau.median});
+      if(peakLevel!==level&&peakLevel!=='clear')alerts.push({code:'dust-peak',level:peakLevel==='elevated'?'warning':'alert',value:tau.max});
+      if(rising)alerts.push({code:'dust-rising',level:'warning',value:slope});
+    }else alerts.push({code:'dust',level:'unknown',value:null});
+    // Radiación: tasa de dosis ambiental; el pico se compara con la mediana de todo el historial del mismo conjunto de datos.
+    let radiation=null;
+    if(dose){
+      const baseline=median(d.records.map(r=>r.doseRateUSvH)),baselineCount=d.records.filter(r=>Number.isFinite(r.doseRateUSvH)).length;
+      const spike=baselineCount>=6&&baseline>0&&dose.max>=RADIATION_SPIKE_FACTOR*baseline;
+      radiation={...dose,baselineUSvH:baseline,baselineCount,spike,exposureMSv:dose.median*hours/1000,exposureHours:hours,exposureAssumption:'constant-median-rate'};
+      alerts.push({code:'radiation',level:spike?'alert':'info',value:dose.median});
+    }else alerts.push({code:'radiation',level:'unknown',value:null});
+    // Viento: umbrales orientativos de levantamiento de polvo, no de fuerza sobre el traje (la atmósfera es muy tenue).
+    if(wind)alerts.push({code:'wind',level:wind.max>=WIND_ALERT_MPS?'alert':wind.max>=WIND_WARNING_MPS?'warning':'info',value:wind.max});
+    else alerts.push({code:'wind',level:'unknown',value:null});
+    if(!pressure)alerts.push({code:'pressure',level:'unknown',value:null});
+    // Resumen por sol (mediana diaria) de los últimos 14 sols con datos, para las tendencias.
+    const bySol=new Map();for(const r of d.records){if(r.sol<d.lastSol-13)continue;if(!bySol.has(r.sol))bySol.set(r.sol,[]);bySol.get(r.sol).push(r);}
+    const daily=[...bySol.entries()].sort((a,b)=>a[0]-b[0]).map(([sol,rs])=>({sol,count:rs.length,temperatureMinC:Math.min(...rs.map(r=>r.temperatureC)),temperatureMaxC:Math.max(...rs.map(r=>r.temperatureC)),opticalDepth:median(rs.map(r=>r.opticalDepth)),doseRateUSvH:median(rs.map(r=>r.doseRateUSvH)),pressurePa:median(rs.map(r=>r.pressurePa)),windMps:median(rs.map(r=>r.windMps))}));
+    return {basis:'last-3-sols-observations',sampleCount:recent.length,temperature:temp,pressure,wind,humidity,dust,radiation,alerts,daily,thresholds:{dustTau:DUST_TAU_LEVELS,dustRisingPerSol:DUST_RISING_PER_SOL,radiationSpikeFactor:RADIATION_SPIKE_FACTOR,windWarningMps:WIND_WARNING_MPS,windAlertMps:WIND_ALERT_MPS,heuristic:true}};
   }
   const MAX_HORIZON_SOLS=60,HORIZON_EPS=1e-4;
   // Sols completos que cubre una duración en horas. 14 sols exactos no deben redondearse a 15.
@@ -97,7 +147,7 @@
     // Un solo ajuste armónico diario: cada sol repite la misma curva. No es una predicción independiente por sol.
     const days=Array.from({length:horizonSols},(_,i)=>({offsetSols:i,sol:baseSol+i,series:result.series}));
     return {status:'projection',horizonSols,horizonHours:Number.isFinite(Number(options.horizonHours))?Number(options.horizonHours):null,truncated:Number.isFinite(Number(options.horizonHours))&&Math.ceil(Number(options.horizonHours)/SOL_HOURS-HORIZON_EPS)>MAX_HORIZON_SOLS,
-      radiusKm:WEATHER_RADIUS_KM,model:result.model,series:result.series,days,
+      radiusKm:WEATHER_RADIUS_KM,model:result.model,series:result.series,days,conditions:conditionsFor(weatherData(dataset),options.horizonHours),
       method:{kind:'daily-pattern-extrapolation',independentPerSol:false,dayToDayVariationEstimated:false,
         note:'Cada sol repite la curva diaria ajustada a las últimas muestras. No es una predicción independiente por sol; la variación entre soles, las tormentas de polvo y el cambio estacional no se estiman. La banda es el error residual del ajuste, no un intervalo de confianza calibrado.'}};
   }
@@ -107,7 +157,7 @@
     if(current.status!=='projection')throw Error('Carga históricos válidos de la zona antes de añadir observaciones / Load valid regional history before adding observations');
     if(typeof observerSource!=='string'||!observerSource.trim()||observerSource.length>160)throw Error('Indica la fuente o responsable de la observación / Enter the observation source or observer');
     if(!record||typeof record!=='object'||!Number.isFinite(now))throw Error('Observación inválida / Invalid observation');
-    const next={...dataset,source:{...dataset.source},records:[...dataset.records.map(r=>({...r})),{sol:record.sol,localHour:record.localHour,temperatureC:record.temperatureC,pressurePa:record.pressurePa??null,windMps:record.windMps??null,observerSource:observerSource.trim(),recordedAt:new Date(now).toISOString(),location:validation.point(origin)}]};
+    const next={...dataset,source:{...dataset.source},records:[...dataset.records.map(r=>({...r})),{sol:record.sol,localHour:record.localHour,temperatureC:record.temperatureC,pressurePa:record.pressurePa??null,windMps:record.windMps??null,opticalDepth:record.opticalDepth??null,doseRateUSvH:record.doseRateUSvH??null,humidityPct:record.humidityPct??null,observerSource:observerSource.trim(),recordedAt:new Date(now).toISOString(),location:validation.point(origin)}]};
     weatherModel(next);return next;
   }
   function terrain(mission){
@@ -180,5 +230,5 @@
     const recommended=(feasible.length?feasible:rows).sort((a,b)=>b.timeMarginHours-a.timeMarginHours)[0];
     return {rows,recommendedMode:recommended?.mode||null,hasFeasible:feasible.length>0};
   }
-  return Object.freeze({MODEL_VERSION,SOL_HOURS,horizonSolsFor,MAX_HORIZON_SOLS,WEATHER_RADIUS_KM,DEFAULTS,METABOLIC,TERRAIN_FACTOR,O2_KG_PER_KCAL,pandolf,metabolism,config,weatherData,weatherModel,forecast,observationForecast,appendWeatherObservation,temperature,terrain,evaluate,compare});
+  return Object.freeze({MODEL_VERSION,SOL_HOURS,horizonSolsFor,MAX_HORIZON_SOLS,WEATHER_RADIUS_KM,DEFAULTS,METABOLIC,TERRAIN_FACTOR,O2_KG_PER_KCAL,pandolf,metabolism,config,weatherData,weatherModel,conditionsFor,OPTIONAL_FIELDS,forecast,observationForecast,appendWeatherObservation,temperature,terrain,evaluate,compare});
 });
