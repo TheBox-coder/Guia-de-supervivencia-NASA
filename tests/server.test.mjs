@@ -8,6 +8,13 @@ test('HTTP publication, input validation, PDF and rate limit',async t=>{
  t.after(()=>child.kill());
  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('server timeout')),7000);child.stdout.once('data',()=>{clearTimeout(timer);resolve();});child.once('error',reject);});
  const origin='http://127.0.0.1:18766';
+ const html=await(await fetch(origin+'/')).text();
+ const logo=html.match(/class="brandLogo"[^>]*src="([^"]+)"/)[1];
+ assert.match(logo,/dust-rider-logo\.png/);
+ const logoResponse=await fetch(new URL(logo,origin));assert.equal(logoResponse.status,200);assert.equal(logoResponse.headers.get('content-type'),'image/png');
+ assert.deepEqual([...new Uint8Array(await logoResponse.arrayBuffer()).slice(0,8)],[137,80,78,71,13,10,26,10]);
+ const worker=await(await fetch(origin+'/service-worker.js')).text();assert.ok(worker.includes("'/assets/dust-rider-logo.png'"));
+ assert.equal((await fetch(origin+'/assets/jezero-mark.svg')).status,200,'Older cached pages retain their logo');
  for(const file of ['/','/script.js','/modules/validation.cjs','/modules/route-engine.cjs','/modules/assurance.cjs','/modules/mission-control-engine.cjs','/modules/mission-control.js','/modules/dashboard.js','/assets/chariot-proposal.jpeg','/control.css','/mars-data.json','/assets/favicon.ico']){
   const response=await fetch(origin+file);assert.equal(response.status,200,file);assert.equal(response.headers.get('x-content-type-options'),'nosniff');assert.ok(response.headers.get('content-security-policy'));
  }
