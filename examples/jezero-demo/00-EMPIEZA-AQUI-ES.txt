@@ -1,0 +1,133 @@
+DUST RIDER — TUTORIAL DE LA DEMO DE JEZERO (ESPAÑOL)
+
+RECORRIDO PASO A PASO — UNOS 10 MINUTOS
+
+1. ABRIR DUST RIDER
+Instala Node.js 20 o posterior. Abre una terminal en la carpeta del proyecto
+(la que contiene package.json), ejecuta npm start y entra en
+http://localhost:8000. Mantén abierta la terminal. Si utilizas la aplicación
+publicada, abre su dirección web; también necesitarás los tres archivos JSON.
+Elige Español en el selector de idioma de la barra superior.
+
+2. CONSERVAR TUS DATOS
+Antes de importar, exporta tu misión, guarda tu paquete de Chariot y exporta
+las observaciones meteorológicas que quieras conservar. Las importaciones
+pueden reemplazar los datos locales. Puedes utilizar otro perfil del navegador.
+Los archivos de la demo están en examples/jezero-demo dentro del repositorio.
+Los nombres de los puntos y las fuentes de esta demo se mantienen en inglés.
+
+3. CARGAR LA MISIÓN
+En Misión, utiliza la opción de importar misión desde JSON y selecciona
+01-mission-five-points.json. Comprueba que aparezcan cinco puntos:
+Landing base, North checkpoint, South checkpoint, Delta approach y Destination.
+La base corresponde a la referencia histórica del aterrizaje de Perseverance
+en Jezero. Los otros cuatro puntos son destinos ficticios de demostración.
+
+4. CARGAR CHARIOT
+En Chariot, pulsa Abrir paquete y selecciona 02-chariot-and-support.json.
+Lee el aviso antes de confirmar el reemplazo. Comprueba: dos tripulantes,
+batería de 42 kWh, generador de 1,2 kW, cero soles transcurridos y horizonte
+de planificación de dos soles. La posición de salida debe estar en Jezero.
+Estos datos son de demostración y se basan parcialmente en un diseño conceptual.
+
+5. CARGAR EL CLIMA
+En Clima, utiliza la opción de importar observaciones y selecciona
+03-weather-synthetic.json. Comprueba que se carguen datos de temperatura,
+polvo y radiación. Incluye 72 observaciones horarias sintéticas de los soles
+1000 a 1002; no son mediciones actuales ni telemetría de NASA.
+
+6. CALCULAR LA MISIÓN
+Vuelve a Misión. Elige la estrategia de menor distancia o ruta más directa.
+Deja desactivados Regresar a la base y Optimizar orden. Pulsa Calcular misión.
+Espera a que cargue el terreno y consulta Resultados para ver distancia,
+duración y avisos. Un cálculo anterior produjo unos 9,71 km y 6 h 18 min;
+es una referencia, no un resultado exacto garantizado.
+Si falla, consulta el error y comprueba tu conexión. No relajes los límites
+del terreno únicamente para conseguir que la demostración termine.
+
+7. EXPLORAR EL MAPA
+Abre Mapa y utiliza Ajustar para encuadrar la ruta. Recorre los cinco puntos
+y observa los cambios de dirección. Verde, amarillo, naranja y rojo indican
+dificultad estimada del terreno; no certifican que Chariot pueda circular.
+Selecciona MOLA para consultar los colores de elevación y su leyenda.
+Si hay demasiadas etiquetas, oculta los lugares conocidos o sitios de aterrizaje.
+El círculo de alcance de Chariot es una estimación ideal basada en recursos:
+no representa la ruta ni una zona de circulación segura validada por terreno.
+
+8. UTILIZAR LA VISTA 3D
+Después de calcular, abre Vista 3D de la ruta desde la sección de ruta/resultados.
+Arrastra para girar y utiliza la rueda para acercar. Pulsa Recorrer la ruta
+para iniciar la animación, Pausar para detenerla y Vista general para volver
+al recorrido completo. El deslizador permite explorar otra posición.
+En Ajustar vista, prueba Color por pendiente, curvas de nivel, nombres de la
+zona, exageración vertical y dirección de la luz. Imagen orbital estará
+desactivada si no hay imágenes disponibles. Abre Fuentes y límites del modelo
+para consultar los detalles del relieve. La exageración vertical solo cambia
+la apariencia, no las pendientes calculadas. En móvil, desplázate dentro del
+panel para acceder a todos los controles. Cierra con la X o Escape.
+
+9. AÑADIR UNA OBSERVACIÓN
+En Clima, compara los días de misión 1 y 2. El índice 1003 continúa el último
+sol observado, 1002; no significa que lleves 1003 días de misión. Sol es el
+nombre científico de un día marciano, también en inglés.
+Añade esta observación sintética de un astronauta:
+  Sol de observación: 1003
+  Hora solar local: 12
+  Temperatura: -20 °C
+  Presión: 728 Pa
+  Viento: 4 m/s
+  Profundidad óptica del polvo: 3,2
+  Radiación: 9,5 µSv/h
+  Fuente o responsable: DEMO astronaut
+Si el campo exige punto decimal, utiliza 3.2 y 9.5.
+Pulsa Guardar y actualizar predicción. Compara las curvas antes y después.
+Se reajusta el modelo; no es una predicción validada de tormentas.
+Vuelve a importar el archivo 03 antes de repetir el mismo sol y hora.
+
+10. REINICIAR O TERMINAR
+Importa nuevamente los archivos 01, 02 y 03 en sus respectivos apartados
+y recalcula para restaurar la demo. Para detener el servidor local, pulsa
+Ctrl+C en su terminal.
+
+EJERCICIOS OPCIONALES
+
+Guía y recursos del traje:
+Introduce dos tripulantes, oxígeno de 1,2 kg/persona, consumo declarado de
+0,09 kg/h/persona, batería de 1,2 kWh/persona, carga base de 0,13 kW,
+reserva del 20 %, salida a las 10, terreno Firme y escenario Nominal.
+Revisa y confirma las capacidades del equipo. Son valores sintéticos para
+trajes, distintos de las existencias del Chariot.
+
+Calculadora de misión y emergencia:
+Ábrela desde Chariot. Utiliza batería de 42 kWh y generación de 1,2 kW.
+Prueba distancia de ida de 10 km, velocidad de 2 km/h, tracción de 0,2 kW,
+auxiliares de 1,3 kW y reserva del 20 %. Esta calculadora evalúa un viaje de
+ida y vuelta separado: no añade un retorno a la ruta del mapa.
+Para el ejercicio de tormenta: duración de 24 h, carga esencial de 1,8 kW,
+regreso de 10 km a 2 km/h, tracción de regreso de 0,2 kW, margen del 20 %
+y generador activado. Referencia de energía requerida: 22,08 kWh.
+La calculadora supone batería llena y verifica energía y tiempo restante
+de soporte vital; no sustituye la revisión de todos los consumibles.
+
+SI ALGO NO FUNCIONA
+- Vista 3D vacía: calcula primero y comprueba el acceso al servicio de elevación.
+- Sin imagen orbital: puedes utilizar los colores del terreno; la imagen
+  necesita conexión y cobertura disponible.
+- Oxígeno o batería sin datos: revisa los valores del traje y la confirmación
+  del equipo. Los recursos del traje y del Chariot son independientes.
+- Importación rechazada: elige el JSON correcto para ese apartado, no este TXT.
+- Interfaz antigua: recarga cuando termine el despliegue.
+- Aviso de falta de retorno: puede aparecer porque esta demo es de ida.
+
+FUENTES Y LÍMITES
+La demo requiere internet para el relieve y el cálculo. El DEM es de unos
+200 m; interpolarlo no crea detalle real de rocas. Las reglas de terreno
+proceden de estimaciones para EVA, no de un modelo de movilidad Chariot
+validado. El dossier Chariot V2 es conceptual: las existencias, consumos,
+inspecciones y observaciones meteorológicas de la demo son sintéticos.
+La política de soporte vital de la aplicación es de 14 soles; el círculo
+de alcance también depende de los recursos y horas de conducción declarados.
+No presentes esta demo como una misión tripulada aprobada ni como un vehículo
+certificado. Punto inicial: 18,4446 N, 77,4509 E. Final: 18,4100 N, 77,3000 E.
+Referencia histórica del aterrizaje:
+https://science.nasa.gov/mission/mars-2020-perseverance/location-map/

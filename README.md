@@ -74,6 +74,8 @@ La duración total del viaje se introduce en soles en CHARIOT; los archivos cons
 
 ## Demo de Jezero / Jezero demo
 
+Tutoriales: [Español](examples/jezero-demo/00-EMPIEZA-AQUI-ES.txt) · [English](examples/jezero-demo/00-START-HERE.txt)
+
 La demo completa en inglés está incluida en [examples/jezero-demo](examples/jezero-demo/00-START-HERE.txt). No necesitas archivos del escritorio del autor.
 
 1. Ejecuta `npm start` y abre http://localhost:8000.
