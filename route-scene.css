@@ -1,0 +1,33 @@
+/* V46: vista 3D de la ruta, recorrido animado y selector de minerales. */
+.routeSceneOpen{justify-self:start;margin-top:2px;padding:7px 12px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--theme-accent,#3b82f6);color:#fff;font:600 12px Inter,Segoe UI,sans-serif;cursor:pointer}
+.routeSceneOpen:hover{filter:brightness(1.12)}
+.routeScene{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:16px;background:rgba(3,5,10,.72);backdrop-filter:blur(4px)}
+.routeScene[hidden]{display:none}
+.routeScenePanel{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto auto;gap:10px;width:min(1180px,100%);height:min(780px,100%);padding:14px;border:1px solid var(--border-subtle);border-radius:var(--radius-xl,14px);background:var(--surface-canvas,#0b1020);color:var(--text-primary);box-shadow:var(--shadow-lg)}
+.routeScenePanel header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.routeScenePanel h2{margin:0;font-size:15px;font-weight:700;letter-spacing:.2px}
+.routeSceneClose{width:34px;height:34px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-panel);color:var(--text-primary);font-size:18px;cursor:pointer}
+.routeSceneStage{position:relative;min-height:220px;display:grid;place-items:center}
+.routeSceneCanvas{position:absolute;inset:0;width:100%;height:100%;border-radius:var(--radius-md);background:#120d0a;cursor:grab;touch-action:none;outline-offset:2px}
+.routeSceneCanvas:active{cursor:grabbing}
+.routeSceneStatus{position:relative;z-index:1;margin:0;padding:10px 14px;border-radius:var(--radius-md);background:rgba(8,10,16,.86);font-size:13px;max-width:min(520px,80%);text-align:center}
+.routeSceneStatus[hidden]{display:none}
+.routeSceneBar{display:grid;grid-template-columns:auto minmax(80px,1fr) auto auto;gap:10px;align-items:center}
+.routeSceneBar button,.routeScenePlay{height:34px;padding:0 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-panel);color:var(--text-primary);font:600 12px Inter,Segoe UI,sans-serif;cursor:pointer;white-space:nowrap}
+.routeSceneBar .routeScenePlay{background:var(--theme-accent,#3b82f6);border-color:transparent;color:#fff}
+.routeSceneBar button:disabled{opacity:.45;cursor:not-allowed}
+.routeSceneBar output{font:600 12px ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap}
+.routeSceneBar input[type=range]{width:100%}
+.routeSceneOptions{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:12px}
+.routeSceneOptions label{display:flex;align-items:center;gap:6px}
+.routeSceneVe input{width:130px}
+.routeSceneCaption{margin:0;font-size:11px;line-height:1.45;color:var(--text-tertiary)}
+.mineralPicker{display:grid;gap:6px;margin:10px 0;padding:10px;border:1px solid var(--border-subtle);border-radius:var(--radius-md)}
+.mineralPicker label{display:grid;gap:5px}
+.mineralPicker b{font-size:12px}
+.mineralPicker select{width:100%;height:34px;padding:0 8px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-panel);color:var(--text-primary);font-size:12px}
+.mineralNote{font-size:11px;line-height:1.4;color:var(--text-tertiary)}
+.mineralNote[data-state="outside"],.mineralNote[data-state="error"]{color:#fbbf24}
+.mineralGo{justify-self:start;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-panel);color:var(--text-primary);font-size:11.5px;cursor:pointer}
+.mineralGo[hidden]{display:none}
+@media (max-width:760px){.routeSceneBar{grid-template-columns:1fr 1fr}.routeSceneBar input[type=range]{grid-column:1/-1;order:-1}.routeScenePanel{padding:10px}}

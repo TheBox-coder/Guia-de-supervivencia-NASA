@@ -54,6 +54,7 @@
     if(hud&&!$('hudDifficulty')){
       const cell=(id,es,en)=>{const c=el('div','missionHudCell routeIntelCell'),s=el('span'),b=el('b','', '—');s.dataset.es=es;s.dataset.en=en;b.id=id;c.append(s,b);return c;};
       hud.append(cell('hudDifficulty','DIFICULTAD','DIFFICULTY'),cell('hudDuration','DURACIÓN','DURATION'));
+      if(window.JEZERO_ROUTE_SCENE){const b=el('button','missionHudScene');b.type='button';b.id='hudScene';b.addEventListener('click',()=>window.JEZERO_ROUTE_SCENE.open());hud.append(b);}
     }
     const map=hud?.parentElement;
     if(map&&!$('routeDifficultyLegend')){
@@ -78,6 +79,7 @@
     for(const [id,es,en,color] of DIFF){const item=el('span','routeLegendStep');item.style.setProperty('--step',color);item.append(el('i'),el('em','',ui(es,en)));item.dataset.cls=id;ramp.append(item);}
     box.append(ramp);
     box.append(el('small','',ui('△ pendiente, pendiente lateral o giro brusco · ○ marca de distancia','△ slope, cross slope or sharp turn · ○ distance mark')));
+    if(window.JEZERO_ROUTE_SCENE){const b=el('button','routeSceneOpen',ui('Vista 3D y recorrido','3D view and flyover'));b.type='button';b.addEventListener('click',()=>window.JEZERO_ROUTE_SCENE.open());box.append(b);}
   }
   function renderCard(mission){
     const card=$('routeFactorsCard');if(!card)return;
@@ -132,6 +134,7 @@
     document.querySelectorAll('.routeIntelCell > span').forEach(s=>{s.textContent=ui(s.dataset.es,s.dataset.en);});
     const text=toggle?.parentElement?.querySelector('[data-route-text="context-toggle"]');
     if(text)text.textContent=ui('Usar clima observado y soporte declarado en la ruta','Use observed weather and declared support in the route');
+    if($('hudScene')){$('hudScene').textContent=ui('Vista 3D','3D view');$('hudScene').hidden=!mission;}
     if($('hudDifficulty')){
       const score=mission?.score;
       $('hudDifficulty').textContent=finite(score)?`${Math.round(score)}/100`:'—';

@@ -1,7 +1,7 @@
 /* V45: leyenda de dificultad, panel de factores de ruta y celdas extra del HUD. */
 .missionHud.is-compact .routeIntelCell{display:none}
 .missionHud .routeIntelCell b{min-width:62px}
-.routeDifficultyLegend{position:absolute;left:16px;bottom:44px;z-index:14;display:grid;gap:6px;max-width:min(360px,calc(100% - 32px));padding:10px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:color-mix(in srgb,var(--surface-panel) 92%,transparent);backdrop-filter:blur(12px);box-shadow:var(--shadow-md);color:var(--text-primary)}
+.routeDifficultyLegend{position:absolute;right:16px;bottom:110px;z-index:14;display:grid;gap:6px;max-width:min(360px,calc(100% - 32px));padding:10px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:color-mix(in srgb,var(--surface-panel) 92%,transparent);backdrop-filter:blur(12px);box-shadow:var(--shadow-md);color:var(--text-primary)}
 .routeDifficultyLegend[hidden]{display:none}
 .routeDifficultyLegend strong{font-size:9.5px;letter-spacing:.6px;font-weight:700;color:var(--text-tertiary)}
 .routeDifficultyLegend small{font-size:10px;line-height:1.35;color:var(--text-tertiary)}
@@ -31,4 +31,7 @@ body[data-module]:not([data-module="planner"]) .routeDifficultyLegend{display:no
 .routeFactorsNote{margin:0;font-size:10.5px;line-height:1.4;color:var(--text-tertiary)}
 .routeFactorsNote.warn{color:#fbbf24}
 .routeFactorsEmpty{margin:0;font-size:11.5px;color:var(--text-tertiary)}
-@media (max-width:760px){.routeDifficultyLegend{left:8px;right:8px;bottom:64px;max-width:none}.routeBreakdownRow{grid-template-columns:1fr 1fr auto}}
+@media (max-width:760px){.routeDifficultyLegend{left:8px;right:8px;bottom:110px;max-width:none}.routeBreakdownRow{grid-template-columns:1fr 1fr auto}}
+.missionHudScene{align-self:stretch;margin:6px 8px;padding:0 12px;border:0;border-radius:var(--radius-sm);background:var(--theme-accent,#3b82f6);color:#fff;font:700 11px Inter,Segoe UI,sans-serif;letter-spacing:.3px;cursor:pointer;white-space:nowrap}
+.missionHudScene[hidden]{display:none}
+.missionHudScene:hover{filter:brightness(1.12)}

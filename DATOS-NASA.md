@@ -102,3 +102,20 @@ El motor de rutas sigue usando pendiente direccional, rugosidad, transitabilidad
 | Distancia a refugios y cobertura de enlaces | Refugios y enlaces declarados en Soporte (con radio de cobertura) | Costo y dificultad; la cobertura es la declarada, no medida |
 
 Reglas: un factor sin dato no se aplica y se muestra como «sin dato»; los pesos son heurísticas de planificación, no límites de seguridad ni mediciones; el contexto se puede desactivar con la casilla de la ruta. El puntaje de dificultad conserva su valor anterior cuando no hay estos datos.
+
+## Vista 3D, recorrido y capas de minerales (V46)
+
+- **Vista 3D y recorrido animado:** el relieve usa el mismo DEM de ~200 m que el cálculo de rutas, en una malla alrededor de la ruta (mínimo 3 km de lado). La exageración vertical se indica en pantalla. Si las teselas cargan, el relieve lleva encima la imagen orbital (CTX en Jezero, Viking MDIM 2.1 en el resto); si no, se colorea por elevación.
+- **Nombres de la zona:** nomenclatura IAU/USGS y sitios de aterrizaje ya cargados en el mapa, más las paradas de la misión. No son unidades geológicas.
+- **Minerales:** teselas WMTS de NASA Mars Trek comprobadas el 2026-11-14 contra su `WMTSCapabilities.xml`.
+
+| Capa | Producto Mars Trek | Cobertura | Detalle |
+|---|---|---|---|
+| TES · Filosilicatos / vidrio rico en Si | `TES_Glass_Clay` | Global | Zoom 1 (~7 km/píxel) |
+| TES · Piroxeno rico en Ca | `TES_Clinopyroxene` | Global | Zoom 1 |
+| TES · Plagioclasa | `TES_Plagioclase` | Global | Zoom 1 |
+| TES · Índice de cobertura de polvo | `tes_ruffdust` | Global | Zoom 2 |
+| CRISM · Esmectita Fe-Mg | `T1303_FeMgSmectite_Mineral_Indicator_SP` | 20,5°O–14,5°O, 17°N–23°N (Mawrth Vallis) | Zoom 11 |
+| CRISM · Sulfatos polihidratados | `MC18_PolySulfate_Mineral_IndicatorV2_SP` | MC-18 (Valles Marineris) | Zoom 11 |
+
+Mars Trek no publica teselas CRISM para Jezero ni para Gale: sus productos CRISM de observación dirigida figuran solo como huellas, no como mosaico. Por eso en esas zonas la app ofrece únicamente los mapas globales TES, como contexto regional. Los colores son los del producto publicado; la app no los reinterpreta.
