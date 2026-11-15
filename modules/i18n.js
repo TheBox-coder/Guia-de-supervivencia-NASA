@@ -35,7 +35,7 @@
     'Aterrizajes en Marte':'Mars landings','Misiones exitosas y referencias históricas':'Successful missions and historical references',
     'Topografía · MOLA + HRSC':'Topography · MOLA + HRSC','Híbrido · imagen + relieve':'Hybrid · image + relief',
     'Nombres IAU / USGS':'IAU / USGS names','Se cargan por zona al acercar':'Loaded by area as you zoom in',
-    'Aterrizajes':'Landings','NASA + Zhurong y referencias históricas':'NASA + Zhurong and historical references',
+    'Aterrizajes':'Landings','NASA y referencias históricas':'NASA and historical references',
     'FUENTES':'SOURCES','Viking VIS / MOLA: NASA Mars Trek · Nombres: USGS Gazetteer / IAU':'Viking VIS / MOLA: NASA Mars Trek · Names: USGS Gazetteer / IAU',
     'NOMBRES GLOBALES':'GLOBAL NAMES','BASE LOCAL':'LOCAL FALLBACK',
     'Construir misión':'Build mission','Base, objetivos y rutas':'Base, targets and routes',

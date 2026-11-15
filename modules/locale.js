@@ -101,7 +101,6 @@
  ["Lugar de aterrizaje de Curiosity en Gale Crater.","Curiosity landing site in Gale Crater."],
  ["Lugar de aterrizaje de InSight en Elysium Planitia.","InSight landing site in Elysium Planitia."],
  ["Lugar de aterrizaje de Perseverance en Jezero Crater.","Perseverance landing site in Jezero Crater."],
- ["Rover de la misión Tianwen-1. Aterrizó con éxito en el sur de Utopia Planitia; coordenadas publicadas 109.925° E, 25.066° N.","Tianwen-1 mission rover. It landed successfully in southern Utopia Planitia; published coordinates: 109.925° E, 25.066° N."],
  ["Coordenadas publicadas para el aterrizaje de Mars 2020/Perseverance en Jezero Crater.","Published coordinates for the Mars 2020/Perseverance landing in Jezero Crater."],
  ["Sitio hipotético del equipo Dust Rider; criterio de radio de NASA EVA-EXP-0042 Rev. B","Hypothetical Dust Rider team site; radius criterion from NASA EVA-EXP-0042 Rev. B"],
  ['Configurar Chariot','Set up Chariot'],['Temperatura modelada por hora local','Modeled temperature by local time'],['Reserva de recursos durante el escenario','Remaining resources during the scenario'],['BASE · REGRESO','BASE · RETURN'],

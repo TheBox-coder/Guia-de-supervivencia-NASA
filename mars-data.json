@@ -199,19 +199,6 @@
       "source": "NASA NTRS",
       "sourceUrl": "https://ntrs.nasa.gov/citations/20210024644",
       "description": "Lugar de aterrizaje de Perseverance en Jezero Crater."
-    },
-    {
-      "id": "zhurong",
-      "name": "Zhurong",
-      "mission": "Tianwen-1",
-      "type": "CNSA",
-      "lat": 25.066,
-      "lon": 109.925,
-      "site": "Utopia Planitia",
-      "date": "15 mayo 2021",
-      "source": "Nature Astronomy / CNSA",
-      "sourceUrl": "https://www.nature.com/articles/s41550-021-01519-5",
-      "description": "Rover de la misión Tianwen-1. Aterrizó con éxito en el sur de Utopia Planitia; coordenadas publicadas 109.925° E, 25.066° N."
     }
   ],
   "knownLocations": [

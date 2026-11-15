@@ -19,7 +19,6 @@
 ## Aterrizajes
 
 - Se conservan los nueve sitios de aterrizaje exitosos de NASA del conjunto existente.
-- Se añadió **Zhurong / Tianwen-1**, Utopia Planitia, 25.066° N, 109.925° E.
 
 ## Interfaz
 
