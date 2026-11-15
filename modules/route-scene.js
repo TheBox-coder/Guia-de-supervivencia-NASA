@@ -155,7 +155,7 @@
     }
     if(mineralGo)mineralGo.textContent=ui('Ir a la región con cobertura','Go to the covered region');
     updateMineralNote();
-    if(scene)drawChrome();
+    if(scene){drawChrome();redraw();}
   }
 
   // ---------- Vista 3D ----------
@@ -171,6 +171,7 @@
     }
     return out;
   }
+  const referenceName=name=>window.JEZERO_I18N?.translateText?.(name)??name;
   function referenceCandidates(){
     const out=[];
     try{if(typeof knownLayer!=='undefined')for(const f of knownLayer.getSource().getFeatures()){const c=f.getGeometry()?.getCoordinates?.();if(c)out.push({name:f.get('label'),lon:c[0],lat:c[1],kind:'known'});}}catch{}
@@ -443,7 +444,7 @@
       ctx.fillStyle='#fff';ctx.fillText(text,bx+9,by+11.5);
     };
     sc.stops.forEach(s=>label(s.x,s.y,s.name.length>44?s.name.slice(0,43)+'…':s.name,s.base?'#34d399':'#c4b5fd',true));
-    if(sc.names)for(const r of sc.refs)label(r.x,r.y,r.name.length>24?r.name.slice(0,23)+'…':r.name,'#7dd3fc',false);
+    if(sc.names)for(const r of sc.refs){const name=referenceName(r.name);label(r.x,r.y,name.length>24?name.slice(0,23)+'…':name,'#7dd3fc',false);}
     if(cam.fly){
       const m=cam.marker,g=toScreen(cam,m.x,m.y,cam.zk(heightAt(sc,m.x,m.y)));
       if(g){ctx.fillStyle='rgba(255,255,255,.25)';ctx.beginPath();ctx.arc(g.sx,g.sy,15,0,Math.PI*2);ctx.fill();
@@ -595,7 +596,7 @@
   function init(){ensureMineralControl();}
   window.addEventListener('jezero:languagechange',translate);
   window.JEZERO_ROUTE_SCENE=Object.freeze({open,close,init,setMineral,MINERALS,mineralCoverage,
-    _test:{upsample,contourInterval,sceneFrame,gridSize,gridPoints,fillElevations,autoExaggeration,routeTrack,trackAt,nearbyReferences,project,textureTiles,textureMapping,cameraMatrices,toScreen}});
+    _test:{referenceName,upsample,contourInterval,sceneFrame,gridSize,gridPoints,fillElevations,autoExaggeration,routeTrack,trackAt,nearbyReferences,project,textureTiles,textureMapping,cameraMatrices,toScreen}});
   if(typeof document!=='undefined'){
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
     // El mapa se crea después de cargar los datos: se reintenta hasta que exista el panel de capas y el mapa.

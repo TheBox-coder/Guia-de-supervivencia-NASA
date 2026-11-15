@@ -106,3 +106,17 @@ test('overview fits terrain corners at portrait and landscape aspect ratios',()=
   }
  }
 });
+
+test('3D reference labels use the shared translator at draw time and preserve source names',()=>{
+ const window={addEventListener(){}};
+ const ctx=vm.createContext({window,clearInterval(){},setInterval(){return 0;}});
+ vm.runInContext(fs.readFileSync(new URL('../modules/route-scene.js',import.meta.url),'utf8'),ctx);
+ const name=window.JEZERO_ROUTE_SCENE._test.referenceName;
+ const source='EVA-01 · Base hipotética';
+ assert.equal(name(source),source);
+ let english=true;
+ window.JEZERO_I18N={translateText:text=>english&&text===source?'EVA-01 · Hypothetical base':text};
+ assert.equal(name(source),'EVA-01 · Hypothetical base');
+ assert.equal(name('Jezero Crater'),'Jezero Crater');
+ english=false;assert.equal(name(source),source);
+});
