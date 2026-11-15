@@ -2,6 +2,7 @@
 (() => {
   const $=id=>document.getElementById(id),ui=(es,en)=>window.JEZERO_I18N.ui(es,en);
   const workspace=$('homeWorkspace');let current=null,pending=false;
+  const reviewedSteps=new Set();
   const copy={home:['INICIO','HOME'],dashboard:['CONTROL','CONTROL'],survival:['SUPERVIVENCIA','LIFE SUPPORT'],operations:['CHARIOT','CHARIOT'],weather:['CLIMA','WEATHER'],explorer:['MAPAS','MAPS'],planner:['MISIONES','MISSIONS'],eva:['EVA','EVA'],analysis:['RESULTADOS','RESULTS'],settings:['AJUSTES','SETTINGS']};
   const labels={duration:['Duración estimada','Estimated duration'],oxygen:['Oxígeno al finalizar','Final oxygen'],battery:['Batería al finalizar','Final battery'],water:['Agua al finalizar','Final water'],co2:['Captura CO₂ restante','CO₂ removal remaining'],thermal:['Energía térmica restante','Thermal energy remaining']};
   const origins={calculated:['CALCULADO','CALCULATED'],inferred:['MODELO HIPOTÉTICO','HYPOTHETICAL MODEL'],unknown:['SIN DATOS SUFICIENTES','INSUFFICIENT DATA']};
@@ -75,8 +76,8 @@
       else if(notes.length)row.append(node('small',notes.join(' ')));$('controlMetrics').append(row);}
     text('controlStepsTitle',ui('Antes de salir','Before heading out'));$('controlSteps').replaceChildren();
     const steps=[['planner',ui('Define base y destinos','Define base and destinations'),current.prerequisites.route?ui('Ruta calculada','Route calculated'):ui('La ruta todavía necesita un cálculo válido.','The route still needs a valid calculation.')],['survival',ui('Revisa el equipo y los consumos','Review equipment and consumption'),current.prerequisites.equipment?ui('Confirmado por el usuario; sin inspección física.','User-confirmed; no physical inspection.'):ui('Abre la Guía y confirma tus parámetros.','Open the Guide and confirm your parameters.')],['operations',ui('Completa soporte y contingencias','Complete support and contingencies'),`${current.shelterCount} ${ui('refugios','shelters')} · ${current.procedureCount} ${ui('protocolos registrados','recorded protocols')}`],['analysis',ui('Examina y guarda los resultados','Inspect and save results'),ui('Compara rutas y exporta tu misión.','Compare routes and export your mission.')]];
-    // Lista de comprobación: completado, siguiente (el primero sin completar) o pendiente.
-    const done={planner:current.prerequisites.route,survival:current.prerequisites.equipment,operations:current.shelterCount>0&&current.procedureCount>0,analysis:false};
+    // Saved data alone does not complete a step: its section must be reviewed in this visit.
+    const done={planner:reviewedSteps.has('planner')&&current.prerequisites.route,survival:reviewedSteps.has('survival')&&current.prerequisites.equipment,operations:reviewedSteps.has('operations')&&current.shelterCount>0&&current.procedureCount>0,analysis:false};
     const next=steps.findIndex(([target])=>!done[target]);
     steps.forEach(([target,title,detail],i)=>{const state=done[target]?'done':i===next?'current':'pending';const b=node('button');b.type='button';b.dataset.controlStep=target;b.dataset.state=state;const copy=node('span',undefined,'stepCopy');copy.append(node('b',title),node('small',detail));b.append(node('span',state==='done'?'✓':String(i+1),'stepMarker'),copy,node('span',state==='done'?ui('Listo','Done'):state==='current'?ui('Siguiente','Next'):ui('Pendiente','Pending'),'stepState'));b.addEventListener('click',()=>window.JEZERO_MODULES.activate(target));$('controlSteps').append(b);});
     text('controlDataTitle',ui('Datos ambientales','Environmental data'));text('controlDataSource',current.weather.kind==='unknown'?ui('Sin observaciones locales válidas','No valid regional observations'):current.weather.source);
@@ -91,6 +92,7 @@
   }
   function schedule(){if(pending)return;pending=true;requestAnimationFrame(render);}
   $('controlExport').addEventListener('click',()=>{try{const inputs=context(),evaluation=window.JEZERO_CONTROL_ENGINE.overview(inputs);const blob=new Blob([JSON.stringify({format:'JEZERO-ASSURANCE',version:1,software:'4.0.0-p0',exportedAt:new Date().toISOString(),inputs,evaluation,catalogue:window.JEZERO_ASSURANCE,limitations:ui('Instantánea de evidencia, no paquete Survival Twin ni restauración de misión. Conserva además los JSON originales.','Evidence snapshot, not a Survival Twin package or mission restore. Also retain the original JSON files.')},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='dust-rider-evidence.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch{window.showToast?.(ui('No se pudo exportar la evidencia. Revisa tus entradas.','Evidence export failed. Review your inputs.'));}});
+  window.addEventListener('jezero:modulechange',event=>{if(event.detail?.module)reviewedSteps.add(event.detail.module);});
   ['jezero:modulechange','jezero:modulevisibility','jezero:languagechange','jezero:weatherchange','jezero:supportchange','online','offline'].forEach(event=>window.addEventListener(event,schedule));
   document.addEventListener('jezero:missionedited',schedule);render();
   window.JEZERO_CONTROL=Object.freeze({refresh:schedule,getOverview:()=>current});
