@@ -74,6 +74,8 @@ La duración total del viaje se introduce en soles en CHARIOT; los archivos cons
 
 ## Demo de Jezero / Jezero demo
 
+Dentro de la app: **Ayuda → Demo guiada de Jezero**. Nueve pasos en español o inglés con descargas y navegación a cada apartado. / In the app: **Help → Jezero guided demo**, with nine steps, downloads and section navigation.
+
 Tutoriales: [Español](examples/jezero-demo/00-EMPIEZA-AQUI-ES.txt) · [English](examples/jezero-demo/00-START-HERE.txt)
 
 La demo completa en inglés está incluida en [examples/jezero-demo](examples/jezero-demo/00-START-HERE.txt). No necesitas archivos del escritorio del autor.

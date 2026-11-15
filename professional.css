@@ -657,3 +657,7 @@ body[data-module="analysis"] :is(.sidebar, .details, .missionHud, .uiCanvasWelco
     white-space: nowrap;
   }
 }
+
+body.jezero-ui #tutorialDemoDownload[hidden]{display:none}
+#tutorialDemoDownload{display:block;margin:14px 0;text-align:center;text-decoration:none}
+#helpDialog .dialogFooter{flex-wrap:wrap;gap:10px}
