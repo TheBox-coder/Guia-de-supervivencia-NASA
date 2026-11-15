@@ -1,0 +1,62 @@
+{
+  "format": "JEZERO-MISSION",
+  "version": 44,
+  "mode": "distance",
+  "returnBase": false,
+  "optimizeOrder": false,
+  "interface": {
+    "language": "en",
+    "routeAnimation": false
+  },
+  "missionMeta": {
+    "missionName": "Chariot - Jezero Winding Traverse",
+    "missionCode": "JEZERO-WINDING-05",
+    "crew": "2 demonstration crew members",
+    "notes": "Five fixed waypoints form a winding one-way traverse from the historical Perseverance landing site. Real MDEM200M terrain determines local difficulty colors. Keep fixed order, return OFF and Most direct selected. Weather and vehicle operating inputs are synthetic; terrain limits are unchanged. This is not a certified Chariot driving model."
+  },
+  "params": {
+    "speed": 2,
+    "evaTime": 12,
+    "returnMargin": 0,
+    "maxSlopeLimit": 20,
+    "minTransitability": 25,
+    "minConfidence": 20
+  },
+  "points": [
+    {
+      "lat": 18.4446,
+      "lon": 77.4509,
+      "name": "P0 - Landing base",
+      "type": "base",
+      "dwellMin": 0
+    },
+    {
+      "lat": 18.457,
+      "lon": 77.413175,
+      "name": "North checkpoint",
+      "type": "target",
+      "dwellMin": 5
+    },
+    {
+      "lat": 18.417,
+      "lon": 77.37545,
+      "name": "South checkpoint",
+      "type": "target",
+      "dwellMin": 5
+    },
+    {
+      "lat": 18.41865,
+      "lon": 77.337725,
+      "name": "Delta approach",
+      "type": "target",
+      "dwellMin": 5
+    },
+    {
+      "lat": 18.41,
+      "lon": 77.3,
+      "name": "Destination",
+      "type": "target",
+      "dwellMin": 5
+    }
+  ]
+}

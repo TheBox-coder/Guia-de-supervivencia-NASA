@@ -1,0 +1,32 @@
+DUST RIDER - WINDING JEZERO DEMO (ENGLISH)
+
+ONLY THREE FILES TO IMPORT
+1. MISSION: open 01-mission-five-points.json.
+2. CHARIOT: Open pack > 02-chariot-and-support.json. This replaces the local support pack.
+3. GUIDE: import 03-weather-synthetic.json as weather observations. This replaces the local weather dataset.
+4. In MISSION, select Most direct / Shortest distance, Return to base OFF, Optimize order OFF. Click Calculate mission.
+5. Open MAP, press Fit and let the view settle. Use Panels to hide the side panels. Optional: hide Known locations and Landing sites in Layers to keep the route readable.
+
+WHAT TO SHOW
+Five waypoints with turns: the historical Perseverance landing-site base and four demonstration destinations inside Jezero. The Chariot is moving at departure. One-way route; no automatic return. Route animation is off to keep the colored line clear. Empty shelter/relay lists avoid extra map markers.
+Real elevation data produced a winding 9.71 km route in the browser, estimated 6 h 18 min. Maximum slope 15.9 degrees; minimum traversability 40/100. Terrain limits were not relaxed. Calculation requires the remote elevation service; results can change if its data change.
+
+ROUTE COLORS
+Green = Easy. Yellow = Moderate. Red = Critical. This route contains all three. Orange can also appear because the app has an additional Demanding class; it is a valid intermediate result. Colors come from the terrain-derived difficulty score, not from the dust/radiation file or the remaining 14-sol clock. A red segment is a heuristic difficulty classification, not proof that the route is safe or a certified Chariot driving limit.
+
+CHARIOT AND WEATHER
+Two crew, 42 kWh battery, proposed 1.2 kW generation; synthetic nominal demand 1.5 kW; 2-sol planning horizon; elapsed 0 sols; estimated speed 2 km/h and 4 driving hours/sol. The resource-limited reach circle is separate from route difficulty. Weather contains 72 synthetic hourly observations with dust/radiation; they are not NASA telemetry.
+Optional astronaut update in WEATHER: sol 1003, local hour 12, temperature -20 C, pressure 728 Pa, wind 4 m/s, optical depth 3.2, radiation 9.5 microSv/h, observer DEMO astronaut. The environmental projections should refit. Re-import file 03 before repeating the same sol/hour.
+
+OPTIONAL GUIDE INPUTS
+Crew 2; oxygen 1.2 kg/person; declared oxygen rate 0.09 kg/h/person; battery 1.2 kWh/person; base power 0.13 kW/person; reserve 20%; departure hour 10; surface Firm; scenario Nominal. Review and confirm equipment. These suit values are synthetic and separate from Chariot stocks. A missing-return warning is expected for this one-way vehicle demonstration.
+
+OPTIONAL CALCULATOR
+Open Chariot > Open mission and emergency calculator. Use declared battery/generator data. Set one-way distance 10 km (rounded planning allowance, not the exact routed distance), speed 2 km/h, traction 0.2 kW, auxiliary 1.3 kW and reserve 20%. The calculator evaluates a separate round trip and does not add a return to the map route.
+For its storm exercise: 24 h, essential load 1.8 kW, return distance 10 km, return speed 2 km/h, return traction 0.2 kW, margin 20%, generator ON. Expected required energy: 22.08 kWh. The calculator assumes a full battery and checks energy plus remaining life-policy time, not all consumables.
+
+SOURCE AND LIMITS
+Chariot V2 dossier: conceptual design targets, not certified hardware. Stocks, consumption rates, inspections and weather are synthetic. The map uses the app's real MDEM200M elevation service, with EVA-derived terrain rules rather than a validated Chariot mobility model. Start at 18.4446 N, 77.4509 E; finish at 18.4100 N, 77.3000 E.
+Historical landing-site reference: https://science.nasa.gov/mission/mars-2020-perseverance/location-map/
+
+Re-import 01/02/03 to restart. These files do not erase browser data until you import/confirm replacement.

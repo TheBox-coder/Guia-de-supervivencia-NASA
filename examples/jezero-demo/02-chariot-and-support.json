@@ -1,0 +1,135 @@
+{
+  "format": "JEZERO-SUPPORT",
+  "version": 1,
+  "exportedAt": "2026-11-15T05:22:41.268Z",
+  "state": {
+    "base": {
+      "lat": 18.4446,
+      "lon": 77.4509,
+      "mobility": "moving",
+      "crew": 2,
+      "hours": 49.3194,
+      "delayHours": 0,
+      "energyLossPct": 0,
+      "oxygenKg": 10,
+      "oxygenRateKgH": 0.04,
+      "waterL": 30,
+      "waterRateLH": 0.15,
+      "energyKWh": 42,
+      "batteryCapacityKWh": 42,
+      "generationKW": 1.2,
+      "powerKW": 1.5,
+      "co2CapacityKg": 6,
+      "co2RateKgH": 0.04,
+      "source": "Chariot V2 dossier pp. 1, 4: crew 2, battery 42 kWh, proposed generation 1.2 kW. All stocks, rates, full charge, position, two-sol duration and 1.5 kW draw are SYNTHETIC DEMO assumptions.",
+      "updatedAt": "2026-11-15T05:22:41.268Z",
+      "speedKmh": 2,
+      "driveHoursPerSol": 4,
+      "elapsedSols": 0
+    },
+    "resources": {
+      "waterL": 3,
+      "waterRateLH": 0.15,
+      "co2CapacityKg": 1,
+      "co2RateKgH": 0.04,
+      "thermalKWh": 1,
+      "thermalKW": 0.05,
+      "source": "SYNTHETIC DEMO: assumed operating inputs, not measured hardware data or NASA telemetry."
+    },
+    "radiation": {
+      "rateUSvH": 2.193,
+      "accumulatedMSv": 0,
+      "source": "SYNTHETIC DEMO - latest dose rate from file 03, not real telemetry or personal dose",
+      "measuredAt": "2026-11-15T05:22:41.268Z"
+    },
+    "communications": {
+      "status": "verified",
+      "source": "SYNTHETIC DEMO: assumed operating inputs, not measured hardware data or NASA telemetry.",
+      "checkedAt": "2026-11-15T05:22:41.268Z",
+      "contact": "DEMO mission control - simulated link, no live connection"
+    },
+    "criteria": {
+      "maxDurationH": 12,
+      "minWaterL": 0.5,
+      "maxDoseMSv": 1,
+      "maxSlopeDeg": 20,
+      "sensorAgeH": 168,
+      "requireReturn": false,
+      "stopOnLinkLoss": true,
+      "stopOnEquipmentFault": true,
+      "source": "SYNTHETIC DEMO: assumed operating inputs, not measured hardware data or NASA telemetry."
+    },
+    "shelters": [],
+    "relays": [],
+    "equipment": [
+      {
+        "id": "chariot-habitat",
+        "name": "Chariot V2 pressurized cabin",
+        "type": "habitat",
+        "status": "checked",
+        "critical": true,
+        "source": "SYNTHETIC DEMO: assumed operating inputs, not measured hardware data or NASA telemetry.",
+        "checkedAt": "2026-11-15T05:22:41.268Z",
+        "serviceDue": "",
+        "notes": "Simulated inspection status for interface demonstration only; no real hardware inspection."
+      },
+      {
+        "id": "chariot-mobility",
+        "name": "Chariot V2 mobility system",
+        "type": "rover",
+        "status": "checked",
+        "critical": true,
+        "source": "SYNTHETIC DEMO: assumed operating inputs, not measured hardware data or NASA telemetry.",
+        "checkedAt": "2026-11-15T05:22:41.268Z",
+        "serviceDue": "",
+        "notes": "Simulated inspection status for interface demonstration only; no real hardware inspection."
+      },
+      {
+        "id": "suit-ev1",
+        "name": "DEMO suit EV1",
+        "type": "suit",
+        "status": "checked",
+        "critical": true,
+        "source": "SYNTHETIC DEMO: assumed operating inputs, not measured hardware data or NASA telemetry.",
+        "checkedAt": "2026-11-15T05:22:41.268Z",
+        "serviceDue": "",
+        "notes": "Simulated inspection status for interface demonstration only; no real hardware inspection."
+      },
+      {
+        "id": "suit-ev2",
+        "name": "DEMO suit EV2",
+        "type": "suit",
+        "status": "checked",
+        "critical": true,
+        "source": "SYNTHETIC DEMO: assumed operating inputs, not measured hardware data or NASA telemetry.",
+        "checkedAt": "2026-11-15T05:22:41.268Z",
+        "serviceDue": "",
+        "notes": "Simulated inspection status for interface demonstration only; no real hardware inspection."
+      },
+      {
+        "id": "radio",
+        "name": "DEMO radio",
+        "type": "radio",
+        "status": "checked",
+        "critical": true,
+        "source": "SYNTHETIC DEMO: assumed operating inputs, not measured hardware data or NASA telemetry.",
+        "checkedAt": "2026-11-15T05:22:41.268Z",
+        "serviceDue": "",
+        "notes": "Simulated inspection status for interface demonstration only; no real hardware inspection."
+      },
+      {
+        "id": "dosimeter",
+        "name": "DEMO dosimeter",
+        "type": "dosimeter",
+        "status": "checked",
+        "critical": true,
+        "source": "SYNTHETIC DEMO: assumed operating inputs, not measured hardware data or NASA telemetry.",
+        "checkedAt": "2026-11-15T05:22:41.268Z",
+        "serviceDue": "",
+        "notes": "Simulated inspection status for interface demonstration only; no real hardware inspection."
+      }
+    ],
+    "procedures": [],
+    "log": []
+  }
+}

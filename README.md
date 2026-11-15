@@ -71,3 +71,17 @@ CLIMA toma la posición declarada del Chariot o, si no existe, el punto de salid
 El formulario de CLIMA permite añadir mediciones del astronauta una vez cargada una base histórica válida. Conserva fuente, posición y hora de registro; valida límites y duplicados y vuelve a entrenar el modelo. Si cambia la zona, CLIMA y los presupuestos EVA dejan de usar la referencia distante hasta cargar datos locales. Los errores de almacenamiento no reemplazan los datos guardados.
 
 La duración total del viaje se introduce en soles en CHARIOT; los archivos conservan horas para seguir siendo compatibles. Un sol equivale a 24,6597 horas terrestres. El límite de soporte vital de esta propuesta es de 14 soles: la alerta aparece al superarlo, también al añadir retrasos. Es un criterio del equipo, independiente de las reservas calculadas, no una especificación de hardware certificada.
+
+## Demo de Jezero / Jezero demo
+
+La demo completa en inglés está incluida en [examples/jezero-demo](examples/jezero-demo/00-START-HERE.txt). No necesitas archivos del escritorio del autor.
+
+1. Ejecuta `npm start` y abre http://localhost:8000.
+2. En Misión, importa [01-mission-five-points.json](examples/jezero-demo/01-mission-five-points.json).
+3. En Chariot, abre el paquete [02-chariot-and-support.json](examples/jezero-demo/02-chariot-and-support.json). Reemplaza el paquete local: exporta antes tus datos si quieres conservarlos.
+4. En Clima, importa [03-weather-synthetic.json](examples/jezero-demo/03-weather-synthetic.json). Reemplaza las observaciones locales.
+5. Selecciona inglés, calcula la misión y abre la vista 3D. Mantén desactivados el regreso a base y la optimización del orden.
+
+English: run `npm start`, open http://localhost:8000 and follow [the complete English instructions](examples/jezero-demo/00-START-HERE.txt). Import files 01 in Mission, 02 in Chariot and 03 in Weather, then calculate the mission. Back up existing support/weather data before importing replacements.
+
+Incluye cinco puntos dentro de Jezero, Chariot para dos personas y observaciones sintéticas de clima, polvo y radiación. Los datos de operación son de demostración; no son telemetría NASA. El cálculo y el relieve 3D requieren acceso al servicio de elevación; no es una demo completamente sin conexión.

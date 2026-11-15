@@ -1,0 +1,666 @@
+{
+  "format": "JEZERO-WEATHER",
+  "version": 1,
+  "source": {
+    "name": "SYNTHETIC DEMO - temperature, dust and radiation; artificial hourly data, not MEDA or dosimeter telemetry"
+  },
+  "location": {
+    "lat": 18.4446,
+    "lon": 77.4509
+  },
+  "units": {
+    "temperature": "C",
+    "pressure": "Pa",
+    "wind": "m/s"
+  },
+  "records": [
+    {
+      "sol": 1000,
+      "localHour": 0,
+      "temperatureC": -69.14,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.75,
+      "doseRateUSvH": 2.2
+    },
+    {
+      "sol": 1000,
+      "localHour": 1,
+      "temperatureC": -72.32,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.743,
+      "doseRateUSvH": 2.193
+    },
+    {
+      "sol": 1000,
+      "localHour": 2,
+      "temperatureC": -74.32,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.723,
+      "doseRateUSvH": 2.173
+    },
+    {
+      "sol": 1000,
+      "localHour": 3,
+      "temperatureC": -75,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.691,
+      "doseRateUSvH": 2.141
+    },
+    {
+      "sol": 1000,
+      "localHour": 4,
+      "temperatureC": -74.32,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.65,
+      "doseRateUSvH": 2.1
+    },
+    {
+      "sol": 1000,
+      "localHour": 5,
+      "temperatureC": -72.32,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.602,
+      "doseRateUSvH": 2.052
+    },
+    {
+      "sol": 1000,
+      "localHour": 6,
+      "temperatureC": -69.14,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.55,
+      "doseRateUSvH": 2
+    },
+    {
+      "sol": 1000,
+      "localHour": 7,
+      "temperatureC": -65,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.498,
+      "doseRateUSvH": 1.948
+    },
+    {
+      "sol": 1000,
+      "localHour": 8,
+      "temperatureC": -60.18,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.45,
+      "doseRateUSvH": 1.9
+    },
+    {
+      "sol": 1000,
+      "localHour": 9,
+      "temperatureC": -55,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.409,
+      "doseRateUSvH": 1.859
+    },
+    {
+      "sol": 1000,
+      "localHour": 10,
+      "temperatureC": -49.82,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.377,
+      "doseRateUSvH": 1.827
+    },
+    {
+      "sol": 1000,
+      "localHour": 11,
+      "temperatureC": -45,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.357,
+      "doseRateUSvH": 1.807
+    },
+    {
+      "sol": 1000,
+      "localHour": 12,
+      "temperatureC": -40.86,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.35,
+      "doseRateUSvH": 1.8
+    },
+    {
+      "sol": 1000,
+      "localHour": 13,
+      "temperatureC": -37.68,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.357,
+      "doseRateUSvH": 1.807
+    },
+    {
+      "sol": 1000,
+      "localHour": 14,
+      "temperatureC": -35.68,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.377,
+      "doseRateUSvH": 1.827
+    },
+    {
+      "sol": 1000,
+      "localHour": 15,
+      "temperatureC": -35,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.409,
+      "doseRateUSvH": 1.859
+    },
+    {
+      "sol": 1000,
+      "localHour": 16,
+      "temperatureC": -35.68,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.45,
+      "doseRateUSvH": 1.9
+    },
+    {
+      "sol": 1000,
+      "localHour": 17,
+      "temperatureC": -37.68,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.498,
+      "doseRateUSvH": 1.948
+    },
+    {
+      "sol": 1000,
+      "localHour": 18,
+      "temperatureC": -40.86,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.55,
+      "doseRateUSvH": 2
+    },
+    {
+      "sol": 1000,
+      "localHour": 19,
+      "temperatureC": -45,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.602,
+      "doseRateUSvH": 2.052
+    },
+    {
+      "sol": 1000,
+      "localHour": 20,
+      "temperatureC": -49.82,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.65,
+      "doseRateUSvH": 2.1
+    },
+    {
+      "sol": 1000,
+      "localHour": 21,
+      "temperatureC": -55,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.691,
+      "doseRateUSvH": 2.141
+    },
+    {
+      "sol": 1000,
+      "localHour": 22,
+      "temperatureC": -60.18,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.723,
+      "doseRateUSvH": 2.173
+    },
+    {
+      "sol": 1000,
+      "localHour": 23,
+      "temperatureC": -65,
+      "pressurePa": 720,
+      "windMps": 3,
+      "opticalDepth": 0.743,
+      "doseRateUSvH": 2.193
+    },
+    {
+      "sol": 1001,
+      "localHour": 0,
+      "temperatureC": -68.64,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 1,
+      "doseRateUSvH": 2.2
+    },
+    {
+      "sol": 1001,
+      "localHour": 1,
+      "temperatureC": -71.82,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.993,
+      "doseRateUSvH": 2.193
+    },
+    {
+      "sol": 1001,
+      "localHour": 2,
+      "temperatureC": -73.82,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.973,
+      "doseRateUSvH": 2.173
+    },
+    {
+      "sol": 1001,
+      "localHour": 3,
+      "temperatureC": -74.5,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.941,
+      "doseRateUSvH": 2.141
+    },
+    {
+      "sol": 1001,
+      "localHour": 4,
+      "temperatureC": -73.82,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.9,
+      "doseRateUSvH": 2.1
+    },
+    {
+      "sol": 1001,
+      "localHour": 5,
+      "temperatureC": -71.82,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.852,
+      "doseRateUSvH": 2.052
+    },
+    {
+      "sol": 1001,
+      "localHour": 6,
+      "temperatureC": -68.64,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.8,
+      "doseRateUSvH": 2
+    },
+    {
+      "sol": 1001,
+      "localHour": 7,
+      "temperatureC": -64.5,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.748,
+      "doseRateUSvH": 1.948
+    },
+    {
+      "sol": 1001,
+      "localHour": 8,
+      "temperatureC": -59.68,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.7,
+      "doseRateUSvH": 1.9
+    },
+    {
+      "sol": 1001,
+      "localHour": 9,
+      "temperatureC": -54.5,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.659,
+      "doseRateUSvH": 1.859
+    },
+    {
+      "sol": 1001,
+      "localHour": 10,
+      "temperatureC": -49.32,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.627,
+      "doseRateUSvH": 1.827
+    },
+    {
+      "sol": 1001,
+      "localHour": 11,
+      "temperatureC": -44.5,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.607,
+      "doseRateUSvH": 1.807
+    },
+    {
+      "sol": 1001,
+      "localHour": 12,
+      "temperatureC": -40.36,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.6,
+      "doseRateUSvH": 1.8
+    },
+    {
+      "sol": 1001,
+      "localHour": 13,
+      "temperatureC": -37.18,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.607,
+      "doseRateUSvH": 1.807
+    },
+    {
+      "sol": 1001,
+      "localHour": 14,
+      "temperatureC": -35.18,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.627,
+      "doseRateUSvH": 1.827
+    },
+    {
+      "sol": 1001,
+      "localHour": 15,
+      "temperatureC": -34.5,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.659,
+      "doseRateUSvH": 1.859
+    },
+    {
+      "sol": 1001,
+      "localHour": 16,
+      "temperatureC": -35.18,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.7,
+      "doseRateUSvH": 1.9
+    },
+    {
+      "sol": 1001,
+      "localHour": 17,
+      "temperatureC": -37.18,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.748,
+      "doseRateUSvH": 1.948
+    },
+    {
+      "sol": 1001,
+      "localHour": 18,
+      "temperatureC": -40.36,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.8,
+      "doseRateUSvH": 2
+    },
+    {
+      "sol": 1001,
+      "localHour": 19,
+      "temperatureC": -44.5,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.852,
+      "doseRateUSvH": 2.052
+    },
+    {
+      "sol": 1001,
+      "localHour": 20,
+      "temperatureC": -49.32,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.9,
+      "doseRateUSvH": 2.1
+    },
+    {
+      "sol": 1001,
+      "localHour": 21,
+      "temperatureC": -54.5,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.941,
+      "doseRateUSvH": 2.141
+    },
+    {
+      "sol": 1001,
+      "localHour": 22,
+      "temperatureC": -59.68,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.973,
+      "doseRateUSvH": 2.173
+    },
+    {
+      "sol": 1001,
+      "localHour": 23,
+      "temperatureC": -64.5,
+      "pressurePa": 722,
+      "windMps": 3,
+      "opticalDepth": 0.993,
+      "doseRateUSvH": 2.193
+    },
+    {
+      "sol": 1002,
+      "localHour": 0,
+      "temperatureC": -68.14,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 1.25,
+      "doseRateUSvH": 2.2
+    },
+    {
+      "sol": 1002,
+      "localHour": 1,
+      "temperatureC": -71.32,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 1.243,
+      "doseRateUSvH": 2.193
+    },
+    {
+      "sol": 1002,
+      "localHour": 2,
+      "temperatureC": -73.32,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 1.223,
+      "doseRateUSvH": 2.173
+    },
+    {
+      "sol": 1002,
+      "localHour": 3,
+      "temperatureC": -74,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 1.191,
+      "doseRateUSvH": 2.141
+    },
+    {
+      "sol": 1002,
+      "localHour": 4,
+      "temperatureC": -73.32,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 1.15,
+      "doseRateUSvH": 2.1
+    },
+    {
+      "sol": 1002,
+      "localHour": 5,
+      "temperatureC": -71.32,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 1.102,
+      "doseRateUSvH": 2.052
+    },
+    {
+      "sol": 1002,
+      "localHour": 6,
+      "temperatureC": -68.14,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 1.05,
+      "doseRateUSvH": 2
+    },
+    {
+      "sol": 1002,
+      "localHour": 7,
+      "temperatureC": -64,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 0.998,
+      "doseRateUSvH": 1.948
+    },
+    {
+      "sol": 1002,
+      "localHour": 8,
+      "temperatureC": -59.18,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 0.95,
+      "doseRateUSvH": 1.9
+    },
+    {
+      "sol": 1002,
+      "localHour": 9,
+      "temperatureC": -54,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 0.909,
+      "doseRateUSvH": 1.859
+    },
+    {
+      "sol": 1002,
+      "localHour": 10,
+      "temperatureC": -48.82,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 0.877,
+      "doseRateUSvH": 1.827
+    },
+    {
+      "sol": 1002,
+      "localHour": 11,
+      "temperatureC": -44,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 0.857,
+      "doseRateUSvH": 1.807
+    },
+    {
+      "sol": 1002,
+      "localHour": 12,
+      "temperatureC": -39.86,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 0.85,
+      "doseRateUSvH": 1.8
+    },
+    {
+      "sol": 1002,
+      "localHour": 13,
+      "temperatureC": -36.68,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 2.657,
+      "doseRateUSvH": 1.807
+    },
+    {
+      "sol": 1002,
+      "localHour": 14,
+      "temperatureC": -34.68,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 0.877,
+      "doseRateUSvH": 1.827
+    },
+    {
+      "sol": 1002,
+      "localHour": 15,
+      "temperatureC": -34,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 0.909,
+      "doseRateUSvH": 7.859
+    },
+    {
+      "sol": 1002,
+      "localHour": 16,
+      "temperatureC": -34.68,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 0.95,
+      "doseRateUSvH": 1.9
+    },
+    {
+      "sol": 1002,
+      "localHour": 17,
+      "temperatureC": -36.68,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 0.998,
+      "doseRateUSvH": 1.948
+    },
+    {
+      "sol": 1002,
+      "localHour": 18,
+      "temperatureC": -39.86,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 1.05,
+      "doseRateUSvH": 2
+    },
+    {
+      "sol": 1002,
+      "localHour": 19,
+      "temperatureC": -44,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 1.102,
+      "doseRateUSvH": 2.052
+    },
+    {
+      "sol": 1002,
+      "localHour": 20,
+      "temperatureC": -48.82,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 1.15,
+      "doseRateUSvH": 2.1
+    },
+    {
+      "sol": 1002,
+      "localHour": 21,
+      "temperatureC": -54,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 1.191,
+      "doseRateUSvH": 2.141
+    },
+    {
+      "sol": 1002,
+      "localHour": 22,
+      "temperatureC": -59.18,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 1.223,
+      "doseRateUSvH": 2.173
+    },
+    {
+      "sol": 1002,
+      "localHour": 23,
+      "temperatureC": -64,
+      "pressurePa": 724,
+      "windMps": 3,
+      "opticalDepth": 1.243,
+      "doseRateUSvH": 2.193
+    }
+  ]
+}

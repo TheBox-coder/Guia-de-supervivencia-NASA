@@ -12,6 +12,7 @@ const PORT = Number(process.env.PORT || 8000);
 const NOMENCLATURE_ENDPOINT = 'https://planetarynames.wr.usgs.gov/nomenclature/SearchResults';
 const nomenclatureCache = new Map();
 const PUBLIC_FILES = new Set([
+  "/examples/jezero-demo/00-START-HERE.txt","/examples/jezero-demo/01-mission-five-points.json","/examples/jezero-demo/02-chariot-and-support.json","/examples/jezero-demo/03-weather-synthetic.json",
   '/waypoint-list.css','/route-intel.css','/modules/route-intel.js','/route-scene.css','/modules/route-scene.js',
   '/control.css','/components.css','/modules/assurance.cjs','/modules/mission-control-engine.cjs','/modules/mission-control.js','/modules/dashboard.js','/modules/command-palette.js',
   '/modules/chariot-calculator-engine.cjs','/modules/chariot-calculator.js','/operations.css','/modules/operations-engine.cjs','/modules/operations-map.js','/modules/operations.js',
