@@ -62,6 +62,7 @@
     badge.dataset.state=best?'detail':pending?'loading':zoom>7&&mode!=='mola'?'limited':'global';
     badge.textContent=best?`${best.name} · ${best.resolution}`:pending?`${pending.name} · ${failures.has(pending.id)?'servicio no disponible':'cargando detalle'}`:mode==='mola'?'MOLA / HRSC · relieve':zoom>7?'Viking global · límite de detalle':'Viking · mosaico global';
     badge.title='Detalle de imagen, no resolución de cálculo. DEM del planificador: ~200 m. Los mosaicos regionales pueden tener huecos.';
+    if(typeof updateMolaLegend==='function')updateMolaLegend(mode);
     document.querySelectorAll('[data-imagery-detail]').forEach(el=>el.checked=enabled);
     document.querySelectorAll('[data-thermal-themis]').forEach(el=>el.checked=thermal);
   }

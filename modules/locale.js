@@ -1,6 +1,17 @@
 /* Copy added after the original ES/EN release. Numeric patterns preserve values and declared source names. */
 (() => {
  const pairs=[
+ ['Elevación MOLA + HRSC','MOLA + HRSC elevation'],
+ ['Más bajo','Lower'],['Más alto','Higher'],
+ ['Violeta y azul: zonas bajas.','Purple and blue: low elevations.'],
+ ['Verde y amarillo: elevación intermedia.','Green and yellow: intermediate elevations.'],
+ ['Naranja, rojo y marrón: zonas altas.','Orange, red and brown: high elevations.'],
+ ['Los colores indican elevación, no pendiente. El sombreado representa la forma del relieve.','Colors indicate elevation, not slope. Shading represents the shape of the terrain.'],
+ ['Escala cualitativa: la elevación en metros se obtiene del DEM al calcular la ruta.','Qualitative scale: elevation in meters comes from the DEM when calculating the route.'],
+ ['En Híbrido, la imagen modifica la apariencia de los colores.','In Hybrid mode, imagery changes the appearance of the colors.'],
+ ['El estilo visual altera los colores. Selecciona «Topografía · color MOLA» para compararlos.','The visual style alters the colors. Select “Topography · MOLA color” to compare them.'],
+ ['La capa térmica THEMIS puede cubrir los colores de elevación.','The THEMIS thermal layer can cover the elevation colors.'],
+ ['Fuente de la capa: NASA Mars Trek','Layer source: NASA Mars Trek'],
  ["Predicción meteorológica de la misión","Mission weather forecast"],
  ["Ver predicción meteorológica ↗","View weather forecast ↗"],
  ["Extrapolación del patrón diario ajustado (armónico) a las últimas muestras; cada sol repite la misma curva. La banda es error residual, no intervalo de confianza calibrado. No predice tormentas.","Extrapolation of the fitted (harmonic) daily pattern from the latest samples; every sol repeats the same curve. The band is residual error, not a calibrated confidence interval. It does not predict storms."],

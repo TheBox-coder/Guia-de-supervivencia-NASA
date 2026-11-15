@@ -17,6 +17,10 @@ function createEngine({getElevations,optimizeOrderEnabled=()=>true}){
     const numericValue=validation.numeric,finiteValue=validation.finite;
     const normalizeLon=lon=>{const x=((lon+180)%360+360)%360-180;return Math.abs(x)===180?180:x;};
     const pointCoordKey=p=>`${Number(p?.lat).toFixed(5)},${Number(p?.lon).toFixed(5)}`;
+    // Factores adicionales a la pendiente (V45). Todos salen del propio DEM o de datos que el usuario declara;
+    // lo que no existe queda en null y no se inventa. Los pesos son heurísticos de planificación, no mediciones.
+    const FACTORS=Object.freeze({version:'1.0',crossSlopeSoftDeg:15,reliefSoftM:40,hollowM:20,sharpTurnDeg:60,
+      note:'Pesos heurísticos de planificación; no son límites de seguridad ni mediciones.'});
 function haversine(a,b){
   const p1=a.lat*Math.PI/180,p2=b.lat*Math.PI/180,dp=(b.lat-a.lat)*Math.PI/180,dl=shortestLonDelta(a.lon,b.lon)*Math.PI/180;
   const h=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
@@ -27,6 +31,8 @@ function pathMetrics(path,params){
   let maxUphill=0,maxDownhill=0,uphillWeighted=0,downhillWeighted=0;
   let transitWeighted=0,confidenceWeighted=0,roughWeighted=0,metricDistance=0;
   let minTransitability=100,minConfidence=100,uncertainDistance=0,difficultDistance=0;
+  let crossWeighted=0,crossDistance=0,maxCross=0,reliefWeighted=0,reliefDistance=0,hollowDistance=0,effortWeighted=0,effortDistance=0;
+  let turnTotal=0,sharpTurns=0,refugeWeighted=0,refugeDistance=0,maxRefuge=null,relayKnownDistance=0,relayCoveredDistance=0;
   for(let i=1;i<path.length;i++){
     const a=path[i-1],b=path[i];
     const dist=haversine(a,b); const e1=a.elevationM,e2=b.elevationM;
@@ -53,6 +59,19 @@ function pathMetrics(path,params){
     }
     if(Number.isFinite(analysis.roughnessDeg)) roughWeighted+=analysis.roughnessDeg*dist;
     metricDistance+=dist;
+    if(dist>0&&Number.isFinite(analysis.signedSlopeDeg)){
+      const up=Math.max(0,analysis.signedSlopeDeg),down=Math.max(0,-analysis.signedSlopeDeg),cross=analysis.crossSlopeDeg||0;
+      // Índice relativo (1 = terreno llano y liso). No es un modelo metabólico calibrado.
+      const effort=(1+.035*up+.012*down+.02*cross)*(1+clamp((analysis.roughnessDeg||0)/20,0,.5));
+      effortWeighted+=effort*dist;effortDistance+=dist;
+      if(Number.isFinite(analysis.crossSlopeDeg)){crossWeighted+=cross*dist;crossDistance+=dist;maxCross=Math.max(maxCross,cross);path[i].crossSlopeDeg=cross;}
+      if(Number.isFinite(analysis.reliefM)){reliefWeighted+=analysis.reliefM*dist;reliefDistance+=dist;}
+      if(Number.isFinite(analysis.curvatureM)&&analysis.curvatureM<-FACTORS.hollowM)hollowDistance+=dist;
+      const ex=edgeExposure(a,b,params);
+      if(ex.refugeKm!==null){refugeWeighted+=ex.refugeKm*dist;refugeDistance+=dist;maxRefuge=maxRefuge===null?ex.refugeKm:Math.max(maxRefuge,ex.refugeKm);}
+      if(ex.relayCovered!==null){relayKnownDistance+=dist;if(ex.relayCovered)relayCoveredDistance+=dist;}
+    }
+    if(i>=2&&dist>0&&haversine(path[i-2],a)>0){const t=turnAngleDeg(path[i-2],a,b);turnTotal+=t;if(t>=FACTORS.sharpTurnDeg)sharpTurns++;}
   }
   return {
     distanceKm:d,
@@ -72,7 +91,22 @@ function pathMetrics(path,params){
     avgRoughnessDeg:metricDistance?roughWeighted/metricDistance:null,
     uncertainDistanceKm:uncertainDistance,
     difficultDistanceKm:difficultDistance,
-    segments:count
+    segments:count,
+    avgCrossSlopeDeg:crossDistance?crossWeighted/crossDistance:null,
+    maxCrossSlopeDeg:crossDistance?maxCross:null,
+    crossDistanceKm:crossDistance,
+    avgReliefM:reliefDistance?reliefWeighted/reliefDistance:null,
+    reliefDistanceKm:reliefDistance,
+    hollowDistanceKm:hollowDistance,
+    effortIndex:effortDistance?effortWeighted/effortDistance:null,
+    effortDistanceKm:effortDistance,
+    turnTotalDeg:turnTotal,
+    sharpTurns,
+    avgRefugeDistanceKm:refugeDistance?refugeWeighted/refugeDistance:null,
+    refugeDistanceKm:refugeDistance,
+    maxRefugeDistanceKm:maxRefuge,
+    relayKnownDistanceKm:relayKnownDistance,
+    relayCoveredDistanceKm:relayCoveredDistance
   };
 }
 function nearestNode(grid,p){ return grid.nodes.reduce((best,n)=>!best||haversine(n,p)<haversine(best,p)?n:best,null); }
@@ -84,6 +118,39 @@ function heuristic(n,goal,mode,params){
   // Mantener la heurística neutra evita que el A* esconda diferencias introducidas
   // por los costos de terreno de cada estrategia.
   return haversine(n,goal);
+}
+function localKm(a,b){
+  const kmPerDeg=Math.PI*MARTIAN_RADIUS/180,midLat=(a.lat+b.lat)/2*Math.PI/180;
+  const e=shortestLonDelta(a.lon,b.lon)*kmPerDeg*Math.max(.08,Math.cos(midLat)),n=(b.lat-a.lat)*kmPerDeg;
+  return {e,n,len:Math.hypot(e,n)};
+}
+function turnAngleDeg(a,b,c){
+  const u=localKm(a,b),v=localKm(b,c);
+  if(u.len<1e-9||v.len<1e-9)return 0;
+  return Math.acos(clamp((u.e*v.e+u.n*v.n)/(u.len*v.len),-1,1))*180/Math.PI;
+}
+const contextCache=new WeakMap();
+function routeContext(params){
+  const c=params&&typeof params.context==='object'?params.context:null;
+  if(!c)return {dustTau:null,windMps:null,doseRateUSvH:null,refuges:[],relays:[],present:false};
+  if(contextCache.has(c))return contextCache.get(c);
+  const num=v=>finiteValue(v)?Number(v):null;
+  const pts=list=>Array.isArray(list)?list.filter(x=>finiteValue(x?.lat)&&finiteValue(x?.lon)).map(x=>({lat:Number(x.lat),lon:Number(x.lon),radiusKm:num(x.radiusKm)})):[];
+  const out={dustTau:num(c.dustTau),windMps:num(c.windMps),doseRateUSvH:num(c.doseRateUSvH),refuges:pts(c.refuges),relays:pts(c.relays).filter(r=>r.radiusKm>0),present:true};
+  contextCache.set(c,out);return out;
+}
+// Severidades 0..1 del entorno declarado. Solo ajustan tiempos y costos; no bloquean.
+function environmentSeverity(ctx){
+  return {dust:ctx.dustTau===null?0:clamp((ctx.dustTau-.5)/2.5,0,1),wind:ctx.windMps===null?0:clamp((ctx.windMps-10)/20,0,1),radiation:ctx.doseRateUSvH===null?0:clamp(ctx.doseRateUSvH/50,0,1)};
+}
+function nearestKm(p,list){let best=Infinity;for(const r of list)best=Math.min(best,haversine(p,r));return best;}
+function edgeExposure(a,b,params){
+  const ctx=routeContext(params),mid={lat:(a.lat+b.lat)/2,lon:interpolateLon(a.lon,b.lon,.5)};
+  const walkback=finiteValue(params?.walkbackKm)?Number(params.walkbackKm):EVA_LIMITS.walkbackKm;
+  const refugeKm=ctx.refuges.length?nearestKm(mid,ctx.refuges):null;
+  let relayCovered=null;
+  if(ctx.relays.length)relayCovered=ctx.relays.some(r=>haversine(mid,r)<=r.radiusKm);
+  return {refugeKm,refugeNorm:refugeKm===null?0:clamp((refugeKm-walkback*.5)/walkback,0,1.5),relayCovered};
 }
 function analyzeEdge(a,b,params){
   const d=haversine(a,b);
@@ -99,12 +166,33 @@ function analyzeEdge(a,b,params){
   const baseTransitability=baseVals.length?baseVals.reduce((x,y)=>x+y,0)/baseVals.length:50;
   const directionalPenalty=signedSlopeDeg>=0 ? absSlope*.75 : absSlope*.45;
   const transitability=clamp(baseTransitability-directionalPenalty,0,100);
+  const ge=[a.gradE,b.gradE].filter(Number.isFinite),gn=[a.gradN,b.gradN].filter(Number.isFinite);
+  let crossSlopeDeg=null;
+  if(ge.length&&gn.length){
+    const u=localKm(a,b);
+    if(u.len>0){
+      const gE=ge.reduce((x,y)=>x+y,0)/ge.length,gN=gn.reduce((x,y)=>x+y,0)/gn.length;
+      crossSlopeDeg=Math.atan(Math.abs(gE*(-u.n/u.len)+gN*(u.e/u.len)))*180/Math.PI;
+    }
+  }
+  const reliefVals=[a.reliefM,b.reliefM].filter(Number.isFinite),curvVals=[a.curvatureM,b.curvatureM].filter(Number.isFinite);
+  const reliefM=reliefVals.length?reliefVals.reduce((x,y)=>x+y,0)/reliefVals.length:null;
+  const curvatureM=curvVals.length?Math.min(...curvVals):null;
   const reasons=[];
   if(absSlope>params.maxSlopeLimit) reasons.push(`pendiente ${absSlope.toFixed(1)}° > ${params.maxSlopeLimit.toFixed(1)}°`);
   if(transitability<params.minTransitability) reasons.push(`transitabilidad ${transitability.toFixed(0)} < ${params.minTransitability.toFixed(0)}`);
   if(confidence<params.minConfidence) reasons.push(`calidad de muestreo ${confidence.toFixed(0)}% < ${params.minConfidence.toFixed(0)}%`);
-  return {distanceKm:d,riseM:rise,signedSlopeDeg,absSlopeDeg:absSlope,roughnessDeg,confidence,transitability,blocked:reasons.length>0,reasons};
+  return {distanceKm:d,riseM:rise,signedSlopeDeg,absSlopeDeg:absSlope,roughnessDeg,crossSlopeDeg,reliefM,curvatureM,confidence,transitability,blocked:reasons.length>0,reasons};
 }
+// Dificultad local 0..100 de un segmento, para colorear la ruta. Mezcla pendiente, transitabilidad, pendiente lateral y depresiones.
+function edgeDifficulty(a,b,params){
+  const x=analyzeEdge(a,b,params);
+  if(!Number.isFinite(x.distanceKm)||x.signedSlopeDeg===null)return null;
+  const limit=Math.max(1,Number(params?.maxSlopeLimit)||20);
+  const hollow=x.curvatureM!==null&&x.curvatureM<-FACTORS.hollowM?1:0;
+  return Math.round(clamp((100-x.transitability)*.6+x.absSlopeDeg/limit*35+clamp((x.crossSlopeDeg||0)/FACTORS.crossSlopeSoftDeg,0,1)*15+hollow*10,0,100));
+}
+function difficultyClass(v){ if(!Number.isFinite(v))return 'unknown'; if(v<25)return 'easy'; if(v<45)return 'moderate'; if(v<65)return 'demanding'; return 'critical'; }
 function edgeCost(a,b,mode,params){
   const x=analyzeEdge(a,b,params);
   if(x.blocked || !Number.isFinite(x.distanceKm)) return Infinity;
@@ -119,8 +207,16 @@ function edgeCost(a,b,mode,params){
   // V42: las estrategias tienen objetivos deliberadamente distintos. Los límites
   // duros se aplican arriba en analyzeEdge() para las tres por igual.
   if(mode==='distance') return d;
-  if(mode==='risk') return d*(1+directionalSlopeNorm*3.15+transitPenalty*3.25+uncertaintyPenalty*2.45+roughPenalty*1.65)+travelHours*.45;
-  return d*(1+directionalSlopeNorm*1.15+transitPenalty*1.20+uncertaintyPenalty*.90+roughPenalty*.62)+travelHours*.11;
+  // V45: factores adicionales. Sin DEM suficiente o sin contexto declarado valen 0, y el costo es el de V44.
+  const crossPenalty=clamp((x.crossSlopeDeg||0)/FACTORS.crossSlopeSoftDeg,0,1.5);
+  const reliefPenalty=clamp((x.reliefM||0)/FACTORS.reliefSoftM,0,1.5);
+  const hollowPenalty=x.curvatureM!==null&&x.curvatureM<0?clamp(-x.curvatureM/(FACTORS.hollowM*1.5),0,1):0;
+  const ctx=routeContext(params),env=environmentSeverity(ctx);
+  const exposure=ctx.present?edgeExposure(a,b,params):{refugeNorm:0,relayCovered:null};
+  const commsGap=exposure.relayCovered===false?1:0;
+  const envTime=travelHours*(env.dust*1.1+env.wind*.4+env.radiation*.9);
+  if(mode==='risk') return d*(1+directionalSlopeNorm*3.15+transitPenalty*3.25+uncertaintyPenalty*2.45+roughPenalty*1.65+crossPenalty*1.9+reliefPenalty*.9+hollowPenalty*1.1+exposure.refugeNorm*1.6+commsGap*.7)+travelHours*.45+envTime*.45;
+  return d*(1+directionalSlopeNorm*1.15+transitPenalty*1.20+uncertaintyPenalty*.90+roughPenalty*.62+crossPenalty*.70+reliefPenalty*.30+hollowPenalty*.40+exposure.refugeNorm*.55+commsGap*.22)+travelHours*.11+envTime*.11;
 }
 function aStar(grid,start,goal,mode,params){
   const open=[start], came=new Map(), g=new Map([[key(start),0]]), f=new Map([[key(start),heuristic(start,goal,mode,params)]]);
@@ -131,8 +227,11 @@ function aStar(grid,start,goal,mode,params){
       const path=[]; let n=cur; while(n){path.push(n);n=came.get(key(n));} return path.reverse();
     }
     for(const nb of neighbors(cur,grid)){
-      const edge=edgeCost(cur,nb,mode,params);
+      let edge=edgeCost(cur,nb,mode,params);
       if(!Number.isFinite(edge)) continue;
+      // V45: los giros bruscos cuestan tiempo y estabilidad con traje. Solo se penaliza fuera de la estrategia de distancia.
+      const prev=came.get(key(cur));
+      if(prev&&mode!=='distance'){const turn=turnAngleDeg(prev,cur,nb);if(turn>0)edge+=haversine(cur,nb)*(mode==='risk'?.34:.14)*(turn/180);}
       const tentative=(g.get(key(cur))??Infinity)+edge;
       if(tentative<(g.get(key(nb))??Infinity)){
         came.set(key(nb),cur);g.set(key(nb),tentative);f.set(key(nb),tentative+heuristic(nb,goal,mode,params));
@@ -215,7 +314,14 @@ function annotateGridTerrain(grid){
     const localRoughnessDeg=slopes.length?stddev(slopes):null;
     const localRoughnessM=elevations.length>1?stddev(elevations):null;
     const baseTransitability=ownValid?clamp(100-(maxLocalSlopeDeg||0)*2.35-(localRoughnessDeg||0)*2.0-(100-confidence)*.22,0,100):0;
-    Object.assign(node,{dataConfidence:confidence,maxLocalSlopeDeg,localRoughnessDeg,localRoughnessM,baseTransitability});
+    let sxx=0,syy=0,sxz=0,syz=0,absDiff=0,sumNb=0,nbCount=0;
+    if(ownValid)for(const nb of validNeighbors){
+      const o=localKm(node,nb),dx=o.e*1000,dy=o.n*1000,dz=nb.elevationM-node.elevationM;
+      sxx+=dx*dx;sxz+=dx*dz;syy+=dy*dy;syz+=dy*dz;absDiff+=Math.abs(dz);sumNb+=nb.elevationM;nbCount++;
+    }
+    const gradE=sxx>0?sxz/sxx:null,gradN=syy>0?syz/syy:null;
+    const reliefM=nbCount?absDiff/nbCount:null,curvatureM=nbCount?node.elevationM-sumNb/nbCount:null;
+    Object.assign(node,{dataConfidence:confidence,maxLocalSlopeDeg,localRoughnessDeg,localRoughnessM,baseTransitability,gradE,gradN,reliefM,curvatureM});
   }
   grid.medianSpacingKm=medianSpacingKm;
   grid.densityFactor=densityFactor;
@@ -253,8 +359,8 @@ async function calculateLeg(a,b,mode,params,terrainCache=null){
     for(const node of grid.nodes)for(const next of neighbors(node,grid))for(const reason of analyzeEdge(node,next,params).reasons)reasons.add(reason);
     throw new Error(`No se encontró una trayectoria entre ${a.name} y ${b.name}. Límites: pendiente ≤ ${params.maxSlopeLimit}°, transitabilidad ≥ ${params.minTransitability}, calidad ≥ ${params.minConfidence}%. Bloqueos detectados en el corredor: ${[...reasons].slice(0,6).join('; ')}. Cambia los puntos o revisa los parámetros; no se han relajado los límites.`);
   }
-  const startPoint={...aa,dataConfidence:s.dataConfidence,baseTransitability:s.baseTransitability,localRoughnessDeg:s.localRoughnessDeg,localRoughnessM:s.localRoughnessM};
-  const endPoint={...bb,dataConfidence:g.dataConfidence,baseTransitability:g.baseTransitability,localRoughnessDeg:g.localRoughnessDeg,localRoughnessM:g.localRoughnessM};
+  const startPoint={...aa,dataConfidence:s.dataConfidence,baseTransitability:s.baseTransitability,localRoughnessDeg:s.localRoughnessDeg,localRoughnessM:s.localRoughnessM,gradE:s.gradE,gradN:s.gradN,reliefM:s.reliefM,curvatureM:s.curvatureM};
+  const endPoint={...bb,dataConfidence:g.dataConfidence,baseTransitability:g.baseTransitability,localRoughnessDeg:g.localRoughnessDeg,localRoughnessM:g.localRoughnessM,gradE:g.gradE,gradN:g.gradN,reliefM:g.reliefM,curvatureM:g.curvatureM};
   const path=forceEndpoints(path0,startPoint,endPoint);
   validateFinalPath(path,params);
   const metrics=pathMetrics(path,params);
@@ -269,7 +375,33 @@ function riskScore(m){
   const transitPenalty=clamp((100-(m.minTransitability??100))/100,0,1)*30;
   const uncertaintyPenalty=clamp((100-(m.avgConfidence??100))/100,0,1)*20;
   const roughnessPenalty=clamp((m.avgRoughnessDeg||0)/10,0,1)*15;
-  return Math.round(clamp(slopePenalty+transitPenalty+uncertaintyPenalty+roughnessPenalty,0,100));
+  // V45: aportes adicionales, 0 si el dato no existe (los resultados sin esos datos no cambian).
+  const crossPenalty=clamp((m.avgCrossSlopeDeg||0)/FACTORS.crossSlopeSoftDeg,0,1)*8+clamp((m.maxCrossSlopeDeg||0)/(FACTORS.crossSlopeSoftDeg*1.5),0,1)*4;
+  const hollowPenalty=clamp((m.hollowDistanceKm||0)/Math.max(.001,m.distanceKm||1),0,1)*6;
+  const turnPenalty=clamp((m.sharpTurns||0)/8,0,1)*4;
+  const walkback=finiteValue(m.walkbackLimitKm)?Number(m.walkbackLimitKm):EVA_LIMITS.walkbackKm;
+  const exposurePenalty=Number.isFinite(m.maxRefugeDistanceKm)?clamp(m.maxRefugeDistanceKm/walkback,0,1.5)/1.5*8:0;
+  const commsPenalty=m.relayKnownDistanceKm>0?(1-m.relayCoveredDistanceKm/m.relayKnownDistanceKm)*4:0;
+  const envPenalty=Number.isFinite(m.environmentSeverity)?clamp(m.environmentSeverity,0,1)*8:0;
+  return Math.round(clamp(slopePenalty+transitPenalty+uncertaintyPenalty+roughnessPenalty+crossPenalty+hollowPenalty+turnPenalty+exposurePenalty+commsPenalty+envPenalty,0,100));
+}
+// Desglose de aportes al puntaje de dificultad, para explicar la ruta al usuario.
+function riskBreakdown(m){
+  if(!m||!Number.isFinite(m.maxSlopeDeg))return [];
+  const walkback=finiteValue(m.walkbackLimitKm)?Number(m.walkbackLimitKm):EVA_LIMITS.walkbackKm;
+  const items=[
+    ['slope',clamp(m.maxSlopeDeg/25,0,1)*35,35],
+    ['transit',clamp((100-(m.minTransitability??100))/100,0,1)*30,30],
+    ['uncertainty',clamp((100-(m.avgConfidence??100))/100,0,1)*20,20],
+    ['roughness',clamp((m.avgRoughnessDeg||0)/10,0,1)*15,15],
+    ['cross',clamp((m.avgCrossSlopeDeg||0)/FACTORS.crossSlopeSoftDeg,0,1)*8+clamp((m.maxCrossSlopeDeg||0)/(FACTORS.crossSlopeSoftDeg*1.5),0,1)*4,12],
+    ['hollow',clamp((m.hollowDistanceKm||0)/Math.max(.001,m.distanceKm||1),0,1)*6,6],
+    ['turns',clamp((m.sharpTurns||0)/8,0,1)*4,4],
+    ['refuge',Number.isFinite(m.maxRefugeDistanceKm)?clamp(m.maxRefugeDistanceKm/walkback,0,1.5)/1.5*8:null,8],
+    ['comms',m.relayKnownDistanceKm>0?(1-m.relayCoveredDistanceKm/m.relayKnownDistanceKm)*4:null,4],
+    ['environment',Number.isFinite(m.environmentSeverity)?clamp(m.environmentSeverity,0,1)*8:null,8]
+  ];
+  return items.map(([id,points,max])=>({id,points:points===null?null:Math.round(points*10)/10,max}));
 }
 function riskLabel(score){ if(score<30)return 'Bajo'; if(score<55)return 'Moderado'; if(score<75)return 'Alto'; return 'Muy alto'; }
 function availableMissionHours(params){ return params.evaTime*(1-params.returnMargin/100); }
@@ -279,7 +411,11 @@ function estimateDuration(metrics,params){
   const downhillFactor=1+clamp((metrics.avgDownhillSlopeDeg||0)/20,0,.7)*.28;
   const terrainFactor=1+clamp((100-(metrics.avgTransitability??100))/100,0,1)*.35;
   const uncertaintyFactor=1+clamp((100-(metrics.avgConfidence??100))/100,0,1)*.12;
-  return metrics.distanceKm/speed*uphillFactor*downhillFactor*terrainFactor*uncertaintyFactor;
+  // V45: pendiente lateral y entorno declarado (polvo/viento). Sin esos datos los factores valen 1.
+  const crossFactor=1+clamp((metrics.avgCrossSlopeDeg||0)/20,0,1)*.18;
+  const sev=environmentSeverity(routeContext(params));
+  const environmentFactor=1+sev.dust*.22+sev.wind*.08;
+  return metrics.distanceKm/speed*uphillFactor*downhillFactor*terrainFactor*uncertaintyFactor*crossFactor*environmentFactor;
 }
 function formatHours(h){
   if(!finiteValue(h))return '—';
@@ -297,7 +433,7 @@ function sequenceWithReturn(points, returnBase){
   return out;
 }
 
-function createLegCache(){ const cache=new Map(); return { cache, terrain:new Map(), key:(a,b,mode,params)=>`${mode}|${a.lat.toFixed(7)},${a.lon.toFixed(7)}>${b.lat.toFixed(7)},${b.lon.toFixed(7)}|${params.speed.toFixed(2)}|${params.maxSlopeLimit.toFixed(1)}|${params.minTransitability.toFixed(0)}|${params.minConfidence.toFixed(0)}` }; }
+function createLegCache(){ const cache=new Map(); return { cache, terrain:new Map(), key:(a,b,mode,params)=>`${mode}|${a.lat.toFixed(7)},${a.lon.toFixed(7)}>${b.lat.toFixed(7)},${b.lon.toFixed(7)}|${params.speed.toFixed(2)}|${params.maxSlopeLimit.toFixed(1)}|${params.minTransitability.toFixed(0)}|${params.minConfidence.toFixed(0)}|${params.contextKey||''}` }; }
 async function getCachedLeg(a,b,mode,params,legCache){
   const k=legCache.key(a,b,mode,params); if(legCache.cache.has(k)) return legCache.cache.get(k);
   const promise=calculateLeg(a,b,mode,params,legCache.terrain); legCache.cache.set(k,promise); return promise;
@@ -374,8 +510,9 @@ function missionOrderObjective(mission,mode){
   const transit=finiteValue(m.avgTransitability)?Number(m.avgTransitability):60;
   const slope=Number(m.maxSlopeDeg)||0, rough=Number(m.avgRoughnessDeg)||0;
   if(mode==='distance') return distance;
-  if(mode==='risk') return distance*.18 + duration*.72 + risk*.115 + difficult*4.2 + uncertain*2.4 + Math.max(0,88-transit)*.12 + slope*.16 + rough*.20;
-  return distance*.48 + duration*.72 + risk*.042 + difficult*1.45 + uncertain*.82 + Math.max(0,76-transit)*.052 + slope*.055 + rough*.07;
+  const hollow=Number(m.hollowDistanceKm)||0,cross=Number(m.avgCrossSlopeDeg)||0,sharp=Number(m.sharpTurns)||0,far=Number(m.maxRefugeDistanceKm)||0;
+  if(mode==='risk') return distance*.18 + duration*.72 + risk*.115 + difficult*4.2 + uncertain*2.4 + Math.max(0,88-transit)*.12 + slope*.16 + rough*.20 + hollow*2.2 + cross*.10 + sharp*.18 + far*.12;
+  return distance*.48 + duration*.72 + risk*.042 + difficult*1.45 + uncertain*.82 + Math.max(0,76-transit)*.052 + slope*.055 + rough*.07 + hollow*.8 + cross*.04 + sharp*.06 + far*.04;
 }
 async function refineWaypointOrder(base,seedOrder,returnBase,mode,params,legCache){
   let order=seedOrder.slice();
@@ -435,12 +572,23 @@ async function chooseSequence(mode,basePoints,returnBase,params,legCache){
 
 function aggregateMission(legs,mode,params,sequence){
   const metrics={distanceKm:0,gainM:0,descentM:0,elevationChangeM:0,maxSlopeDeg:null,avgSlopeDeg:null,maxUphillSlopeDeg:null,maxDownhillSlopeDeg:null,avgUphillSlopeDeg:null,avgDownhillSlopeDeg:null,avgTransitability:null,minTransitability:null,avgConfidence:null,minConfidence:null,avgRoughnessDeg:null,uncertainDistanceKm:0,difficultDistanceKm:0,segments:0,
-    maxRadialKm:null,walkRadiusLimitKm:null,walkbackLimitKm:null,radiusExceeded:false,walkbackExceeded:false};
+    maxRadialKm:null,walkRadiusLimitKm:null,walkbackLimitKm:null,radiusExceeded:false,walkbackExceeded:false,
+    avgCrossSlopeDeg:null,maxCrossSlopeDeg:null,crossDistanceKm:0,avgReliefM:null,reliefDistanceKm:0,hollowDistanceKm:0,effortIndex:null,effortDistanceKm:0,turnTotalDeg:0,sharpTurns:0,
+    avgRefugeDistanceKm:null,refugeDistanceKm:0,maxRefugeDistanceKm:null,relayKnownDistanceKm:0,relayCoveredDistanceKm:0};
+  let wCross=0,wRelief=0,wEffort=0,wRefuge=0;
   let weightedSlope=0,weightedDistance=0,weightedUp=0,weightedDown=0,weightedTransit=0,weightedConfidence=0,weightedRough=0;
   legs.forEach(leg=>{
     const lm=leg.metrics,dist=lm.distanceKm||0;
     metrics.distanceKm+=dist; metrics.gainM+=lm.gainM; metrics.descentM+=lm.descentM; metrics.elevationChangeM+=lm.elevationChangeM; metrics.segments+=lm.segments;
     metrics.uncertainDistanceKm+=lm.uncertainDistanceKm||0; metrics.difficultDistanceKm+=lm.difficultDistanceKm||0;
+    metrics.crossDistanceKm+=lm.crossDistanceKm||0; metrics.reliefDistanceKm+=lm.reliefDistanceKm||0; metrics.hollowDistanceKm+=lm.hollowDistanceKm||0; metrics.effortDistanceKm+=lm.effortDistanceKm||0;
+    metrics.turnTotalDeg+=lm.turnTotalDeg||0; metrics.sharpTurns+=lm.sharpTurns||0; metrics.refugeDistanceKm+=lm.refugeDistanceKm||0; metrics.relayKnownDistanceKm+=lm.relayKnownDistanceKm||0; metrics.relayCoveredDistanceKm+=lm.relayCoveredDistanceKm||0;
+    if(Number.isFinite(lm.avgCrossSlopeDeg))wCross+=lm.avgCrossSlopeDeg*(lm.crossDistanceKm||0);
+    if(Number.isFinite(lm.avgReliefM))wRelief+=lm.avgReliefM*(lm.reliefDistanceKm||0);
+    if(Number.isFinite(lm.effortIndex))wEffort+=lm.effortIndex*(lm.effortDistanceKm||0);
+    if(Number.isFinite(lm.avgRefugeDistanceKm))wRefuge+=lm.avgRefugeDistanceKm*(lm.refugeDistanceKm||0);
+    if(Number.isFinite(lm.maxCrossSlopeDeg))metrics.maxCrossSlopeDeg=metrics.maxCrossSlopeDeg===null?lm.maxCrossSlopeDeg:Math.max(metrics.maxCrossSlopeDeg,lm.maxCrossSlopeDeg);
+    if(Number.isFinite(lm.maxRefugeDistanceKm))metrics.maxRefugeDistanceKm=metrics.maxRefugeDistanceKm===null?lm.maxRefugeDistanceKm:Math.max(metrics.maxRefugeDistanceKm,lm.maxRefugeDistanceKm);
     if(Number.isFinite(lm.maxSlopeDeg)) metrics.maxSlopeDeg=metrics.maxSlopeDeg===null?lm.maxSlopeDeg:Math.max(metrics.maxSlopeDeg,lm.maxSlopeDeg);
     if(Number.isFinite(lm.maxUphillSlopeDeg)) metrics.maxUphillSlopeDeg=metrics.maxUphillSlopeDeg===null?lm.maxUphillSlopeDeg:Math.max(metrics.maxUphillSlopeDeg,lm.maxUphillSlopeDeg);
     if(Number.isFinite(lm.maxDownhillSlopeDeg)) metrics.maxDownhillSlopeDeg=metrics.maxDownhillSlopeDeg===null?lm.maxDownhillSlopeDeg:Math.max(metrics.maxDownhillSlopeDeg,lm.maxDownhillSlopeDeg);
@@ -462,6 +610,11 @@ function aggregateMission(legs,mode,params,sequence){
   metrics.avgTransitability=weightedDistance?weightedTransit/weightedDistance:null;
   metrics.avgConfidence=weightedDistance?weightedConfidence/weightedDistance:null;
   metrics.avgRoughnessDeg=weightedDistance?weightedRough/weightedDistance:null;
+  metrics.avgCrossSlopeDeg=metrics.crossDistanceKm?wCross/metrics.crossDistanceKm:null;
+  metrics.avgReliefM=metrics.reliefDistanceKm?wRelief/metrics.reliefDistanceKm:null;
+  metrics.effortIndex=metrics.effortDistanceKm?wEffort/metrics.effortDistanceKm:null;
+  metrics.avgRefugeDistanceKm=metrics.refugeDistanceKm?wRefuge/metrics.refugeDistanceKm:null;
+  metrics.relayCoverage=metrics.relayKnownDistanceKm>0?metrics.relayCoveredDistanceKm/metrics.relayKnownDistanceKm:null;
   // Radio maximo: distancia directa de la base al punto mas lejano del recorrido. No es la longitud recorrida,
   // y se compara con los criterios de EVA-EXP-0042 (radio de caminata y walkback).
   const originPoint=sequence.find(p=>p.type==='base')||sequence[0];
@@ -473,7 +626,12 @@ function aggregateMission(legs,mode,params,sequence){
   metrics.walkbackExceeded=Number.isFinite(metrics.maxRadialKm)&&metrics.maxRadialKm>metrics.walkbackLimitKm;
   const dwellMinutes=sequence.reduce((s,p)=>s+(Number(p.dwellMin)||0),0);
   const duration=legs.reduce((sum,leg)=>sum+leg.durationHours,0)+dwellMinutes/60;
-  const scores=legs.map(x=>riskScore(x.metrics)).filter(Number.isFinite);
+  // V45: contexto declarado (polvo, viento, radiación). La dosis supone tasa constante durante la duración total.
+  const ctx=routeContext(params),sev=environmentSeverity(ctx);
+  metrics.context={present:ctx.present,dustTau:ctx.dustTau,windMps:ctx.windMps,doseRateUSvH:ctx.doseRateUSvH,refugeCount:ctx.refuges.length,relayCount:ctx.relays.length};
+  metrics.exposureUSv=ctx.doseRateUSvH===null?null:ctx.doseRateUSvH*duration;
+  metrics.environmentSeverity=ctx.present&&(ctx.dustTau!==null||ctx.windMps!==null||ctx.doseRateUSvH!==null)?Math.max(sev.dust,sev.wind,sev.radiation):null;
+  const scores=legs.map(x=>riskScore({...x.metrics,environmentSeverity:metrics.environmentSeverity})).filter(Number.isFinite);
   const score=scores.length?Math.max(...scores):null;
   const targetKeys=new Set(sequence.filter(p=>p.type!=='base').map(pointCoordKey));
   return {mode,legs,metrics,dwellMinutes,duration,score,sequence,targetCount:targetKeys.size};
@@ -488,7 +646,7 @@ function validateFinalPath(path,params){
   return true;
 }
 
-return Object.freeze({haversine,pathMetrics,nearestNode,neighbors,heuristic,analyzeEdge,edgeCost,aStar,forceEndpoints,shortestLonDelta,interpolateLon,buildGrid,stddev,annotateGridTerrain,gridSizeForDistanceKm,calculateLeg,riskScore,riskLabel,availableMissionHours,estimateDuration,formatHours,formatSignedMargin,sequenceWithReturn,createLegCache,getCachedLeg,evaluateSequence,routeOrderGeodesicCost,heldKarpWaypointOrder,heuristicWaypointOrder,waypointOrderSeed,missionOrderObjective,refineWaypointOrder,chooseSequence,aggregateMission,validateFinalPath,EVA_LIMITS});
+return Object.freeze({FACTORS,edgeDifficulty,difficultyClass,riskBreakdown,turnAngleDeg,routeContext,edgeExposure,haversine,pathMetrics,nearestNode,neighbors,heuristic,analyzeEdge,edgeCost,aStar,forceEndpoints,shortestLonDelta,interpolateLon,buildGrid,stddev,annotateGridTerrain,gridSizeForDistanceKm,calculateLeg,riskScore,riskLabel,availableMissionHours,estimateDuration,formatHours,formatSignedMargin,sequenceWithReturn,createLegCache,getCachedLeg,evaluateSequence,routeOrderGeodesicCost,heldKarpWaypointOrder,heuristicWaypointOrder,waypointOrderSeed,missionOrderObjective,refineWaypointOrder,chooseSequence,aggregateMission,validateFinalPath,EVA_LIMITS});
   }
   return Object.freeze({createEngine,algorithmVersion:'44.0',EVA_LIMITS});
 });

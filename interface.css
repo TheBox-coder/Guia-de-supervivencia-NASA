@@ -923,3 +923,16 @@ body.jezero-ui[data-mission-state="empty"] .missionHud {
     scroll-behavior: auto !important;
   }
 }
+
+/* Qualitative key for the color-shaded MOLA/HRSC basemap. */
+.molaLegend{position:absolute;z-index:12;right:20px;bottom:100px;width:min(280px,calc(100% - 40px));max-height:50%;overflow:auto;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--surface-panel);color:var(--text-primary);font-size:12px;box-shadow:0 4px 18px #0005}
+.molaLegend[hidden]{display:none}
+.molaLegend summary{padding:10px 12px;cursor:pointer;font-weight:700}
+.molaLegendContent{padding:0 12px 12px;line-height:1.5}
+.molaColorRamp{height:14px;border-radius:4px;background:linear-gradient(90deg,#431375,#1635bd,#009fc2,#35b841,#d5cb43,#d57939,#b84b36,#9a6952)}
+.molaLegendEnds{display:flex;justify-content:space-between;font-size:11px}
+.molaLegend ul{padding-left:16px;margin:8px 0}
+.molaLegend p{margin:8px 0;color:var(--text-secondary)}
+.molaLegend a{color:var(--theme-accent-2)}
+body:is([data-module="home"],[data-module="dashboard"],[data-module="survival"],[data-module="weather"],[data-module="operations"],[data-module="analysis"]) .molaLegend{display:none}
+@media(max-width:760px){.molaLegend{right:12px;bottom:100px;width:min(250px,calc(100% - 24px));max-height:35%}}

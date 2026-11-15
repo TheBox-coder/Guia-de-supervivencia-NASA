@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="operations.css?v=4p0">
   <link rel="stylesheet" href="control.css?v=4p0">
   <link rel="stylesheet" href="components.css?v=4p0">
+  <link rel="stylesheet" href="route-intel.css?v=4p0">
   <script src="modules/theme.js?v=4p0"></script>
 </head>
 <body class="jezero-ui" data-module="planner" data-mission-state="empty">
@@ -528,6 +529,24 @@
     <div class="mapMissionHint" id="mapMissionHint" aria-live="polite" title="Modo de edición de misión">
       <span class="mapMissionHintIcon">＋</span><span id="selectionHint"></span>
     </div>
+    <details id="molaLegend" class="molaLegend" hidden open>
+      <summary>Elevación MOLA + HRSC</summary>
+      <div class="molaLegendContent">
+        <div class="molaColorRamp" aria-hidden="true"></div>
+        <div class="molaLegendEnds"><span>Más bajo</span><span>Más alto</span></div>
+        <ul>
+          <li>Violeta y azul: zonas bajas.</li>
+          <li>Verde y amarillo: elevación intermedia.</li>
+          <li>Naranja, rojo y marrón: zonas altas.</li>
+        </ul>
+        <p>Los colores indican elevación, no pendiente. El sombreado representa la forma del relieve.</p>
+        <p>Escala cualitativa: la elevación en metros se obtiene del DEM al calcular la ruta.</p>
+        <p id="molaHybridNote" hidden>En Híbrido, la imagen modifica la apariencia de los colores.</p>
+        <p id="molaStyleNote" hidden>El estilo visual altera los colores. Selecciona «Topografía · color MOLA» para compararlos.</p>
+        <p id="molaOverlayNote" hidden>La capa térmica THEMIS puede cubrir los colores de elevación.</p>
+        <a href="https://trek.nasa.gov/tiles/apidoc/trekAPI.html?body=mars" target="_blank" rel="noopener noreferrer">Fuente de la capa: NASA Mars Trek</a>
+      </div>
+    </details>
     <div id="imageryDetailStatus" class="imageryDetailStatus" role="status">Viking · mosaico global</div>
     <div class="mapCoordChip" id="coordReadout" title="Coordenadas del cursor">18.44463° N · 77.45088° E</div>
     <div class="mapScaleChip" id="scale" title="Anchura aproximada de la vista">VISTA ~0 km</div>
@@ -646,6 +665,7 @@
 <script src="modules/operations.js?v=4p0"></script>
 <script src="modules/chariot-calculator-engine.cjs?v=4p0"></script>
 <script src="modules/chariot-calculator.js?v=4p0"></script>
+<script src="modules/route-intel.js?v=4p0"></script>
 <script src="modules/assurance.cjs?v=4p0"></script>
 <script src="modules/mission-control-engine.cjs?v=4p0"></script>
 <script src="modules/mission-control.js?v=4p0"></script>

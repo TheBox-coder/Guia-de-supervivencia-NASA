@@ -272,18 +272,32 @@ function routeFlowStyles(feature,color,c){
   return styles;
 }
 function routeStyle(feature){
-  const selected=feature?.get?.('selected'),kind=feature?.get?.('kind');
+  const selected=feature?.get?.('selected'),kind=feature?.get?.('kind'),layer=feature?.get?.('layer');
   const c=themeColors();
   const color = kind==='risk' ? (c.success||'#54e0a6') : kind==='distance' ? (c.accent2||'#55b7ff') : (c.accent||'#8a5cff');
+  if(selected&&layer==='seg'){
+    const meta=DIFFICULTY_META[feature.get('cls')]||DIFFICULTY_META.unknown;
+    return [new ol.style.Style({zIndex:4,stroke:new ol.style.Stroke({color:meta[2],width:4.4,lineCap:'round',lineJoin:'round'})}),
+      new ol.style.Style({zIndex:5,stroke:new ol.style.Stroke({color:'rgba(255,255,255,.34)',width:.8,lineCap:'round',lineJoin:'round'})})];
+  }
+  if(selected&&layer==='tick'){
+    return [new ol.style.Style({zIndex:6,image:new ol.style.Circle({radius:3.4,fill:new ol.style.Fill({color:hexAlpha(c.bg||'#020611','f0')}),stroke:new ol.style.Stroke({color:c.text||'#fff',width:1.4})}),
+      text:new ol.style.Text({text:feature.get('label')||'',offsetY:13,fill:new ol.style.Fill({color:hexAlpha(c.text||'#fff','e6')}),stroke:new ol.style.Stroke({color:c.bg||'#020611',width:3.2}),font:'800 9px "DM Mono",Consolas,monospace'})})];
+  }
+  if(selected&&layer==='hazard'){
+    const hazard=feature.get('hazard'),tone=hazard==='turn'?(c.warning||'#ffc857'):hazard==='cross'?'#fb923c':(c.danger||'#f43f5e');
+    return [new ol.style.Style({zIndex:8,image:new ol.style.RegularShape({points:3,radius:9,angle:0,fill:new ol.style.Fill({color:hexAlpha(c.bg||'#020611','ee')}),stroke:new ol.style.Stroke({color:tone,width:2.4})}),
+      text:new ol.style.Text({text:feature.get('label')||'',offsetY:-17,fill:new ol.style.Fill({color:tone}),stroke:new ol.style.Stroke({color:c.bg||'#020611',width:4}),font:'900 10px "DM Mono",Consolas,monospace'})})];
+  }
   if(selected){
-    const corridor=kind==='risk'?hexAlpha(c.success||'#54e0a6','24'):kind==='distance'?hexAlpha(c.accent2||'#55b7ff','20'):hexAlpha(c.accent||'#8a5cff','22');
+    // Estuche y corredor: el color de la estrategia queda como halo; el trazo de dificultad va encima (capa 'seg').
+    const corridor=kind==='risk'?hexAlpha(c.success||'#54e0a6','3a'):kind==='distance'?hexAlpha(c.accent2||'#55b7ff','34'):hexAlpha(c.accent||'#8a5cff','38');
     const baseStyles=[
-      new ol.style.Style({stroke:new ol.style.Stroke({color:'rgba(0,0,0,.58)',width:8,lineCap:'round',lineJoin:'round'})}),
-      new ol.style.Style({stroke:new ol.style.Stroke({color:corridor,width:6,lineCap:'round',lineJoin:'round'})}),
-      new ol.style.Style({stroke:new ol.style.Stroke({color,width:3.1,lineCap:'round',lineJoin:'round'})}),
-      new ol.style.Style({stroke:new ol.style.Stroke({color:hexAlpha(c.text||'#fff','55'),width:.75,lineCap:'round',lineJoin:'round'})})
+      new ol.style.Style({zIndex:1,stroke:new ol.style.Stroke({color:'rgba(0,0,0,.62)',width:9.5,lineCap:'round',lineJoin:'round'})}),
+      new ol.style.Style({zIndex:2,stroke:new ol.style.Stroke({color:corridor,width:7.4,lineCap:'round',lineJoin:'round'})})
     ];
-    return baseStyles.concat(routeFlowStyles(feature,color,c));
+    const flow=routeFlowStyles(feature,color,c);flow.forEach(st=>st.setZIndex?.(7));
+    return baseStyles.concat(flow);
   }
   const dash=kind==='risk'?[3,8]:kind==='distance'?[9,7]:[6,7];
   return new ol.style.Style({ stroke:new ol.style.Stroke({color:hexAlpha(color,'8f'), width:1.7, lineDash:dash,lineCap:'round',lineJoin:'round'}) });
@@ -641,7 +655,7 @@ const routing=window.JEZERO_ROUTING.createEngine({
   getElevations:points=>getElevations(points),
   optimizeOrderEnabled:()=>$('optimizeOrder')?.checked!==false
 });
-const {haversine,pathMetrics,nearestNode,neighbors,heuristic,analyzeEdge,edgeCost,aStar,forceEndpoints,shortestLonDelta,interpolateLon,buildGrid,stddev,annotateGridTerrain,gridSizeForDistanceKm,calculateLeg,riskScore,riskLabel,availableMissionHours,estimateDuration,formatHours,formatSignedMargin,sequenceWithReturn,createLegCache,getCachedLeg,evaluateSequence,routeOrderGeodesicCost,heldKarpWaypointOrder,heuristicWaypointOrder,waypointOrderSeed,missionOrderObjective,refineWaypointOrder,chooseSequence,aggregateMission,validateFinalPath}=routing;
+const {haversine,pathMetrics,nearestNode,neighbors,heuristic,analyzeEdge,edgeCost,aStar,forceEndpoints,shortestLonDelta,interpolateLon,buildGrid,stddev,annotateGridTerrain,gridSizeForDistanceKm,calculateLeg,riskScore,riskLabel,availableMissionHours,estimateDuration,formatHours,formatSignedMargin,sequenceWithReturn,createLegCache,getCachedLeg,evaluateSequence,routeOrderGeodesicCost,heldKarpWaypointOrder,heuristicWaypointOrder,waypointOrderSeed,missionOrderObjective,refineWaypointOrder,chooseSequence,aggregateMission,validateFinalPath,edgeDifficulty,difficultyClass,riskBreakdown,FACTORS:ROUTE_FACTORS,turnAngleDeg}=routing;
 async function getElevations(points){
   if(window.JEZERO_DEMO?.enabled)return window.JEZERO_DEMO.sample(points);
   if(!window.marsElevationReady){
@@ -658,10 +672,14 @@ async function getElevations(points){
 }
 
 function normalizeParams(){
-  return validation.parameters(Object.fromEntries(Object.keys(validation.PARAM_RULES).map(id=>[id,$(id)?.value])));
+  const params=validation.parameters(Object.fromEntries(Object.keys(validation.PARAM_RULES).map(id=>[id,$(id)?.value])));
+  // V45: clima observado y soporte declarado entran al motor solo si el usuario los tiene cargados y no los desactiva.
+  const intel=window.JEZERO_ROUTE_INTEL?.context?.();
+  if(intel?.enabled&&intel.key){params.context=intel.context;params.contextKey=intel.key;}
+  return params;
 }
 function planningFingerprint(){
-  return JSON.stringify({points:missionPoints,params:Object.fromEntries(Object.keys(validation.PARAM_RULES).map(id=>[id,$(id)?.value])),returnBase:$('returnBase')?.checked,optimizeOrder:$('optimizeOrder')?.checked});
+  return JSON.stringify({points:missionPoints,params:Object.fromEntries(Object.keys(validation.PARAM_RULES).map(id=>[id,$(id)?.value])),returnBase:$('returnBase')?.checked,optimizeOrder:$('optimizeOrder')?.checked,routeContext:window.JEZERO_ROUTE_INTEL?.context?.()?.key||''});
 }
 function invalidateMission(){
   currentMission=null;lastCalculatedAt=null;
@@ -707,12 +725,49 @@ async function calculateMission({saveHistory=true}={}){
     setBusy(false,ui('CÁLCULO NO DISPONIBLE · revisa los mensajes','CALCULATION UNAVAILABLE · review the messages'));showToast(err.message);
   }finally{setBusy(false,$('statusText')?.textContent);updateStrategyCards(currentMission);}
 }
+const DIFFICULTY_META={easy:['Fácil','Easy','#34d399'],moderate:['Moderado','Moderate','#fbbf24'],demanding:['Exigente','Demanding','#fb923c'],critical:['Crítico','Critical','#f43f5e'],unknown:['Sin dato','No data','#94a3b8']};
+function routeTickStep(totalKm){return [.05,.1,.25,.5,1,2,5,10,25,50,100,250].find(step=>totalKm/step<=12)||500;}
+function routeAlongPath(nodes,fraction){
+  let total=0;const parts=[];
+  for(let i=1;i<nodes.length;i++){const d=haversine(nodes[i-1],nodes[i]);parts.push(d);total+=d;}
+  return {total,at:km=>{let walked=0;for(let i=0;i<parts.length;i++){if(walked+parts[i]>=km&&parts[i]>0){const t=(km-walked)/parts[i];return [nodes[i].lon+(nodes[i+1].lon-nodes[i].lon)*t,nodes[i].lat+(nodes[i+1].lat-nodes[i].lat)*t];}walked+=parts[i];}const last=nodes[nodes.length-1];return [last.lon,last.lat];}};
+}
 function drawMissionRoutes(mission,selectedMode){
   const source=routeLayer.getSource(); source.clear();
   const active=mission?.[selectedMode];
+  const params=active?.params||normalizeParams();
   active?.legs?.forEach((leg,index)=>{
-    source.addFeature(new ol.Feature({geometry:new ol.geom.LineString(leg.path.map(p=>[p.lon,p.lat])),selected:true,kind:selectedMode,leg:index+1}));
+    const path=leg.path||[];
+    source.addFeature(new ol.Feature({geometry:new ol.geom.LineString(path.map(p=>[p.lon,p.lat])),selected:true,kind:selectedMode,leg:index+1,layer:'leg'}));
+    // Tramos contiguos de la misma clase de dificultad se agrupan en una sola línea.
+    let run=null;
+    const flush=()=>{if(run&&run.coords.length>1)source.addFeature(new ol.Feature({geometry:new ol.geom.LineString(run.coords),selected:true,kind:selectedMode,leg:index+1,layer:'seg',cls:run.cls,difficulty:run.max}));};
+    for(let i=1;i<path.length;i++){
+      const value=edgeDifficulty(path[i-1],path[i],params),cls=difficultyClass(value);
+      const a=[path[i-1].lon,path[i-1].lat],b=[path[i].lon,path[i].lat];
+      if(run&&run.cls===cls){run.coords.push(b);run.max=Math.max(run.max,value||0);}
+      else{flush();run={cls,coords:[a,b],max:value||0};}
+    }
+    flush();
   });
+  const nodes=missionPathNodes(active);
+  if(nodes.length>1){
+    const along=routeAlongPath(nodes),step=routeTickStep(along.total);
+    for(let km=step;km<along.total-step*.25;km+=step){
+      const label=String(parseFloat(km.toFixed(2)));
+      source.addFeature(new ol.Feature({geometry:new ol.geom.Point(along.at(km)),selected:true,kind:selectedMode,layer:'tick',label:`${label} km`}));
+    }
+    const mark=(node,hazard,label)=>node&&source.addFeature(new ol.Feature({geometry:new ol.geom.Point([node.lon,node.lat]),selected:true,kind:selectedMode,layer:'hazard',hazard,label}));
+    let steepest=null,sideways=null;
+    nodes.forEach((n,i)=>{
+      if(Number.isFinite(n.slopeDeg)&&(!steepest||n.slopeDeg>steepest.slopeDeg))steepest=n;
+      if(Number.isFinite(n.crossSlopeDeg)&&(!sideways||n.crossSlopeDeg>sideways.crossSlopeDeg))sideways=n;
+    });
+    if(steepest&&steepest.slopeDeg>=8)mark(steepest,'slope',`${steepest.slopeDeg.toFixed(0)}°`);
+    if(sideways&&sideways.crossSlopeDeg>=ROUTE_FACTORS.crossSlopeSoftDeg*.6&&sideways!==steepest)mark(sideways,'cross',`${sideways.crossSlopeDeg.toFixed(0)}° ${ui('lateral','side')}`);
+    let sharp=0;
+    for(let i=1;i<nodes.length-1&&sharp<4;i++)if(turnAngleDeg(nodes[i-1],nodes[i],nodes[i+1])>=ROUTE_FACTORS.sharpTurnDeg){mark(nodes[i],'turn',ui('Giro','Turn'));sharp++;}
+  }
   drawPointMarkers();
 }
 
@@ -983,6 +1038,14 @@ function updateMissionHud(mission){
   if($('hudDistance'))$('hudDistance').textContent=Number.isFinite(m.distanceKm)?`${m.distanceKm.toFixed(2)} km`:'—';
   if($('hudTransit'))$('hudTransit').textContent=Number.isFinite(m.avgTransitability)?`${Math.round(m.avgTransitability)}/100`:'—';
   if($('hudReturn'))$('hudReturn').textContent=Number.isFinite(margin)?formatSignedMargin(margin):'—';
+  if(mission&&!mission.breakdown&&mission.legs?.length){
+    // Desglose del tramo más exigente: es el que fija el puntaje de dificultad de la misión.
+    let worst=0,worstScore=-1;
+    mission.legs.forEach((leg,i)=>{const sc=riskScore(leg.metrics);if(Number.isFinite(sc)&&sc>worstScore){worstScore=sc;worst=i;}});
+    mission.breakdown=riskBreakdown({...mission.legs[worst].metrics,environmentSeverity:mission.metrics?.environmentSeverity});
+    mission.breakdownLeg=`${worst+1}/${mission.legs.length}`;
+  }
+  window.JEZERO_ROUTE_INTEL?.render?.(mission);
 }
 
 function updateHeaderStatus(){
@@ -1572,7 +1635,15 @@ $('optimizeOrder')?.addEventListener('change',()=>{currentMission=null;routeLaye
 function showToast(msg){$('toast').textContent=msg;$('toast').classList.remove('hide');clearTimeout(showToast.t);showToast.t=setTimeout(()=>$('toast').classList.add('hide'),5000);}
 
 const BASE_MAP_MODES = new Set(['viking','mola','hybrid']);
+function updateMolaLegend(mode=currentBaseMode){
+  const legend=$('molaLegend');if(!legend)return;
+  legend.hidden=mode!=='mola'&&mode!=='hybrid';
+  $('molaHybridNote').hidden=mode!=='hybrid';
+  $('molaStyleNote').hidden=($('mapVisualMode')?.value||'geology')==='geology';
+  $('molaOverlayNote').hidden=!window.JEZERO_IMAGERY?.isThermal?.();
+}
 function updateBaseMapStatus(mode){
+  updateMolaLegend(mode);
   currentBaseMode=mode;
   const wantViking=mode==='viking'||mode==='hybrid',wantMola=mode==='mola'||mode==='hybrid';
   const states={viking:layerState('viking',wantViking),mola:layerState('mola',wantMola)};
@@ -1609,6 +1680,7 @@ function setMapVisualMode(mode,{persist=true}={}){
   if(panel) panel.dataset.mapView=mode;
   if($('mapVisualMode') && $('mapVisualMode').value!==mode) $('mapVisualMode').value=mode;
   if(persist) localStorage.setItem(MAP_VIEW_KEY,mode);
+  updateMolaLegend();
   requestAnimationFrame(()=>map?.render?.());
 }
 function currentPanelState(){

@@ -87,3 +87,18 @@ Reglas de honestidad: un campo sin observaciones genera una alerta «SIN DATOS»
 
 
 El modelo ambiental ajusta regresiones armónicas independientes para temperatura, opacidad del polvo (τ) y tasa de dosis (µSv/h). Cada variable requiere 12 muestras de los últimos 3 soles en al menos 6 franjas de 3 horas. CLIMA muestra curvas horarias de polvo y radiación para el sol seleccionado y exposición ambiental integrada en el horizonte completo, convirtiendo hora local marciana a horas terrestres. Cada sol repite el patrón; no se predicen tormentas, eventos solares ni cambios entre soles. El ajuste no supone un efecto causal del polvo o la radiación sobre la temperatura, ni modifica automáticamente los escenarios de consumo. La exposición no incluye blindaje ni es una dosis personal. Los datos insuficientes permanecen sin proyección; nuevas observaciones reajustan los canales disponibles.
+
+## Factores de ruta adicionales a la pendiente (V45)
+
+El motor de rutas sigue usando pendiente direccional, rugosidad, transitabilidad y calidad del muestreo del DEM, y los límites duros no cambian. Las estrategias «Equilibrada» y «Segura» suman estos factores blandos (la estrategia «Distancia» sigue siendo la más corta):
+
+| Factor | Origen | Cómo entra |
+|---|---|---|
+| Pendiente lateral | Gradiente local del DEM, perpendicular al sentido de marcha | Costo, esfuerzo, duración y dificultad |
+| Relieve local y depresiones | Diferencias de elevación con los vecinos del DEM | Costo y dificultad; las depresiones se marcan por curvatura negativa |
+| Giros bruscos | Geometría de la ruta | Costo en A* y puntos de aviso en el mapa |
+| Índice de esfuerzo | Pendiente, pendiente lateral y rugosidad | Métrica relativa (1 = llano y liso); sin calibración metabólica |
+| Polvo (τ), viento y radiación | Histórico meteorológico cargado en Clima, o tasa de radiación declarada en Soporte | Tiempo de marcha, dificultad y dosis estimada (tasa constante) |
+| Distancia a refugios y cobertura de enlaces | Refugios y enlaces declarados en Soporte (con radio de cobertura) | Costo y dificultad; la cobertura es la declarada, no medida |
+
+Reglas: un factor sin dato no se aplica y se muestra como «sin dato»; los pesos son heurísticas de planificación, no límites de seguridad ni mediciones; el contexto se puede desactivar con la casilla de la ruta. El puntaje de dificultad conserva su valor anterior cuando no hay estos datos.
