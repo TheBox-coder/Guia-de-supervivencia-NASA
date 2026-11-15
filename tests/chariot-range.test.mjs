@@ -37,7 +37,8 @@ test('map draws Chariot reach instead of antenna circles and follows declared po
  const relay={lat:18,lon:77,name:'Relay',radiusKm:5},draw=window.JEZERO_SUPPORT_MAP.draw;
  draw([],[relay],{...base,range:range()});let rings=layer.source.features.filter(f=>f.style);assert.equal(rings.length,1);
  for(const [lon,lat] of rings[0].geometry.coordinates[0])assert.ok(Math.abs(engine.distance(base,{lat,lon})-84)<1e-8);
- assert.match(rings[0].style.text.text,/Chariot reach/);
+ assert.match(rings[0].style[1].text.text,/Chariot reach/);
+ assert.ok(Math.abs(engine.distance(base,{lat:rings[0].style[1].geometry.coordinates[1],lon:rings[0].style[1].geometry.coordinates[0]})-84)<1e-8,'Reach label stays on the boundary, away from Chariot');
  draw([],[relay],{...base,lat:19,range:range()});rings=layer.source.features.filter(f=>f.style);assert.ok(Math.abs(engine.distance({lat:19,lon:base.lon},{lat:rings[0].geometry.coordinates[0][0][1],lon:rings[0].geometry.coordinates[0][0][0]})-84)<1e-8);
  draw([],[relay],{...base,range:{status:'missing-inputs'}});assert.equal(layer.source.features.filter(f=>f.style).length,0);
  draw([],[relay],null);assert.equal(layer.source.features.filter(f=>f.style).length,0);

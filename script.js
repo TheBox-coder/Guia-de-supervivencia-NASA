@@ -117,17 +117,18 @@ function buildLayers(){
   landingLayer.set('layerId','landing-sites');
   markerLayer = new ol.layer.Vector({
     source:new ol.source.Vector(),
-    style: (feature,resolution) => { const styles=[].concat(pointStyle(feature.get('kind'), feature.get('label'), feature)); const prio=feature.get('kind')==='base'?100:60;
-      // "+N": elementos (Chariot, refugios, enlaces, otros puntos) que comparten este sitio y quedan ocultos por prioridad; se abren al pulsar.
-      try{const g=feature.getGeometry()?.getCoordinates?.();const n=g&&window.JEZERO_SUPPORT_MAP?.countNear?window.JEZERO_SUPPORT_MAP.countNear(g[0],g[1],resolution)-1:0;
-        if(n>0){const c=themeColors();styles.push(new ol.style.Style({text:new ol.style.Text({text:`+${n}`,offsetX:62,offsetY:-29,fill:new ol.style.Fill({color:c.warning||'#ffc857'}),stroke:new ol.style.Stroke({color:c.bg||'#020611',width:5}),font:'900 11px "DM Mono",Consolas,monospace'})}));}}catch{}
-      styles.forEach(s=>s.setZIndex(prio)); return styles; },
+    style:(feature,resolution)=>{
+      const coord=feature.getGeometry()?.getCoordinates?.();
+      const count=coord&&window.JEZERO_SUPPORT_MAP?.countNear?Math.max(0,window.JEZERO_SUPPORT_MAP.countNear(coord[0],coord[1],resolution)-1):0;
+      const styles=[].concat(pointStyle(feature.get('kind'),feature.get('label'),feature,count));
+      const priority=feature.get('kind')==='base'?100:60;styles.forEach(style=>style.setZIndex(priority));return styles;
+    },
     zIndex:16,
     declutter:true
   });
-  routeLayer = new ol.layer.Vector({ source:new ol.source.Vector(), zIndex:11 });
+  routeLayer = new ol.layer.Vector({ source:new ol.source.Vector(), zIndex:11, declutter:true });
   routeLayer.setStyle(feature => routeStyle(feature));
-  analysisLayer = new ol.layer.Vector({source:new ol.source.Vector(),zIndex:15,style:feature=>analysisHighlightStyle(feature)});
+  analysisLayer = new ol.layer.Vector({source:new ol.source.Vector(),zIndex:15,declutter:true,style:feature=>analysisHighlightStyle(feature)});
 
   return { projection, layers:[imageryLayer,molaLayer,slopeLayer,roughnessLayer,knownLayer,landingLayer,routeLayer,markerLayer,analysisLayer] };
 }
@@ -164,54 +165,21 @@ function hexAlpha(hex,alpha='33'){
   const value=String(hex||'').trim();
   return /^#[0-9a-f]{6}$/i.test(value) ? `${value}${alpha}` : value;
 }
-function pointStyle(kind,label,feature){
-  const c=themeColors();
-  const textColor=c.text||'#ffffff', bg=c.bg||'#020611';
-  const accent=c.accent||'#8a5cff', success=c.success||'#54e0a6', warning=c.warning||'#ffc857';
+function pointStyle(kind,label,feature,extraCount=0){
+  const c=themeColors(),textColor=c.text||'#fff',bg=c.bg||'#020611';
+  const accent=c.accent||'#8a5cff',success=c.success||'#54e0a6',warning=c.warning||'#ffc857';
   const name=String(feature?.get?.('name')||'').trim();
-  const returnsHome=Boolean(feature?.get?.('returnsHome'));
-  const styles=[];
-  if(kind==='base'){
-    styles.push(new ol.style.Style({image:new ol.style.RegularShape({points:6,radius:18.5,angle:Math.PI/6,displacement:[1,-2],fill:new ol.style.Fill({color:'rgba(0,0,0,.34)'})})}));
-    styles.push(new ol.style.Style({
-      image:new ol.style.RegularShape({points:6,radius:17,angle:Math.PI/6,fill:new ol.style.Fill({color:hexAlpha(success,'28')}),stroke:new ol.style.Stroke({color:hexAlpha(success,'75'),width:6})})
-    }));
-    styles.push(new ol.style.Style({
-      image:new ol.style.RegularShape({points:6,radius:13,angle:Math.PI/6,fill:new ol.style.Fill({color:hexAlpha(bg,'ee')}),stroke:new ol.style.Stroke({color:success,width:2.8})}),
-      text:new ol.style.Text({text:'⌂',offsetY:1,fill:new ol.style.Fill({color:success}),stroke:new ol.style.Stroke({color:bg,width:2}),font:'900 15px Inter,Segoe UI,sans-serif'})
-    }));
-    styles.push(new ol.style.Style({
-      text:new ol.style.Text({text:returnsHome?ui('BASE · REGRESO','BASE · RETURN'):ui('BASE','BASE'),offsetY:-29,fill:new ol.style.Fill({color:textColor}),stroke:new ol.style.Stroke({color:bg,width:5}),font:'900 10px "DM Mono",Consolas,monospace',padding:[2,5,2,5]})
-    }));
+  if(['base','finish','target','science'].includes(kind)){
+    const color=kind==='base'?success:kind==='finish'?warning:accent;
+    const code=kind==='base'?'B':String(label||'•').padStart(2,'0');
+    const caption=(kind==='base'?(feature?.get?.('returnsHome')?ui('BASE · REGRESO','BASE · RETURN'):ui('BASE','BASE')):kind==='finish'?ui('FIN','FINISH'):name.length>22?name.slice(0,21)+'…':name)+(extraCount>0?' (+'+extraCount+')':'');
+    // One symbol per point: stacked symbols compete with each other during decluttering.
+    const styles=[new ol.style.Style({image:new ol.style.RegularShape({points:6,radius:13,angle:Math.PI/6,fill:new ol.style.Fill({color:bg}),stroke:new ol.style.Stroke({color,width:2.5})}),text:new ol.style.Text({text:code,fill:new ol.style.Fill({color:textColor}),font:'700 12px Segoe UI,sans-serif'})})];
+    if(caption)styles.push(new ol.style.Style({text:new ol.style.Text({text:caption,offsetY:-31,font:'600 11px Segoe UI,sans-serif',fill:new ol.style.Fill({color:textColor}),backgroundFill:new ol.style.Fill({color:hexAlpha(bg,'ee')}),padding:[3,5,3,5]})}));
     return styles;
   }
-  if(kind==='finish'){
-    styles.push(new ol.style.Style({image:new ol.style.RegularShape({points:6,radius:17.5,angle:Math.PI/6,displacement:[1,-2],fill:new ol.style.Fill({color:'rgba(0,0,0,.34)'})})}));
-    styles.push(new ol.style.Style({image:new ol.style.RegularShape({points:6,radius:16,angle:Math.PI/6,fill:new ol.style.Fill({color:hexAlpha(warning,'24')}),stroke:new ol.style.Stroke({color:hexAlpha(warning,'72'),width:5})})}));
-    styles.push(new ol.style.Style({
-      image:new ol.style.RegularShape({points:6,radius:12,angle:Math.PI/6,fill:new ol.style.Fill({color:hexAlpha(bg,'ef')}),stroke:new ol.style.Stroke({color:warning,width:2.6})}),
-      text:new ol.style.Text({text:String(label||'F'),offsetY:1,fill:new ol.style.Fill({color:warning}),stroke:new ol.style.Stroke({color:bg,width:2}),font:'950 11px "DM Mono",Consolas,monospace'})
-    }));
-    styles.push(new ol.style.Style({text:new ol.style.Text({text:ui('FIN','FINISH'),offsetY:-27,fill:new ol.style.Fill({color:textColor}),stroke:new ol.style.Stroke({color:bg,width:5}),font:'900 9px "DM Mono",Consolas,monospace'})}));
-    return styles;
-  }
-  if(kind==='target' || kind==='science'){
-    styles.push(new ol.style.Style({image:new ol.style.RegularShape({points:6,radius:17.5,angle:Math.PI/6,displacement:[1,-2],fill:new ol.style.Fill({color:'rgba(0,0,0,.32)'})})}));
-    styles.push(new ol.style.Style({image:new ol.style.RegularShape({points:6,radius:16,angle:Math.PI/6,fill:new ol.style.Fill({color:hexAlpha(accent,'22')}),stroke:new ol.style.Stroke({color:hexAlpha(accent,'70'),width:5})})}));
-    styles.push(new ol.style.Style({
-      image:new ol.style.RegularShape({points:6,radius:12,angle:Math.PI/6,fill:new ol.style.Fill({color:hexAlpha(bg,'ed')}),stroke:new ol.style.Stroke({color:accent,width:2.7})}),
-      text:new ol.style.Text({text:String(label||'•').padStart(2,'0'),offsetY:1,fill:new ol.style.Fill({color:textColor}),stroke:new ol.style.Stroke({color:bg,width:2}),font:'950 10px "DM Mono",Consolas,monospace'})
-    }));
-    if(name){
-      styles.push(new ol.style.Style({text:new ol.style.Text({text:name.length>18?`${name.slice(0,17)}…`:name,offsetY:27,fill:new ol.style.Fill({color:hexAlpha(textColor,'e8')}),stroke:new ol.style.Stroke({color:bg,width:4}),font:'800 8.5px Inter,Segoe UI,sans-serif',padding:[1,3,1,3]})}));
-    }
-    return styles;
-  }
-  const color = kind==='reference' ? c.primary2 : kind==='optional' ? c.accent2 : accent;
-  return new ol.style.Style({
-    image:new ol.style.Circle({radius:8,fill:new ol.style.Fill({color}),stroke:new ol.style.Stroke({color:textColor,width:2})}),
-    text:new ol.style.Text({ text:label||'P', offsetY:-20, fill:new ol.style.Fill({color:textColor}), stroke:new ol.style.Stroke({color:bg,width:4}), font:'800 11px "DM Mono",Consolas,monospace' })
-  });
+  const color=kind==='reference'?c.primary2:kind==='optional'?c.accent2:accent;
+  return new ol.style.Style({image:new ol.style.Circle({radius:8,fill:new ol.style.Fill({color}),stroke:new ol.style.Stroke({color:textColor,width:2})}),text:new ol.style.Text({text:label||'P',offsetY:-22,fill:new ol.style.Fill({color:textColor}),stroke:new ol.style.Stroke({color:bg,width:2}),font:'600 11px Segoe UI,sans-serif'})});
 }
 function routeFractionPoint(coords,fraction){
   if(!Array.isArray(coords)||coords.length<2)return null;
@@ -282,7 +250,7 @@ function routeStyle(feature){
   }
   if(selected&&layer==='tick'){
     return [new ol.style.Style({zIndex:6,image:new ol.style.Circle({radius:3.4,fill:new ol.style.Fill({color:hexAlpha(c.bg||'#020611','f0')}),stroke:new ol.style.Stroke({color:c.text||'#fff',width:1.4})}),
-      text:new ol.style.Text({text:feature.get('label')||'',offsetY:13,fill:new ol.style.Fill({color:hexAlpha(c.text||'#fff','e6')}),stroke:new ol.style.Stroke({color:c.bg||'#020611',width:3.2}),font:'800 9px "DM Mono",Consolas,monospace'})})];
+      text:new ol.style.Text({text:feature.get('label')||'',offsetY:20,fill:new ol.style.Fill({color:c.text||'#fff'}),backgroundFill:new ol.style.Fill({color:hexAlpha(c.bg||'#020611','e8')}),padding:[2,4,2,4],font:'600 10px Segoe UI,sans-serif'})})];
   }
   if(selected&&layer==='hazard'){
     const hazard=feature.get('hazard'),tone=hazard==='turn'?(c.warning||'#ffc857'):hazard==='cross'?'#fb923c':(c.danger||'#f43f5e');
@@ -1132,7 +1100,7 @@ function renderMissionList(){
     const row=document.createElement('div');row.className='waypoint';const base=p.type==='base'||i===0,finalVisit=visit.get(pointCoordKey(p));
     const title=base?'BASE':finalVisit?`#${String(finalVisit).padStart(2,'0')}`:`P${i}`;
     const orderTag=base?'INICIO':finalVisit?'ORDEN CALCULADO':auto?'PENDIENTE DE CÁLCULO':'ORDEN MANUAL';
-    row.innerHTML=`<div class="wpIndex">${title}</div><div class="wpMain"><input class="wpName" value="${escapeHtml(p.name)}" aria-label="${escapeHtml(ui(`Nombre del punto ${i+1}`,`Name of point ${i+1}`))}"><div class="wpMeta"><span>${formatLat(p.lat)} · ${formatLon(p.lon)}</span><span class="tag required">${orderTag}</span>${base?'':`<label class="dwellEdit">PARADA <input class="wpDwell" data-i="${i}" type="number" min="0" max="1440" step="1" value="${Math.max(0,Number(p.dwellMin)||0)}"> min</label>`}</div></div><div class="wpActions">${!base&&!auto?`<button title="Subir" data-action="up" data-i="${i}" ${i<=1?'disabled':''}>↑</button><button title="Bajar" data-action="down" data-i="${i}" ${i===missionPoints.length-1?'disabled':''}>↓</button>`:''}<button title="Eliminar" data-action="delete" data-i="${i}" ${base?'disabled':''}>×</button></div>`;
+    row.innerHTML=`<div class="wpIndex">${title}</div><div class="wpMain"><input class="wpName" value="${escapeHtml(p.name)}" title="${escapeHtml(p.name)}" aria-label="${escapeHtml(ui(`Nombre del punto ${i+1}`,`Name of point ${i+1}`))}"><div class="wpMeta"><span>${formatLat(p.lat)} · ${formatLon(p.lon)}</span><span class="tag required">${orderTag}</span>${base?'':`<label class="dwellEdit">PARADA <input class="wpDwell" data-i="${i}" type="number" min="0" max="1440" step="1" value="${Math.max(0,Number(p.dwellMin)||0)}"> min</label>`}</div></div><div class="wpActions">${!base&&!auto?`<button title="Subir" data-action="up" data-i="${i}" ${i<=1?'disabled':''}>↑</button><button title="Bajar" data-action="down" data-i="${i}" ${i===missionPoints.length-1?'disabled':''}>↓</button>`:''}<button title="Eliminar" data-action="delete" data-i="${i}" ${base?'disabled':''}>×</button></div>`;
     list.appendChild(row);
   });
   list.querySelectorAll('.wpName').forEach((input,i)=>input.onchange=()=>{missionPoints[i].name=input.value.trim()||`Punto ${i}`;currentMission=null;updatePlanningUI();});
