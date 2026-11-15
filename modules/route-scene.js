@@ -62,7 +62,7 @@
   function contourInterval(rangeM){return [1,2,5,10,20,50,100,200,500,1000].find(v=>rangeM/v<=12)||2000;}
   function autoExaggeration(sideKm,minM,maxM){
     const rangeKm=Math.max(.001,(maxM-minM)/1000);
-    return clamp(Math.round(.16*sideKm/rangeKm*2)/2,1,12);
+    return clamp(Math.round(.2*sideKm/rangeKm*2)/2,1,12);
   }
   function routeTrack(nodes,frame){
     const pts=[];let km=0;
@@ -159,7 +159,7 @@
   }
 
   // ---------- Vista 3D ----------
-  let scene=null,dialog=null,canvas=null,raf=0;
+  let scene=null,dialog=null,canvas=null,overlay=null,raf=0,renderer=null;
   const reduced=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   function activeMission(){try{return typeof selectedMission==='function'?selectedMission():null;}catch{return null;}}
   function pathNodes(mission){try{return typeof missionPathNodes==='function'?missionPathNodes(mission):[];}catch{return [];}}
@@ -187,29 +187,33 @@
     }
     return null;
   }
-  async function loadTexture(frame,n){
+  // Coeficientes lineales de (x,y) en km a coordenadas de textura (u hacia el este, v hacia el sur).
+  function textureMapping(frame,tiles){
+    const cols=tiles.x1-tiles.x0+1,rows=tiles.y1-tiles.y0+1,kLon=KM_PER_DEG*Math.max(.08,Math.cos(frame.lat0*Math.PI/180));
+    return [((frame.lon0+180)/tiles.span-tiles.x0)/cols,1/(kLon*tiles.span*cols),((90-frame.lat0)/tiles.span-tiles.y0)/rows,1/(KM_PER_DEG*tiles.span*rows)];
+  }
+  async function loadTexture(frame){
     if(window.JEZERO_DEMO?.enabled||typeof Image==='undefined')return null;
     const [w,s,e,nn]=frame.extent;
     const cfg=TEXTURES.find(t=>!t.extent||(w>=t.extent[0]&&e<=t.extent[2]&&s>=t.extent[1]&&nn<=t.extent[3]));if(!cfg)return null;
-    const tiles=textureTiles(frame.extent,cfg.maxZoom);if(!tiles)return null;
+    const tiles=textureTiles(frame.extent,cfg.maxZoom,24);if(!tiles)return null;
     const cols=tiles.x1-tiles.x0+1,rows=tiles.y1-tiles.y0+1,cv=document.createElement('canvas');cv.width=cols*256;cv.height=rows*256;
     const ctx=cv.getContext('2d',{willReadFrequently:true}),jobs=[];
     for(let y=tiles.y0;y<=tiles.y1;y++)for(let x=tiles.x0;x<=tiles.x1;x++)jobs.push(new Promise((resolve,reject)=>{
-      const img=new Image();img.crossOrigin='anonymous';const timer=setTimeout(()=>reject(new Error('timeout')),7000);
+      const img=new Image();img.crossOrigin='anonymous';const timer=setTimeout(()=>reject(new Error('timeout')),8000);
       img.onload=()=>{clearTimeout(timer);ctx.drawImage(img,(x-tiles.x0)*256,(y-tiles.y0)*256);resolve();};
       img.onerror=()=>{clearTimeout(timer);reject(new Error('tile'));};
       img.src=`${TREK}${cfg.label}/1.0.0/default/default028mm/${tiles.z}/${y}/${x}.${cfg.ext}`;
     }));
     await Promise.all(jobs);
-    const data=ctx.getImageData(0,0,cv.width,cv.height).data,colors=new Array((n-1)*(n-1)),half=frame.sideKm/2;
-    let dark=0;
-    for(let i=0;i<n-1;i++)for(let j=0;j<n-1;j++){
-      const g=frame.toGeo(-half+frame.sideKm*(j+.5)/(n-1),-half+frame.sideKm*(i+.5)/(n-1));
-      const px=clamp(Math.floor((g.lon+180)/tiles.span*256-tiles.x0*256),0,cv.width-1),py=clamp(Math.floor((90-g.lat)/tiles.span*256-tiles.y0*256),0,cv.height-1),o=(py*cv.width+px)*4;
-      colors[i*(n-1)+j]=[data[o],data[o+1],data[o+2]];if(data[o+3]<10||data[o]+data[o+1]+data[o+2]<12)dark++;
+    const A=textureMapping(frame,tiles),half=frame.sideKm/2;let dark=0,total=0;
+    for(let i=0;i<20;i++)for(let j=0;j<20;j++){
+      const x=-half+frame.sideKm*(j+.5)/20,y=-half+frame.sideKm*(i+.5)/20;
+      const px=clamp(Math.floor((A[0]+A[1]*x)*cv.width),0,cv.width-1),py=clamp(Math.floor((A[2]-A[3]*y)*cv.height),0,cv.height-1),d=ctx.getImageData(px,py,1,1).data;
+      total++;if(d[3]<10||d[0]+d[1]+d[2]<12)dark++;
     }
-    if(dark>colors.length*.4)return null; // mosaico vacío en esta zona
-    return {colors,credit:cfg.credit};
+    if(dark>total*.4)return null; // mosaico vacío en esta zona
+    return {canvas:cv,A,credit:cfg.credit,zoom:tiles.z,mpp:Math.round(1000/(A[1]*cv.width))};
   }
   async function build(mission){
     const nodes=pathNodes(mission);if(nodes.length<2)throw new Error(ui('Calcula una misión antes de abrir la vista 3D.','Calculate a mission before opening the 3D view.'));
@@ -218,20 +222,168 @@
     const frame=sceneFrame(nodes),n=gridSize(frame.sideKm);
     const filled=fillElevations(await elevations(gridPoints(frame,n)));
     if(!filled)throw new Error(ui('El DEM no devolvió elevaciones para esta zona.','The DEM returned no elevations for this area.'));
+    const fine=upsample(filled.z,n,clamp(Math.floor(99/(n-1)),1,4)); // malla 2D de respaldo: 100×100 como máximo
     const track=routeTrack(nodes,frame);
-    const stops=(mission.sequence||[]).map((p,i)=>({name:p.name||`P${i}`,base:p.type==='base',...frame.toLocal(p)})).filter((p,i,all)=>all.findIndex(q=>Math.hypot(q.x-p.x,q.y-p.y)<1e-6)===i);
+    // Regreso a base: el último tramo vuelve al punto de salida. Se marca para dibujarlo al lado de la ida y no encima.
+    const legs=mission.legs||[],lastLeg=legs[legs.length-1],first=nodes[0],lastNode=nodes[nodes.length-1];
+    const returns=legs.length>1&&Math.abs(first.lat-lastNode.lat)<1e-7&&Math.abs(first.lon-lastNode.lon)<1e-7;
+    const returnFrom=returns?track.pts.length-((lastLeg.path||[]).length-1):Infinity;
+    track.pts.forEach((p,i)=>{p.ret=i>=returnFrom;});track.returnKm=returns?track.pts[Math.max(0,returnFrom-1)].km:null;
+    const stops=(mission.sequence||[]).map((p,i)=>({name:(p.name||`P${i}`)+(i===0&&returns?ui(' · salida y regreso',' · start and return'):''),base:p.type==='base',...frame.toLocal(p)})).filter((p,i,all)=>all.findIndex(q=>Math.hypot(q.x-p.x,q.y-p.y)<1e-6)===i);
     const refs=nearbyReferences(referenceCandidates(),frame,track).filter(r=>!stops.some(s=>Math.hypot(s.x-r.x,s.y-r.y)<.05));
-    const fine=upsample(filled.z,n,clamp(Math.floor(99/(n-1)),1,4)); // malla dibujada de 100×100 como máximo, para mantener fluido el recorrido
-    let texture=null;try{texture=await loadTexture(frame,fine.n);}catch{texture=null;}
-    return {frame,n:fine.n,z:fine.z,demCellM:Math.round(frame.sideKm/(n-1)*1000),minM:filled.min,maxM:filled.max,missing:filled.missing,track,stops,refs,texture,ve:autoExaggeration(frame.sideKm,filled.min,filled.max),
-      contourM:contourInterval(filled.max-filled.min),contours:true,
-      cam:{az:-.6,tilt:.62,zoom:1},t:0,playing:false,names:true,imagery:Boolean(texture),shade:null,shadeVe:null};
+    let texture=null;try{texture=await loadTexture(frame);}catch{texture=null;}
+    return {frame,n:fine.n,z:fine.z,raw:{z:filled.z,n},demCellM:Math.round(frame.sideKm/(n-1)*1000),minM:filled.min,maxM:filled.max,missing:filled.missing,track,stops,refs,texture,ve:autoExaggeration(frame.sideKm,filled.min,filled.max),
+      contourM:contourInterval(filled.max-filled.min),contours:true,slopes:false,sun:315,
+      cam:{az:-.6,tilt:.52,zoom:1},t:0,playing:false,names:true,imagery:Boolean(texture),shade:null,shadeVe:null};
   }
   function heightAt(sc,x,y){
     const half=sc.frame.sideKm/2,n=sc.n,fx=clamp((x+half)/sc.frame.sideKm*(n-1),0,n-1.001),fy=clamp((y+half)/sc.frame.sideKm*(n-1),0,n-1.001);
     const j=Math.floor(fx),i=Math.floor(fy),a=fx-j,b=fy-i,z=sc.z;
     return (z[i*n+j]*(1-a)+z[i*n+j+1]*a)*(1-b)+(z[(i+1)*n+j]*(1-a)+z[(i+1)*n+j+1]*a)*b;
   }
+
+  // ---------- Cámara en perspectiva (compartida por WebGL y por las etiquetas) ----------
+  function mul4(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o;}
+  function cameraMatrices(sc,w,h){
+    const fly=sc.t>0||sc.playing,m=trackAt(sc.track,sc.t),zk=v=>(v-sc.minM)/1000*sc.ve,side=sc.frame.sideKm;
+    const dist=(fly?clamp(side*.24,.9,5):side*1.22)/sc.cam.zoom,tilt=sc.cam.tilt,az=sc.cam.az;
+    const target=fly?[m.x,m.y,zk(heightAt(sc,m.x,m.y))]:[0,0,zk((sc.minM+sc.maxM)/2)];
+    const eye=[target[0]-Math.sin(az)*Math.cos(tilt)*dist,target[1]-Math.cos(az)*Math.cos(tilt)*dist,target[2]+Math.sin(tilt)*dist];
+    const f=[target[0]-eye[0],target[1]-eye[1],target[2]-eye[2]],fl=Math.hypot(...f);f[0]/=fl;f[1]/=fl;f[2]/=fl;
+    let s=[f[1],-f[0],0];const sl=Math.hypot(...s)||1;s=[s[0]/sl,s[1]/sl,0];
+    const u=[s[1]*f[2]-s[2]*f[1],s[2]*f[0]-s[0]*f[2],s[0]*f[1]-s[1]*f[0]];
+    const view=new Float32Array([s[0],u[0],-f[0],0,s[1],u[1],-f[1],0,s[2],u[2],-f[2],0,-(s[0]*eye[0]+s[1]*eye[1]+s[2]*eye[2]),-(u[0]*eye[0]+u[1]*eye[1]+u[2]*eye[2]),f[0]*eye[0]+f[1]*eye[1]+f[2]*eye[2],1]);
+    const fov=36*Math.PI/180,near=Math.max(.01,dist*.03),far=dist*8+side*3,t=1/Math.tan(fov/2);
+    // En el recorrido el marcador queda en el tercio inferior, para ver el terreno que viene.
+    const proj=new Float32Array([t/(w/h),0,0,0,0,t,0,0,0,fly?.45:0,(far+near)/(near-far),-1,0,0,2*far*near/(near-far),0]);
+    return {mvp:mul4(proj,view),eye,dist,zk,marker:m,fly,w,h,far};
+  }
+  function toScreen(cam,x,y,zKm){
+    const m=cam.mvp,cw=m[3]*x+m[7]*y+m[11]*zKm+m[15];if(cw<=1e-6)return null;
+    const cx=(m[0]*x+m[4]*y+m[8]*zKm+m[12])/cw,cy=(m[1]*x+m[5]*y+m[9]*zKm+m[13])/cw;
+    return {sx:(cx*.5+.5)*cam.w,sy:(1-(cy*.5+.5))*cam.h};
+  }
+
+  // ---------- Renderizador WebGL2 ----------
+  const TERRAIN_VS=`#version 300 es
+  in vec2 aPos;in float aH;in vec2 aGrad;in float aCurv;in float aWall;
+  uniform mat4 uMVP;uniform float uVe;uniform float uFloor;uniform vec4 uTexA;
+  out vec3 vWorld;out float vH;out vec2 vGrad;out float vCurv;out float vWall;out vec2 vUv;
+  void main(){float z=aWall>1.5?uFloor:aH*.001*uVe;vec4 p=vec4(aPos,z,1.);gl_Position=uMVP*p;vWorld=p.xyz;vH=aH;vGrad=aGrad;vCurv=aCurv;vWall=aWall;vUv=vec2(uTexA.x+uTexA.y*aPos.x,uTexA.z-uTexA.w*aPos.y);}`;
+  const TERRAIN_FS=`#version 300 es
+  precision highp float;
+  in vec3 vWorld;in float vH;in vec2 vGrad;in float vCurv;in float vWall;in vec2 vUv;
+  uniform sampler2D uTex;uniform float uUseTex;uniform float uVe;uniform float uRange;uniform float uInterval;uniform float uContours;uniform float uSlopes;
+  uniform vec3 uSun;uniform vec3 uEye;uniform vec3 uFog;uniform float uFogK;uniform float uFloor;
+  out vec4 o;
+  vec3 ramp(float t){t=clamp(t,0.,1.);vec3 a=vec3(.36,.21,.15),b=vec3(.58,.35,.22),c=vec3(.76,.52,.33),d=vec3(.89,.71,.50),e=vec3(.97,.88,.74);
+    return t<.25?mix(a,b,t*4.):t<.5?mix(b,c,(t-.25)*4.):t<.75?mix(c,d,(t-.5)*4.):mix(d,e,(t-.75)*4.);}
+  vec3 slopeColor(float s){vec3 g=vec3(.20,.83,.60),y=vec3(.98,.75,.14),r=vec3(.98,.57,.24),k=vec3(.96,.25,.37);
+    return s<8.?mix(g,y,s/8.):s<15.?mix(y,r,(s-8.)/7.):mix(r,k,clamp((s-15.)/10.,0.,1.));}
+  void main(){
+    float fogD=length(vWorld-uEye),fog=(1.-exp(-pow(fogD*uFogK,1.5)))*.5;
+    if(vWall>.5){float t=clamp(vWall-1.,0.,1.);float band=.5+.5*sin(vWorld.z*90.);vec3 c=mix(vec3(.36,.23,.16),vec3(.13,.08,.06),t)*(.9+.1*band);o=vec4(mix(c,uFog,fog*.5),1.);return;}
+    float slope=degrees(atan(length(vGrad)));
+    vec3 base=uUseTex>.5?texture(uTex,vUv).rgb:ramp(vH/uRange)*(1.-.22*smoothstep(8.,28.,slope));
+    if(uUseTex>.5)base=pow(base,vec3(.92))*1.08;
+    base=mix(base,slopeColor(slope),uSlopes*.72);
+    vec3 n=normalize(vec3(-vGrad*uVe,1.));
+    float diff=max(dot(n,uSun),0.);
+    float light=(uUseTex>.5?.66:.52)+(uUseTex>.5?.58:.82)*diff;
+    light*=1.+clamp(vCurv*.035,-.2,.12);
+    vec3 col=base*light;
+    float f=vH/uInterval,w=fwidth(f);
+    float line=1.-smoothstep(0.,1.4,abs(fract(f-.5)-.5)/max(w,1e-6));
+    float f5=f/5.,w5=fwidth(f5);
+    float major=1.-smoothstep(0.,1.8,abs(fract(f5-.5)-.5)/max(w5,1e-6));
+    float fade=1.-smoothstep(.25,.6,w);
+    col=mix(col,col*.38,uContours*max(line*.45*fade,major*.7*(1.-smoothstep(.25,.6,w5))));
+    o=vec4(mix(col,uFog,fog),1.);
+  }`;
+  const ROUTE_VS=`#version 300 es
+  in vec2 aPos;in float aH;in vec2 aN;in float aSide;in vec3 aColor;in float aShift;
+  uniform mat4 uMVP;uniform float uVe;uniform float uWidth;uniform float uLift;uniform vec2 uViewport;uniform float uShift;
+  out vec3 vColor;out float vSide;
+  void main(){float z=aH*.001*uVe+uLift;vec4 c0=uMVP*vec4(aPos,z,1.),c1=uMVP*vec4(aPos+aN*.01,z,1.);
+    vec2 d=(c1.xy/c1.w-c0.xy/c0.w)*uViewport;d=length(d)>1e-6?normalize(d):vec2(0.,1.);
+    c0.xy+=d*(aSide*uWidth+aShift*uShift)/uViewport*2.*c0.w;gl_Position=c0;vColor=aColor;vSide=aSide;}`;
+  const ROUTE_FS=`#version 300 es
+  precision highp float;in vec3 vColor;in float vSide;uniform float uAlpha;uniform float uDark;out vec4 o;
+  void main(){float edge=1.-smoothstep(.75,1.,abs(vSide));vec3 c=mix(vColor,vec3(.03,.03,.05),uDark);o=vec4(c,uAlpha*(uDark>.5?1.:mix(.75,1.,edge)));}`;
+  function createGL(cv,sc){
+    const gl=cv.getContext('webgl2',{antialias:true,alpha:true,premultipliedAlpha:false});if(!gl)return null;
+    const compile=(type,src)=>{const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;};
+    const program=(vs,fs)=>{const p=gl.createProgram();gl.attachShader(p,compile(gl.VERTEX_SHADER,vs));gl.attachShader(p,compile(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));return p;};
+    let terrain,route;try{terrain=program(TERRAIN_VS,TERRAIN_FS);route=program(ROUTE_VS,ROUTE_FS);}catch(error){console.warn('JEZERO 3D',error);return null;}
+    // Malla fina (hasta 193×193) interpolada desde las muestras del DEM.
+    const raw=sc.raw,k=clamp(Math.floor(192/(raw.n-1)),1,8),fine=upsample(raw.z,raw.n,k),n=fine.n,side=sc.frame.sideKm,half=side/2,step=side/(n-1),cell=step*1000;
+    const at=(i,j)=>fine.z[clamp(i,0,n-1)*n+clamp(j,0,n-1)];
+    const vertex=(i,j,wall)=>{const h=at(i,j)-sc.minM,gx=(at(i,j+1)-at(i,j-1))/(2*cell),gy=(at(i+1,j)-at(i-1,j))/(2*cell),curv=at(i,j)-(at(i,j+1)+at(i,j-1)+at(i+1,j)+at(i-1,j))/4;return [-half+j*step,-half+i*step,h,gx,gy,curv,wall];};
+    const verts=[],index=[];
+    for(let i=0;i<n;i++)for(let j=0;j<n;j++)verts.push(...vertex(i,j,0));
+    for(let i=0;i<n-1;i++)for(let j=0;j<n-1;j++){const a=i*n+j,b=a+1,c=a+n,d=c+1;index.push(a,b,d,a,d,c);}
+    const wall=(cells)=>{const start=verts.length/7;cells.forEach(([i,j])=>{verts.push(...vertex(i,j,1),...vertex(i,j,2));});for(let q=0;q<cells.length-1;q++){const a=start+q*2,b=a+1,c=a+2,d=a+3;index.push(a,c,b,b,c,d);}};
+    const line=fn=>Array.from({length:n},(_,q)=>fn(q));
+    wall(line(q=>[0,q]));wall(line(q=>[n-1,q]));wall(line(q=>[q,0]));wall(line(q=>[q,n-1]));
+    const vao=gl.createVertexArray();gl.bindVertexArray(vao);
+    const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STATIC_DRAW);
+    const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint32Array(index),gl.STATIC_DRAW);
+    const attr=(prog,name,size,stride,offset)=>{const loc=gl.getAttribLocation(prog,name);if(loc<0)return;gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,stride*4,offset*4);};
+    attr(terrain,'aPos',2,7,0);attr(terrain,'aH',1,7,2);attr(terrain,'aGrad',2,7,3);attr(terrain,'aCurv',1,7,5);attr(terrain,'aWall',1,7,6);
+    // Ruta: cinta pegada al relieve, densificada para seguir la malla.
+    const rv=[],hAt=(x,y)=>{const fx=clamp((x+half)/step,0,n-1.001),fy=clamp((y+half)/step,0,n-1.001),j=Math.floor(fx),i=Math.floor(fy),a=fx-j,b=fy-i;return (fine.z[i*n+j]*(1-a)+fine.z[i*n+j+1]*a)*(1-b)+(fine.z[(i+1)*n+j]*(1-a)+fine.z[(i+1)*n+j+1]*a)*b-sc.minM;};
+    const hex=c=>[parseInt(c.slice(1,3),16)/255,parseInt(c.slice(3,5),16)/255,parseInt(c.slice(5,7),16)/255];
+    const pts=sc.track.pts;
+    for(let i=1;i<pts.length;i++){
+      const a=pts[i-1],b=pts[i],len=Math.hypot(b.x-a.x,b.y-a.y);if(len<1e-9)continue;
+      const nx=-(b.y-a.y)/len,ny=(b.x-a.x)/len,parts=Math.max(1,Math.ceil(len/(step*.6))),col=hex(DIFF[b.cls]||DIFF.unknown);
+      for(let q=0;q<parts;q++){
+        const x0=a.x+(b.x-a.x)*q/parts,y0=a.y+(b.y-a.y)*q/parts,x1=a.x+(b.x-a.x)*(q+1)/parts,y1=a.y+(b.y-a.y)*(q+1)/parts,h0=hAt(x0,y0),h1=hAt(x1,y1);
+        const shift=b.ret?1:0,v=(x,y,h,s)=>rv.push(x,y,h,nx,ny,s,...col,shift);
+        v(x0,y0,h0,-1);v(x0,y0,h0,1);v(x1,y1,h1,1);v(x0,y0,h0,-1);v(x1,y1,h1,1);v(x1,y1,h1,-1);
+      }
+    }
+    const rvao=gl.createVertexArray();gl.bindVertexArray(rvao);
+    const rb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,rb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(rv),gl.STATIC_DRAW);
+    attr(route,'aPos',2,10,0);attr(route,'aH',1,10,2);attr(route,'aN',2,10,3);attr(route,'aSide',1,10,5);attr(route,'aColor',3,10,6);attr(route,'aShift',1,10,9);
+    gl.bindVertexArray(null);
+    let tex=null;
+    if(sc.texture){
+      tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,sc.texture.canvas);gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+      const aniso=gl.getExtension('EXT_texture_filter_anisotropic');if(aniso)gl.texParameterf(gl.TEXTURE_2D,aniso.TEXTURE_MAX_ANISOTROPY_EXT,Math.min(8,gl.getParameter(aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
+    }
+    const U=(p,name)=>gl.getUniformLocation(p,name),FOG=[.66,.49,.36];
+    function draw(scn,cam){
+      const dpr=Math.min(2,window.devicePixelRatio||1),w=Math.round(cam.w*dpr),h=Math.round(cam.h*dpr);
+      if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
+      gl.viewport(0,0,w,h);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+      gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.BLEND);gl.disable(gl.CULL_FACE);
+      const floor=-Math.max(.03,(scn.maxM-scn.minM)/1000*scn.ve*.2+side*.035),sunAz=scn.sun*Math.PI/180,sunEl=38*Math.PI/180;
+      gl.useProgram(terrain);gl.bindVertexArray(vao);
+      gl.uniformMatrix4fv(U(terrain,'uMVP'),false,cam.mvp);gl.uniform1f(U(terrain,'uVe'),scn.ve);gl.uniform1f(U(terrain,'uFloor'),floor);
+      gl.uniform4fv(U(terrain,'uTexA'),scn.texture?scn.texture.A:[0,0,0,0]);
+      gl.uniform1f(U(terrain,'uUseTex'),scn.imagery&&tex?1:0);gl.uniform1f(U(terrain,'uRange'),Math.max(1,scn.maxM-scn.minM));
+      gl.uniform1f(U(terrain,'uInterval'),scn.contourM);gl.uniform1f(U(terrain,'uContours'),scn.contours?1:0);gl.uniform1f(U(terrain,'uSlopes'),scn.slopes?1:0);
+      gl.uniform3f(U(terrain,'uSun'),Math.sin(sunAz)*Math.cos(sunEl),Math.cos(sunAz)*Math.cos(sunEl),Math.sin(sunEl));
+      gl.uniform3fv(U(terrain,'uEye'),cam.eye);gl.uniform3fv(U(terrain,'uFog'),FOG);gl.uniform1f(U(terrain,'uFogK'),1/(cam.dist*3.2+side*1.2));
+      if(tex){gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tex);gl.uniform1i(U(terrain,'uTex'),0);}
+      gl.drawElements(gl.TRIANGLES,index.length,gl.UNSIGNED_INT,0);
+      // Ruta: primero la parte oculta por el relieve (tenue), después la visible con borde oscuro.
+      gl.useProgram(route);gl.bindVertexArray(rvao);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+      gl.uniformMatrix4fv(U(route,'uMVP'),false,cam.mvp);gl.uniform1f(U(route,'uVe'),scn.ve);
+      const width=3.2*dpr,lift=cam.dist*.004,count=rv.length/10;gl.uniform2f(U(route,'uViewport'),w,h);gl.uniform1f(U(route,'uShift'),width*2.6);
+      const pass=(w,l,alpha,dark)=>{gl.uniform1f(U(route,'uWidth'),w);gl.uniform1f(U(route,'uLift'),l);gl.uniform1f(U(route,'uAlpha'),alpha);gl.uniform1f(U(route,'uDark'),dark);gl.drawArrays(gl.TRIANGLES,0,count);};
+      gl.depthMask(false);gl.depthFunc(gl.GREATER);pass(width*.8,lift,.3,0);
+      gl.depthFunc(gl.LEQUAL);pass(width+2.2*dpr,lift,.9,1);pass(width,lift*1.5,1,0);
+      gl.depthMask(true);gl.bindVertexArray(null);
+    }
+    return {kind:'webgl',draw,meshSize:n,dispose(){gl.getExtension('WEBGL_lose_context')?.loseContext();}};
+  }
+
+  // ---------- Respaldo en lienzo 2D (si el navegador no ofrece WebGL2) ----------
   function shades(sc){
     if(sc.shade&&sc.shadeVe===sc.ve)return sc.shade;
     const n=sc.n,cell=sc.frame.sideKm/(n-1)*1000,out=new Float32Array((n-1)*(n-1)),L=[-.5,.5,.7071];
@@ -242,85 +394,69 @@
     }
     sc.shade=out;sc.shadeVe=sc.ve;return out;
   }
-  function camera(sc,w,h){
-    const fit=Math.min(w,h*1.25)/(sc.frame.sideKm*1.12),fly=sc.t>0||sc.playing,m=trackAt(sc.track,sc.t);
-    const zk=v=>(v-sc.minM)/1000*sc.ve;
-    return {az:sc.cam.az,tilt:sc.cam.tilt,s:fit*sc.cam.zoom*(fly?2.1:1),cx:w/2,cy:h*(fly?.6:.56),tx:fly?m.x:0,ty:fly?m.y:0,tz:fly?zk(m.elevationM):zk((sc.minM+sc.maxM)/2),zk,marker:m,fly};
-  }
-  function draw(){
-    if(!scene||!canvas)return;
-    const sc=scene,dpr=window.devicePixelRatio||1,w=canvas.clientWidth,h=canvas.clientHeight;
-    if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}
-    const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
-    const sky=ctx.createLinearGradient(0,0,0,h);sky.addColorStop(0,'#1b1410');sky.addColorStop(.55,'#3a2619');sky.addColorStop(1,'#120d0a');ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
-    const cam=camera(sc,w,h),n=sc.n,half=sc.frame.sideKm/2,step=sc.frame.sideKm/(n-1),sh=shades(sc),range=Math.max(1,sc.maxM-sc.minM);
-    const P=new Array(n*n);
-    for(let i=0;i<n;i++)for(let j=0;j<n;j++)P[i*n+j]=project(cam,-half+j*step,-half+i*step,cam.zk(sc.z[i*n+j]));
-    const quads=[];for(let i=0;i<n-1;i++)for(let j=0;j<n-1;j++)quads.push([P[i*n+j].depth+P[(i+1)*n+j+1].depth,i,j]);
-    quads.sort((a,b)=>b[0]-a[0]);
-    const useTexture=sc.imagery&&sc.texture,dNear=quads[quads.length-1][0],dFar=quads[0][0],dSpan=Math.max(1e-9,dFar-dNear),ci=sc.contourM;
-    for(const [depth,i,j] of quads){
-      const a=P[i*n+j],b=P[i*n+j+1],c=P[(i+1)*n+j+1],d=P[(i+1)*n+j],k=i*(n-1)+j;
-      const z00=sc.z[i*n+j],z01=sc.z[i*n+j+1],z11=sc.z[(i+1)*n+j+1],z10=sc.z[(i+1)*n+j];
-      let light=.34+.86*sh[k];
-      const base=useTexture?sc.texture.colors[k]:ramp(((z00+z11)/2-sc.minM)/range),haze=(depth-dNear)/dSpan*.3;
-      const col=`rgb(${(Math.min(255,base[0]*light)*(1-haze)+haze*92)|0},${(Math.min(255,base[1]*light)*(1-haze)+haze*62)|0},${(Math.min(255,base[2]*light)*(1-haze)+haze*46)|0})`;
-      ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(b.sx,b.sy);ctx.lineTo(c.sx,c.sy);ctx.lineTo(d.sx,d.sy);ctx.closePath();ctx.fill();ctx.stroke();
-      // Curvas de nivel: segmento entre los cruces de cada nivel con los lados de la celda.
-      if(sc.contours){
-        const lo=Math.min(z00,z01,z11,z10),hi=Math.max(z00,z01,z11,z10);
-        for(let level=Math.ceil(lo/ci)*ci;level<hi;level+=ci){
-          const cross=[];
-          for(const [p,q,zp,zq] of [[a,b,z00,z01],[b,c,z01,z11],[c,d,z11,z10],[d,a,z10,z00]]){
-            if((zp<level)!==(zq<level)){const f=(level-zp)/(zq-zp);cross.push(p.sx+(q.sx-p.sx)*f,p.sy+(q.sy-p.sy)*f);}
-          }
-          if(cross.length>=4){ctx.strokeStyle=Math.round(level/ci)%5===0?'rgba(30,16,10,.75)':'rgba(30,16,10,.42)';ctx.lineWidth=Math.round(level/ci)%5===0?1.3:.9;ctx.beginPath();ctx.moveTo(cross[0],cross[1]);ctx.lineTo(cross[2],cross[3]);ctx.stroke();}
-        }
+  function create2D(cv){
+    function draw(sc,cam){
+      const dpr=window.devicePixelRatio||1,w=cam.w,h=cam.h;
+      if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+      const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+      const n=sc.n,half=sc.frame.sideKm/2,step=sc.frame.sideKm/(n-1),sh=shades(sc),range=Math.max(1,sc.maxM-sc.minM),P=new Array(n*n),D=new Float32Array(n*n);
+      for(let i=0;i<n;i++)for(let j=0;j<n;j++){const x=-half+j*step,y=-half+i*step;P[i*n+j]=toScreen(cam,x,y,cam.zk(sc.z[i*n+j]));D[i*n+j]=Math.hypot(x-cam.eye[0],y-cam.eye[1]);}
+      const quads=[];for(let i=0;i<n-1;i++)for(let j=0;j<n-1;j++)quads.push([D[i*n+j]+D[(i+1)*n+j+1],i,j]);
+      quads.sort((a,b)=>b[0]-a[0]);
+      for(const [,i,j] of quads){
+        const a=P[i*n+j],b=P[i*n+j+1],c=P[(i+1)*n+j+1],d=P[(i+1)*n+j];if(!a||!b||!c||!d)continue;
+        const light=.34+.86*sh[i*(n-1)+j],base=ramp(((sc.z[i*n+j]+sc.z[(i+1)*n+j+1])/2-sc.minM)/range),col=`rgb(${Math.min(255,base[0]*light)|0},${Math.min(255,base[1]*light)|0},${Math.min(255,base[2]*light)|0})`;
+        ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(b.sx,b.sy);ctx.lineTo(c.sx,c.sy);ctx.lineTo(d.sx,d.sy);ctx.closePath();ctx.fill();ctx.stroke();
       }
+      const rp=sc.track.pts.map(p=>toScreen(cam,p.x,p.y,cam.zk(heightAt(sc,p.x,p.y))));
+      ctx.lineCap='round';ctx.lineJoin='round';
+      for(let i=1;i<rp.length;i++){if(!rp[i-1]||!rp[i])continue;ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(rp[i-1].sx,rp[i-1].sy);ctx.lineTo(rp[i].sx,rp[i].sy);ctx.stroke();}
+      for(let i=1;i<rp.length;i++){if(!rp[i-1]||!rp[i])continue;ctx.strokeStyle=DIFF[sc.track.pts[i].cls]||DIFF.unknown;ctx.lineWidth=3.6;ctx.beginPath();ctx.moveTo(rp[i-1].sx,rp[i-1].sy);ctx.lineTo(rp[i].sx,rp[i].sy);ctx.stroke();}
     }
-    // Paredes del bloque: los dos bordes que miran a la cámara bajan hasta una base, como en un bloque diagrama.
-    const floorZ=cam.zk(sc.minM)-Math.max(.02,(sc.maxM-sc.minM)/1000*sc.ve*.18+sc.frame.sideKm*.03),fx=Math.sin(cam.az),fy=Math.cos(cam.az);
-    const wall=(idx,shadeK)=>{
-      const top=idx.map(q=>P[q]),bottom=idx.map(q=>{const i=Math.floor(q/n),j=q%n;return project(cam,-half+j*step,-half+i*step,floorZ);});
-      const g=ctx.createLinearGradient(0,Math.min(...top.map(p=>p.sy)),0,Math.max(...bottom.map(p=>p.sy)));
-      g.addColorStop(0,`rgb(${96*shadeK|0},${62*shadeK|0},${44*shadeK|0})`);g.addColorStop(1,`rgb(${40*shadeK|0},${26*shadeK|0},${20*shadeK|0})`);
-      ctx.fillStyle=g;ctx.beginPath();top.forEach((p,q)=>q?ctx.lineTo(p.sx,p.sy):ctx.moveTo(p.sx,p.sy));for(let q=bottom.length-1;q>=0;q--)ctx.lineTo(bottom[q].sx,bottom[q].sy);ctx.closePath();ctx.fill();
-      ctx.strokeStyle='rgba(255,236,210,.35)';ctx.lineWidth=1;ctx.beginPath();top.forEach((p,q)=>q?ctx.lineTo(p.sx,p.sy):ctx.moveTo(p.sx,p.sy));ctx.stroke();
-    };
-    const line=(fn)=>Array.from({length:n},(_,q)=>fn(q));
-    if(cam.tilt<1.5){
-      if(fy>0)wall(line(q=>q),.95);else wall(line(q=>(n-1)*n+q),.95);       // borde sur o norte
-      if(fx>0)wall(line(q=>q*n),.72);else wall(line(q=>q*n+n-1),.72);         // borde oeste o este
-    }
-    // Ruta: se dibuja sobre el relieve, algo elevada, con el color de dificultad de cada tramo.
-    const rp=sc.track.pts.map(p=>project(cam,p.x,p.y,cam.zk(Math.max(p.elevationM??-Infinity,heightAt(sc,p.x,p.y)))));
-    ctx.lineCap='round';ctx.lineJoin='round';
-    ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=7;ctx.beginPath();rp.forEach((p,i)=>i?ctx.lineTo(p.sx,p.sy):ctx.moveTo(p.sx,p.sy));ctx.stroke();
-    for(let i=1;i<rp.length;i++){ctx.strokeStyle=DIFF[sc.track.pts[i].cls]||DIFF.unknown;ctx.lineWidth=3.6;ctx.beginPath();ctx.moveTo(rp[i-1].sx,rp[i-1].sy);ctx.lineTo(rp[i].sx,rp[i].sy);ctx.stroke();}
-    // Etiquetas: paradas de la misión y nombres oficiales cercanos, sin solaparse.
+    return {kind:'2d',draw,meshSize:null,dispose(){}};
+  }
+
+  // ---------- Etiquetas, marcador y norte (lienzo superpuesto) ----------
+  function drawOverlay(sc,cam){
+    const dpr=window.devicePixelRatio||1,w=cam.w,h=cam.h;
+    if(overlay.width!==Math.round(w*dpr)||overlay.height!==Math.round(h*dpr)){overlay.width=Math.round(w*dpr);overlay.height=Math.round(h*dpr);}
+    const ctx=overlay.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
     const boxes=[];ctx.textBaseline='middle';
     const label=(x,y,text,color,strong)=>{
-      const g=project(cam,x,y,cam.zk(heightAt(sc,x,y)));
+      const g=toScreen(cam,x,y,cam.zk(heightAt(sc,x,y)));if(!g||g.sx<0||g.sx>w||g.sy<0||g.sy>h)return;
       ctx.font=`${strong?700:600} ${strong?12:11}px Inter,Segoe UI,sans-serif`;
-      const tw=ctx.measureText(text).width+12,bx=g.sx-tw/2,by=g.sy-(strong?44:34),box=[bx,by,tw,20];
-      if(g.sx<0||g.sx>w||g.sy<0||g.sy>h)return;
-      if(boxes.some(o=>bx<o[0]+o[2]&&bx+tw>o[0]&&by<o[1]+o[3]&&by+20>o[1]))return;
-      boxes.push(box);
-      ctx.strokeStyle=color;ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(g.sx,g.sy);ctx.lineTo(g.sx,by+20);ctx.stroke();
-      ctx.fillStyle=color;ctx.beginPath();ctx.arc(g.sx,g.sy,strong?4.5:3,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='rgba(8,10,16,.86)';ctx.fillRect(bx,by,tw,20);ctx.strokeRect(bx,by,tw,20);
-      ctx.fillStyle='#fff';ctx.fillText(text,bx+6,by+10.5);
+      const tw=ctx.measureText(text).width+14,pole=strong?46:34,bx=clamp(g.sx-tw/2,4,w-tw-4),by=g.sy-pole-22;
+      if(by<4||boxes.some(o=>bx<o[0]+o[2]+4&&bx+tw+4>o[0]&&by<o[1]+o[3]+3&&by+22+3>o[1]))return;
+      boxes.push([bx,by,tw,22]);
+      ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(g.sx,g.sy);ctx.lineTo(g.sx,by+22);ctx.stroke();
+      ctx.fillStyle=color;ctx.strokeStyle='#0b0f18';ctx.lineWidth=2;ctx.beginPath();ctx.arc(g.sx,g.sy,strong?5.5:3.5,0,Math.PI*2);ctx.fill();ctx.stroke();
+      ctx.fillStyle='rgba(9,12,20,.88)';ctx.beginPath();ctx.roundRect?ctx.roundRect(bx,by,tw,22,5):ctx.rect(bx,by,tw,22);ctx.fill();
+      ctx.fillStyle=color;ctx.fillRect(bx,by+3,3,16);
+      ctx.fillStyle='#fff';ctx.fillText(text,bx+9,by+11.5);
     };
-    for(const s of sc.stops)label(s.x,s.y,s.name.length>26?s.name.slice(0,25)+'…':s.name,s.base?'#34d399':'#c4b5fd',true);
+    sc.stops.forEach(s=>label(s.x,s.y,s.name.length>44?s.name.slice(0,43)+'…':s.name,s.base?'#34d399':'#c4b5fd',true));
     if(sc.names)for(const r of sc.refs)label(r.x,r.y,r.name.length>24?r.name.slice(0,23)+'…':r.name,'#7dd3fc',false);
     if(cam.fly){
-      const m=cam.marker,g=project(cam,m.x,m.y,cam.zk(m.elevationM));
-      ctx.fillStyle='rgba(255,255,255,.22)';ctx.beginPath();ctx.arc(g.sx,g.sy,13,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='#fff';ctx.strokeStyle='#0b0f18';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(g.sx,g.sy,6,0,Math.PI*2);ctx.fill();ctx.stroke();
+      const m=cam.marker,g=toScreen(cam,m.x,m.y,cam.zk(heightAt(sc,m.x,m.y)));
+      if(g){ctx.fillStyle='rgba(255,255,255,.25)';ctx.beginPath();ctx.arc(g.sx,g.sy,15,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#fff';ctx.strokeStyle='#0b0f18';ctx.lineWidth=3;ctx.beginPath();ctx.arc(g.sx,g.sy,7,0,Math.PI*2);ctx.fill();ctx.stroke();}
     }
-    // Norte
-    const nx=w-44,ny=44,a=-cam.az;ctx.save();ctx.translate(nx,ny);ctx.rotate(a);ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(0,-16);ctx.lineTo(6,6);ctx.lineTo(0,2);ctx.lineTo(-6,6);ctx.closePath();ctx.fill();ctx.restore();
-    ctx.font='700 10px Inter,Segoe UI,sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText('N',nx,ny+26);ctx.textAlign='start';
+    // Brújula: el norte gira con la cámara.
+    const nx=w-46,ny=48;ctx.save();ctx.translate(nx,ny);ctx.fillStyle='rgba(9,12,20,.7)';ctx.beginPath();ctx.arc(0,0,26,0,Math.PI*2);ctx.fill();
+    ctx.rotate(-sc.cam.az);ctx.fillStyle='#f87171';ctx.beginPath();ctx.moveTo(0,-18);ctx.lineTo(6,0);ctx.lineTo(-6,0);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#e5e7eb';ctx.beginPath();ctx.moveTo(0,18);ctx.lineTo(6,0);ctx.lineTo(-6,0);ctx.closePath();ctx.fill();
+    ctx.font='700 10px Inter,Segoe UI,sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText('N',0,-24+0);ctx.restore();ctx.textAlign='start';
+    // Escala gráfica aproximada en el punto de mira.
+    const a=toScreen(cam,cam.fly?cam.marker.x:0,cam.fly?cam.marker.y:0,cam.zk(heightAt(sc,cam.fly?cam.marker.x:0,cam.fly?cam.marker.y:0)));
+    const stepKm=[.05,.1,.2,.5,1,2,5,10,20,50].find(v=>v>=sc.frame.sideKm/(cam.fly?14:6))||50;
+    const bx=cam.fly?cam.marker.x:0,by2=cam.fly?cam.marker.y:0,b=toScreen(cam,bx+Math.cos(sc.cam.az)*stepKm,by2-Math.sin(sc.cam.az)*stepKm,cam.zk(heightAt(sc,bx,by2)));
+    if(a&&b){const len=Math.hypot(b.sx-a.sx,b.sy-a.sy);if(len>20&&len<w*.5){const x0=18,y0=h-22;ctx.fillStyle='rgba(9,12,20,.7)';ctx.fillRect(x0-8,y0-20,len+16,32);ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x0,y0-5);ctx.lineTo(x0,y0);ctx.lineTo(x0+len,y0);ctx.lineTo(x0+len,y0-5);ctx.stroke();ctx.fillStyle='#fff';ctx.font='600 11px Inter,Segoe UI,sans-serif';ctx.fillText(stepKm<1?`${stepKm*1000} m`:`${stepKm} km`,x0+4,y0-11);}}
+  }
+  function draw(){
+    if(!scene||!canvas||!renderer)return;
+    const w=canvas.clientWidth,h=canvas.clientHeight;if(w<2||h<2)return;
+    const cam=cameraMatrices(scene,w,h);
+    renderer.draw(scene,cam);drawOverlay(scene,cam);
   }
   let els={};
   function drawChrome(){
@@ -330,18 +466,23 @@
     els.reset.textContent=ui('Vista general','Overview');
     els.close.setAttribute('aria-label',ui('Cerrar vista 3D','Close 3D view'));
     els.veLabel.textContent=ui(`Exageración vertical ×${sc.ve}`,`Vertical exaggeration ×${sc.ve}`);
+    els.sunLabel.textContent=ui('Dirección de la luz','Light direction');
     els.namesLabel.textContent=ui('Nombres de la zona','Place names');
     els.imageryLabel.textContent=ui('Imagen orbital','Orbital image');
     els.contoursLabel.textContent=ui(`Curvas de nivel cada ${sc.contourM} m`,`Contours every ${sc.contourM} m`);
-    els.imagery.disabled=!sc.texture;els.imagery.checked=sc.imagery;
+    els.slopesLabel.textContent=ui('Color por pendiente','Color by slope');
+    els.imagery.disabled=!sc.texture||renderer?.kind!=='webgl';els.imagery.checked=sc.imagery&&!els.imagery.disabled;
+    els.slopes.disabled=renderer?.kind!=='webgl';els.contours.disabled=renderer?.kind!=='webgl';els.sun.disabled=renderer?.kind!=='webgl';
+    els.slopeKey.hidden=!sc.slopes;els.slopeKey.textContent=ui('Pendiente real del DEM: verde 0° · amarillo 8° · naranja 15° · rojo 25° o más','Real DEM slope: green 0° · yellow 8° · orange 15° · red 25° or more');
     els.scrub.value=String(Math.round(sc.t*1000));els.scrub.setAttribute('aria-label',ui('Posición en la ruta','Position along the route'));
-    els.readout.textContent=`${m.km.toFixed(2)} / ${sc.track.totalKm.toFixed(2)} km · ${Math.round(m.elevationM)} m`+(Number.isFinite(m.slopeDeg)&&sc.t>0?` · ${ui('pendiente','slope')} ${m.slopeDeg.toFixed(1)}°`:'');
-    const cell=sc.demCellM;
-    els.caption.textContent=ui(`Relieve: DEM de ~200 m muestreado cada ${cell} m y suavizado por interpolación (${sc.frame.sideKm.toFixed(1)} km de lado); no muestra rocas ni detalle menor que el DEM. `,`Relief: ~200 m DEM sampled every ${cell} m and smoothed by interpolation (${sc.frame.sideKm.toFixed(1)} km across); it shows no rocks or detail finer than the DEM. `)
+    els.readout.textContent=`${m.km.toFixed(2)} / ${sc.track.totalKm.toFixed(2)} km · ${Math.round(m.elevationM)} m`+(Number.isFinite(m.slopeDeg)&&sc.t>0?` · ${ui('pendiente','slope')} ${m.slopeDeg.toFixed(1)}°`:'')+(sc.track.returnKm!==null&&sc.t>0?` · ${m.km>=sc.track.returnKm?ui('regreso a base','return to base'):ui('ida','outbound')}`:'');
+    els.caption.textContent=ui(`Relieve: DEM de ~200 m muestreado cada ${sc.demCellM} m y suavizado por interpolación (${sc.frame.sideKm.toFixed(1)} km de lado); no muestra rocas ni detalle menor que el DEM. `,`Relief: ~200 m DEM sampled every ${sc.demCellM} m and smoothed by interpolation (${sc.frame.sideKm.toFixed(1)} km across); it shows no rocks or detail finer than the DEM. `)
       +(sc.ve>1?ui(`La altura está exagerada ×${sc.ve}; las pendientes reales son las del panel. `,`Height is exaggerated ×${sc.ve}; real slopes are the ones in the panel. `):ui('Altura sin exagerar. ','Height not exaggerated. '))
-      +(sc.imagery&&sc.texture?ui(`Imagen: ${sc.texture.credit}. `,`Image: ${sc.texture.credit}. `):ui('Color por elevación (sin imagen orbital). ','Color by elevation (no orbital image). '))
-      +(sc.refs.length?ui(`Nombres: nomenclatura IAU/USGS y sitios de aterrizaje cargados en el mapa (${sc.refs.length}). `,`Names: IAU/USGS nomenclature and landing sites loaded on the map (${sc.refs.length}). `):ui('Sin nombres oficiales cargados en esta zona. ','No official names loaded in this area. '))
+      +(sc.imagery&&sc.texture&&renderer?.kind==='webgl'?ui(`Imagen: ${sc.texture.credit} (~${sc.texture.mpp} m/píxel). `,`Image: ${sc.texture.credit} (~${sc.texture.mpp} m/pixel). `):ui('Color por elevación (sin imagen orbital). ','Color by elevation (no orbital image). '))
+      +(sc.track.returnKm!==null?ui('La ruta vuelve a la base: el regreso se dibuja al lado de la ida. ','The route returns to base: the return leg is drawn beside the outbound one. '):'')
+      +(sc.refs.length?ui(`Nombres: nomenclatura IAU/USGS y sitios de aterrizaje cargados en el mapa (${sc.refs.length}). `,`Names: IAU/USGS nomenclature and landing sites loaded on the map (${sc.refs.length}). `):'')
       +(sc.missing?ui(`${sc.missing} celdas sin dato se rellenaron con la media. `,`${sc.missing} cells without data were filled with the mean. `):'')
+      +(renderer?.kind==='2d'?ui('Este navegador no ofrece WebGL2: vista simplificada. ','This browser has no WebGL2: simplified view. '):'')
       +ui('Arrastra para girar, rueda para acercar.','Drag to rotate, scroll to zoom.');
   }
   function tick(now){
@@ -349,7 +490,9 @@
     if(sc.playing){
       const dt=Math.min(.5,(now-(sc.last||now))/1000);sc.last=now;
       sc.t=Math.min(1,sc.t+dt/sc.duration);
-      const m=trackAt(sc.track,sc.t);let diff=m.heading-sc.cam.az;diff=Math.atan2(Math.sin(diff),Math.cos(diff));sc.cam.az+=diff*Math.min(1,dt*1.6);
+      // La cámara mira hacia donde va la ruta un poco más adelante, para que los giros no la sacudan.
+      const ahead=trackAt(sc.track,Math.min(1,sc.t+.035)),here=trackAt(sc.track,sc.t),want=(ahead.x!==here.x||ahead.y!==here.y)?Math.atan2(ahead.x-here.x,ahead.y-here.y):here.heading;
+      let diff=want-sc.cam.az;diff=Math.atan2(Math.sin(diff),Math.cos(diff));sc.cam.az+=diff*Math.min(1,dt*1.2);
       if(sc.t>=1){sc.playing=false;}
       drawChrome();
     }
@@ -361,7 +504,8 @@
     const sc=scene;if(!sc)return;
     if(sc.playing){sc.playing=false;drawChrome();return;}
     if(sc.t>=1)sc.t=0;
-    sc.duration=clamp(sc.track.totalKm*7,14,50);sc.playing=true;sc.last=null;sc.cam.tilt=.5;
+    sc.duration=clamp(sc.track.totalKm*6,16,55);sc.playing=true;sc.last=null;sc.cam.tilt=.36;sc.cam.zoom=1;
+    if(sc.t===0)sc.cam.az=trackAt(sc.track,.02).heading;
     drawChrome();redraw();
   }
   function ensureDialog(){
@@ -370,56 +514,65 @@
     dialog=mk('div','routeScene');dialog.hidden=true;dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','routeSceneTitle');
     const panel=mk('div','routeScenePanel'),head=mk('header'),bar=mk('div','routeSceneBar'),opts=mk('div','routeSceneOptions');
     els.title=mk('h2');els.title.id='routeSceneTitle';els.close=mk('button','routeSceneClose');els.close.type='button';els.close.textContent='×';head.append(els.title,els.close);
-    canvas=mk('canvas','routeSceneCanvas');canvas.tabIndex=0;
-    els.status=mk('p','routeSceneStatus');
+    els.stage=mk('div','routeSceneStage');
+    els.status=mk('p','routeSceneStatus');els.slopeKey=mk('p','routeSceneKey');els.slopeKey.hidden=true;
     els.play=mk('button','routeScenePlay');els.play.type='button';els.reset=mk('button');els.reset.type='button';
     els.scrub=mk('input');els.scrub.type='range';els.scrub.min='0';els.scrub.max='1000';els.scrub.value='0';
     els.readout=mk('output');bar.append(els.play,els.scrub,els.readout,els.reset);
     const check=(key)=>{const l=mk('label'),i=mk('input'),s=mk('span');i.type='checkbox';l.append(i,s);els[key]=i;els[key+'Label']=s;return l;};
-    const veBox=mk('label','routeSceneVe');els.veLabel=mk('span');els.ve=mk('input');els.ve.type='range';els.ve.min='1';els.ve.max='15';els.ve.step='.5';veBox.append(els.veLabel,els.ve);
-    opts.append(check('names'),check('imagery'),check('contours'),veBox);
+    const slider=(key,min,max,step)=>{const l=mk('label','routeSceneVe'),s=mk('span'),i=mk('input');i.type='range';i.min=min;i.max=max;i.step=step;l.append(s,i);els[key]=i;els[key+'Label']=s;return l;};
+    opts.append(check('imagery'),check('slopes'),check('contours'),check('names'),slider('ve','1','15','.5'),slider('sun','0','359','1'));
     els.caption=mk('p','routeSceneCaption');
-    const stage=mk('div','routeSceneStage');stage.append(canvas,els.status);panel.append(head,stage,bar,opts,els.caption);dialog.append(panel);document.body.append(dialog);
+    panel.append(head,els.stage,bar,opts,els.caption);dialog.append(panel);document.body.append(dialog);
     els.close.addEventListener('click',close);dialog.addEventListener('click',e=>{if(e.target===dialog)close();});
     dialog.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
     els.play.addEventListener('click',play);
-    els.reset.addEventListener('click',()=>{if(!scene)return;Object.assign(scene,{t:0,playing:false});scene.cam={az:-.6,tilt:.62,zoom:1};drawChrome();redraw();});
-    els.scrub.addEventListener('input',()=>{if(!scene)return;scene.playing=false;scene.t=Number(els.scrub.value)/1000;const m=trackAt(scene.track,scene.t);if(scene.t>0)scene.cam.az=m.heading;drawChrome();redraw();});
-    els.names.addEventListener('change',()=>{scene.names=els.names.checked;redraw();});
-    els.contours.addEventListener('change',()=>{scene.contours=els.contours.checked;drawChrome();redraw();});
-    els.imagery.addEventListener('change',()=>{scene.imagery=els.imagery.checked;drawChrome();redraw();});
-    els.ve.addEventListener('input',()=>{scene.ve=Number(els.ve.value);drawChrome();redraw();});
-    let drag=null;
-    canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};canvas.setPointerCapture?.(e.pointerId);});
-    canvas.addEventListener('pointermove',e=>{if(!drag||!scene)return;scene.cam.az+=(e.clientX-drag.x)*.008;scene.cam.tilt=clamp(scene.cam.tilt+(e.clientY-drag.y)*.006,.18,1.45);drag={x:e.clientX,y:e.clientY};redraw();});
-    ['pointerup','pointercancel'].forEach(n=>canvas.addEventListener(n,()=>{drag=null;}));
-    canvas.addEventListener('wheel',e=>{if(!scene)return;e.preventDefault();scene.cam.zoom=clamp(scene.cam.zoom*(e.deltaY<0?1.12:.89),.5,6);redraw();},{passive:false});
-    canvas.addEventListener('keydown',e=>{if(!scene)return;const k=e.key;if(k==='ArrowLeft')scene.cam.az-=.1;else if(k==='ArrowRight')scene.cam.az+=.1;else if(k==='ArrowUp')scene.cam.tilt=clamp(scene.cam.tilt+.06,.18,1.45);else if(k==='ArrowDown')scene.cam.tilt=clamp(scene.cam.tilt-.06,.18,1.45);else if(k==='+'||k==='=')scene.cam.zoom=clamp(scene.cam.zoom*1.12,.5,6);else if(k==='-')scene.cam.zoom=clamp(scene.cam.zoom*.89,.5,6);else return;e.preventDefault();redraw();});
+    els.reset.addEventListener('click',()=>{if(!scene)return;Object.assign(scene,{t:0,playing:false});scene.cam={az:-.6,tilt:.52,zoom:1};drawChrome();redraw();});
+    els.scrub.addEventListener('input',()=>{if(!scene)return;scene.playing=false;scene.t=Number(els.scrub.value)/1000;const m=trackAt(scene.track,scene.t);if(scene.t>0){scene.cam.az=m.heading;scene.cam.tilt=.36;}drawChrome();redraw();});
+    const bind=(key,event,apply)=>els[key].addEventListener(event,()=>{if(!scene)return;apply();drawChrome();redraw();});
+    bind('names','change',()=>{scene.names=els.names.checked;});bind('imagery','change',()=>{scene.imagery=els.imagery.checked;});
+    bind('contours','change',()=>{scene.contours=els.contours.checked;});bind('slopes','change',()=>{scene.slopes=els.slopes.checked;});
+    bind('ve','input',()=>{scene.ve=Number(els.ve.value);});bind('sun','input',()=>{scene.sun=Number(els.sun.value);});
     window.addEventListener('resize',()=>{if(scene)redraw();});
+  }
+  function mountCanvases(){
+    // Un lienzo nuevo por apertura: un contexto WebGL no se puede reutilizar como 2D ni al revés.
+    els.stage.replaceChildren();
+    canvas=document.createElement('canvas');canvas.className='routeSceneCanvas';
+    overlay=document.createElement('canvas');overlay.className='routeSceneCanvas routeSceneOverlay';overlay.tabIndex=0;
+    els.stage.append(canvas,overlay,els.status,els.slopeKey);
+    let drag=null;
+    overlay.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};overlay.setPointerCapture?.(e.pointerId);});
+    overlay.addEventListener('pointermove',e=>{if(!drag||!scene)return;scene.cam.az+=(e.clientX-drag.x)*.008;scene.cam.tilt=clamp(scene.cam.tilt+(e.clientY-drag.y)*.006,.1,1.5);drag={x:e.clientX,y:e.clientY};redraw();});
+    ['pointerup','pointercancel'].forEach(n=>overlay.addEventListener(n,()=>{drag=null;}));
+    overlay.addEventListener('wheel',e=>{if(!scene)return;e.preventDefault();scene.cam.zoom=clamp(scene.cam.zoom*(e.deltaY<0?1.12:.89),.4,8);redraw();},{passive:false});
+    overlay.addEventListener('keydown',e=>{if(!scene)return;const k=e.key;if(k==='ArrowLeft')scene.cam.az-=.1;else if(k==='ArrowRight')scene.cam.az+=.1;else if(k==='ArrowUp')scene.cam.tilt=clamp(scene.cam.tilt+.06,.1,1.5);else if(k==='ArrowDown')scene.cam.tilt=clamp(scene.cam.tilt-.06,.1,1.5);else if(k==='+'||k==='=')scene.cam.zoom=clamp(scene.cam.zoom*1.12,.4,8);else if(k==='-')scene.cam.zoom=clamp(scene.cam.zoom*.89,.4,8);else return;e.preventDefault();redraw();});
   }
   let opener=null;
   async function open(){
     ensureDialog();opener=document.activeElement;
-    dialog.hidden=false;scene=null;
+    dialog.hidden=false;scene=null;renderer?.dispose?.();renderer=null;mountCanvases();
     els.title.textContent=ui('Vista 3D de la ruta','3D route view');
-    els.status.hidden=false;els.status.textContent=ui('Cargando el relieve de la zona…','Loading terrain for the area…');
-    [els.play,els.reset,els.scrub,els.ve,els.names,els.imagery,els.contours].forEach(e=>{e.disabled=true;});els.caption.textContent='';els.readout.textContent='';
+    els.status.hidden=false;els.status.textContent=ui('Cargando el relieve y la imagen de la zona…','Loading terrain and imagery for the area…');
+    const controls=[els.play,els.reset,els.scrub,els.ve,els.sun,els.names,els.imagery,els.contours,els.slopes];
+    controls.forEach(e=>{e.disabled=true;});els.caption.textContent='';els.readout.textContent='';
     els.close.focus();
     try{
       const built=await build(activeMission());
       if(dialog.hidden)return;
       scene=built;els.status.hidden=true;
-      [els.play,els.reset,els.scrub,els.ve,els.names,els.contours].forEach(e=>{e.disabled=false;});
-      els.names.checked=true;els.contours.checked=true;els.ve.value=String(scene.ve);
+      renderer=createGL(canvas,scene);
+      if(!renderer){mountCanvases();renderer=create2D(canvas);}
+      controls.forEach(e=>{e.disabled=false;});
+      els.names.checked=true;els.contours.checked=true;els.slopes.checked=false;els.ve.value=String(scene.ve);els.sun.value=String(scene.sun);
       drawChrome();redraw();
-      if(reduced())els.status.hidden=true;
     }catch(error){els.status.hidden=false;els.status.textContent=error?.message||String(error);}
   }
-  function close(){if(!dialog)return;dialog.hidden=true;if(scene)scene.playing=false;scene=null;if(raf){cancelAnimationFrame(raf);raf=0;}opener?.focus?.();}
+  function close(){if(!dialog)return;dialog.hidden=true;if(scene)scene.playing=false;scene=null;if(raf){cancelAnimationFrame(raf);raf=0;}renderer?.dispose?.();renderer=null;opener?.focus?.();}
   function init(){ensureMineralControl();}
   window.addEventListener('jezero:languagechange',translate);
   window.JEZERO_ROUTE_SCENE=Object.freeze({open,close,init,setMineral,MINERALS,mineralCoverage,
-    _test:{upsample,contourInterval,sceneFrame,gridSize,gridPoints,fillElevations,autoExaggeration,routeTrack,trackAt,nearbyReferences,project,textureTiles}});
+    _test:{upsample,contourInterval,sceneFrame,gridSize,gridPoints,fillElevations,autoExaggeration,routeTrack,trackAt,nearbyReferences,project,textureTiles,textureMapping,cameraMatrices,toScreen}});
   if(typeof document!=='undefined'){
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
     // El mapa se crea después de cargar los datos: se reintenta hasta que exista el panel de capas y el mapa.

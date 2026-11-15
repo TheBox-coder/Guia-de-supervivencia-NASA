@@ -71,3 +71,22 @@ test('mesh smoothing keeps the DEM samples exactly and adds no extremes on a pla
  assert.equal(t.upsample(z,3,1).n,3);
  assert.equal(t.contourInterval(95),10);assert.equal(t.contourInterval(8),1);assert.equal(t.contourInterval(3000),500);
 });
+
+test('texture mapping puts the scene centre and edges at the right tile pixels',()=>{
+ const f=t.sceneFrame(nodes),tiles=t.textureTiles(f.extent,13,24),A=t.textureMapping(f,tiles);
+ const cols=tiles.x1-tiles.x0+1,rows=tiles.y1-tiles.y0+1;
+ const u0=((f.lon0+180)/tiles.span-tiles.x0)/cols,v0=((90-f.lat0)/tiles.span-tiles.y0)/rows;
+ assert.ok(Math.abs(A[0]-u0)<1e-12&&Math.abs(A[2]-v0)<1e-12);
+ const ne=f.toGeo(1,1),u=A[0]+A[1]*1,v=A[2]-A[3]*1;
+ assert.ok(Math.abs(u-((ne.lon+180)/tiles.span-tiles.x0)/cols)<1e-9);assert.ok(Math.abs(v-((90-ne.lat)/tiles.span-tiles.y0)/rows)<1e-9);
+ assert.ok(u>A[0]&&v<A[2]); // este = u mayor; norte = v menor (arriba en la imagen)
+});
+
+test('perspective camera centres its target and keeps north up when looking north',()=>{
+ const f=t.sceneFrame(nodes),track=t.routeTrack(nodes,f),n=3,z=new Array(9).fill(-2500);
+ const sc={frame:f,n,z,minM:-2500,maxM:-2400,ve:1,track,t:0,playing:false,cam:{az:0,tilt:.6,zoom:1}};
+ const cam=t.cameraMatrices(sc,800,600),centre=t.toScreen(cam,0,0,cam.zk(-2450)),north=t.toScreen(cam,0,1,cam.zk(-2450)),east=t.toScreen(cam,1,0,cam.zk(-2450));
+ assert.ok(Math.abs(centre.sx-400)<1e-3&&Math.abs(centre.sy-300)<1e-3);
+ assert.ok(north.sy<centre.sy&&Math.abs(north.sx-400)<1e-3);assert.ok(east.sx>centre.sx);
+ assert.equal(t.toScreen(cam,cam.eye[0],cam.eye[1]-50,cam.eye[2]),null); // detrás de la cámara
+});
