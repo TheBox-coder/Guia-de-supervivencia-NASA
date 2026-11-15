@@ -661,3 +661,7 @@ body[data-module="analysis"] :is(.sidebar, .details, .missionHud, .uiCanvasWelco
 body.jezero-ui #tutorialDemoDownload[hidden]{display:none}
 #tutorialDemoDownload{display:block;margin:14px 0;text-align:center;text-decoration:none}
 #helpDialog .dialogFooter{flex-wrap:wrap;gap:10px}
+
+.demoWelcome{width:min(540px,calc(100vw - 28px))}
+.demoWelcome .dialogFooter{flex-wrap:wrap;gap:10px}
+.demoWelcome .tutorialBody p{margin:0;line-height:1.7}

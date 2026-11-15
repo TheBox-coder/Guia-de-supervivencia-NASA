@@ -67,7 +67,8 @@
   function tryStep(){const s=steps[index];close($('tutorialDialog'));window.JEZERO_MODULES?.activate(s.module);if(s.module==='planner')window.JEZERO_PANELS?.set(true,false);const el=document.querySelector(s.target);if(el){if(s.target==='#uiPointEntry')el.open=true;if(s.target==='#guideEquipmentCard')el.querySelector('details').open=true;el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('tutorialTarget');setTimeout(()=>el.classList.remove('tutorialTarget'),5000);}renderTutorial();$('tutorialDock').hidden=false;}
   $('helpQuery').addEventListener('input',renderHelp);
   $('helpStartTutorial').addEventListener('click',()=>{demoMode=false;syncLanguage();index=0;close($('helpDialog'));showTutorial();});
-  $('helpDemoTutorial').addEventListener('click',()=>{demoMode=true;index=0;completed=false;syncLanguage();close($('helpDialog'));showTutorial();});
+  function startDemo(){demoMode=true;index=0;completed=false;syncLanguage();showTutorial();}
+  $('helpDemoTutorial').addEventListener('click',()=>{close($('helpDialog'));startDemo();});
   $('tutorialBack').addEventListener('click',()=>{if(index>0)index--;renderTutorial();});
   $('tutorialNext').addEventListener('click',()=>{if(index<steps.length-1){index++;renderTutorial();}else{completed=true;save();close($('tutorialDialog'));$('tutorialDock').hidden=true;document.dispatchEvent(new CustomEvent('jezero:tutorialcomplete'));}});
   $('tutorialTry').addEventListener('click',tryStep);
@@ -81,5 +82,21 @@
   if($('pointCount'))new MutationObserver(updateSave).observe($('pointCount'),{childList:true,characterData:true,subtree:true});updateSave();
   function syncLanguage(){topics=language()==='en'?window.JEZERO_HELP_EN.topics:spanishTopics;steps=demoMode?demoSteps():(language()==='en'?window.JEZERO_HELP_EN.steps:spanishSteps);index=Math.min(index,steps.length-1);$('helpDemoTutorial').textContent=ui('Demo guiada de Jezero','Jezero guided demo');document.querySelector('.helpSearch a').href=language()==='en'?'MANUAL-HELP-EN.md':'MANUAL-DE-AYUDA.md';renderHelp();renderTutorial();}
   window.addEventListener('jezero:languagechange',syncLanguage);syncLanguage();
+  const welcome=document.createElement('dialog');welcome.id='demoWelcome';welcome.className='jezeroDialog demoWelcome';welcome.setAttribute('aria-labelledby','demoWelcomeTitle');welcome.setAttribute('aria-describedby','demoWelcomeText');
+  welcome.innerHTML='<header class="dialogHeader"><div><span>JEZERO / DEMO</span><h2 id="demoWelcomeTitle"></h2></div></header><div class="tutorialBody"><p id="demoWelcomeText"></p></div><footer class="dialogFooter"><button id="demoWelcomeSkip" type="button"></button><button id="demoWelcomeStart" class="helpPrimary" type="button"></button></footer>';
+  document.body.append(welcome);
+  function welcomeLanguage(){
+    $('demoWelcomeTitle').textContent=ui('¿Quieres probar la demo guiada de Jezero?','Would you like to try the Jezero guided demo?');
+    $('demoWelcomeText').textContent=ui('Te acompañamos paso a paso para cargar los cinco puntos, configurar Chariot y explorar el clima y la vista 3D. La guía usa datos de demostración y no los carga automáticamente. También puedes abrirla después desde Ayuda.','Follow the steps to load five waypoints, set up Chariot and explore the weather and 3D view. The guide uses demonstration data and does not load it automatically. You can also open it later from Help.');
+    $('demoWelcomeSkip').textContent=ui('Ahora no','Not now');
+    $('demoWelcomeStart').textContent=ui('Sí, iniciar demo guiada','Yes, start guided demo');
+  }
+  welcomeLanguage();window.addEventListener('jezero:languagechange',welcomeLanguage);
+  let welcomeFocus=null;
+  welcome.addEventListener('close',()=>{if(!document.querySelector('dialog[open]'))welcomeFocus?.focus?.();});
+  $('demoWelcomeSkip').addEventListener('click',()=>welcome.close());
+  $('demoWelcomeStart').addEventListener('click',()=>{welcome.close();startDemo();});
+  const offerDemo=()=>{welcomeLanguage();welcomeFocus=document.activeElement;welcome.showModal();};
+  if(document.readyState==='complete')offerDemo();else window.addEventListener('load',offerDemo,{once:true});
   window.JEZERO_HELP=Object.freeze({open:showHelp,tutorial:showTutorial});
 })();
