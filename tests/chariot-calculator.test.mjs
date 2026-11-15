@@ -133,9 +133,9 @@ test('scenarios never present themselves as a forecast',()=>{
 test('calculator card shows the wait limit and loads a scenario duration',async()=>{
  const fs=await import('node:fs'),vm=await import('node:vm');
  class El{constructor(tag){this.tag=tag;this.children=[];this.dataset={};this.attrs={};this.listeners={};this.className='';this.id='';this.value='';this.textContent='';this.checked=false;this.open=false;}append(...c){this.children.push(...c);}replaceChildren(...c){this.children=[...c];}setAttribute(k,v){this.attrs[k]=v;}addEventListener(n,f){this.listeners[n]=f;}querySelector(t){const walk=e=>{for(const c of e.children||[]){if(c.tag===t)return c;const r=walk(c);if(r)return r;}return null;};return walk(this);}prepend(...c){this.children.unshift(...c);}scrollIntoView(){this.scrolled=true;}focus(){this.focused=true;}}
- const host=new El('section'),byId=new Map();
+ const host=new El('section'),byId=new Map(),events={};let language='es',elapsedSols=0;
  const document={getElementById:id=>id==='opsPanel-base'?host:byId.get(id)||null,createElement:t=>{const e=new El(t);return new Proxy(e,{set(o,k,v){o[k]=v;if(k==='id')byId.set(v,e);return true;},get:(o,k)=>o[k]});}};
- const window={JEZERO_CHARIOT_CALC:calc,JEZERO_I18N:{ui:es=>es},JEZERO_OPERATIONS:{getState:()=>({base:{}})},JEZERO_OPERATIONS_ENGINE:{CHARIOT_PROPOSAL:{batteryCapacityKWh:42,generationKW:1.2,lifeSupportSols:14}},addEventListener(){}};
+ const window={JEZERO_CHARIOT_CALC:calc,JEZERO_I18N:{ui:(es,en)=>language==='en'?en:es},JEZERO_OPERATIONS:{getState:()=>({base:{elapsedSols}})},JEZERO_OPERATIONS_ENGINE:{CHARIOT_PROPOSAL:{batteryCapacityKWh:42,generationKW:1.2,lifeSupportSols:14}},addEventListener(name,fn){(events[name]??=[]).push(fn);}};
  vm.runInContext(fs.readFileSync(new URL('../modules/chariot-calculator.js',import.meta.url),'utf8'),vm.createContext({document,window,Number,Object}));
  const all=[];(function walk(n){for(const c of n.children||[]){all.push(c);walk(c);}})(host);
  const scenarioList=all.find(n=>n.className&&n.className.includes('chariotScenarios'));assert.equal(scenarioList.children.length,4);
@@ -145,4 +145,27 @@ test('calculator card shows the wait limit and loads a scenario duration',async(
  const button=scenarioList.children[2].children.find(c=>c.tag==='button');button.listeners.click();
  assert.equal(byId.get('chariotCalc-stormHours').value,String(Number((28*calc.SOL_HOURS).toFixed(1))));
  assert.ok(all.some(n=>n.tag==='strong'&&/^-?\d+\.\d\d kWh$/.test(n.textContent)));
+ language='en';events['jezero:languagechange'].forEach(fn=>fn());
+ const current=texts(host);assert.ok(current.includes('The battery'));assert.ok(current.some(t=>/95\.2 h.*sols/.test(t)));assert.ok(current.some(t=>/Maximum wait:.*sols/.test(t)));assert.ok(!current.some(t=>/Maximum wait:.*soles/.test(t)));
+ elapsedSols=13;events['jezero:supportchange'].forEach(fn=>fn());assert.ok(texts(host).some(t=>/Remaining life support: 1\.00 sols/.test(t)));
+ byId.get('chariotCalc-returnDistance').value='400';byId.get('chariotCalc-returnSpeed').value='1';byId.get('chariotCalc-returnTraction').value='0';byId.get('chariotCalc-essential').value='1';byId.get('chariotCalc-essential').listeners.input();
+ assert.ok(texts(host).some(t=>/Return time exceeds remaining life support/.test(t)));assert.ok(!texts(host).some(t=>/Maximum wait:/.test(t)));
+
+});
+
+
+test('wait and duration scenarios subtract elapsed sols from the life-support limit',()=>{
+ const options={elapsedSols:13},e=calc.endurance(baseEmergency,options);
+ near(e.remainingLifeSupportSols,1);near(e.maxStormHours,calc.SOL_HOURS-e.travelHours);
+ assert.equal(e.lifeSupportSols,14);assert.equal(e.elapsedSols,13);assert.equal(e.limitingFactor,'life-support');
+ assert.ok(calc.scenarios(baseEmergency,options).scenarios.every(row=>!row.lifeOk));
+ for(const elapsedSols of [14,15])assert.equal(calc.endurance(baseEmergency,{elapsedSols}).canReturn,false);
+ for(const elapsedSols of [-1,'bad',Infinity]){assert.equal(calc.endurance(baseEmergency,{elapsedSols}).ok,false);assert.equal(calc.scenarios(baseEmergency,{elapsedSols}).ok,false);}
+});
+
+test('a return longer than remaining life support is impossible even with enough energy',()=>{
+ const r=calc.endurance({...baseEmergency,essentialKW:1,returnTractionKW:0,returnDistanceKm:400,returnSpeedKmH:1});
+ assert.equal(r.energyReturnOk,true);assert.equal(r.lifeReturnOk,false);assert.equal(r.canReturn,false);assert.equal(r.maxStormHours,0);assert.equal(r.limitingFactor,'life-return');
+ const boundary={...baseEmergency,essentialKW:1,returnTractionKW:0,returnDistanceKm:calc.SOL_HOURS,returnSpeedKmH:1};
+ assert.equal(calc.endurance(boundary,{elapsedSols:13}).canReturn,true);assert.equal(calc.endurance({...boundary,returnDistanceKm:calc.SOL_HOURS+.01},{elapsedSols:13}).canReturn,false);
 });

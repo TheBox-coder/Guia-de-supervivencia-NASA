@@ -184,3 +184,6 @@ El círculo amarillo del Chariot muestra alcance estimado de ida desde su posici
 
 
 El modelo ambiental ajusta regresiones armónicas independientes para temperatura, opacidad del polvo (τ) y tasa de dosis (µSv/h). Cada variable requiere 12 muestras de los últimos 3 soles en al menos 6 franjas de 3 horas. CLIMA muestra curvas horarias de polvo y radiación para el sol seleccionado y exposición ambiental integrada en el horizonte completo, convirtiendo hora local marciana a horas terrestres. Cada sol repite el patrón; no se predicen tormentas, eventos solares ni cambios entre soles. El ajuste no supone un efecto causal del polvo o la radiación sobre la temperatura, ni modifica automáticamente los escenarios de consumo. La exposición no incluye blindaje ni es una dosis personal. Los datos insuficientes permanecen sin proyección; nuevas observaciones reajustan los canales disponibles.
+
+
+La calculadora de espera por tormenta descuenta los soles transcurridos guardados en Chariot del límite total de 14 soles. El regreso debe caber tanto en el presupuesto de energía como en el soporte vital restante; si no cabe, se declara imposible incluso sin espera. Sin soles transcurridos declarados se asume salida (0 soles), y se indica en el resultado. La simulación energética sigue suponiendo batería llena al empezar la tormenta.

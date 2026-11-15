@@ -33,7 +33,7 @@
   update();
  }
  const lifeSupportSols=()=>window.JEZERO_OPERATIONS_ENGINE?.CHARIOT_PROPOSAL?.lifeSupportSols??calc.DEFAULTS.lifeSupportSols;
- const options=()=>({capacityKWh:capacityInput.value,generationKW:generationInput.value,lifeSupportSols:lifeSupportSols()});
+ const options=()=>({capacityKWh:capacityInput.value,generationKW:generationInput.value,lifeSupportSols:lifeSupportSols(),elapsedSols:window.JEZERO_OPERATIONS?.getState?.()?.base?.elapsedSols??0});
  // Misión
  const missionForm=document.createElement('form');missionForm.noValidate=true;missionForm.addEventListener('submit',e=>e.preventDefault());
  const missionTitle=make('h4',null,'Parámetros de la misión','Mission parameters'),missionGrid=make('div','opsInputs');
@@ -102,8 +102,8 @@
   label(emergencyStatus,r.withinCapacity?`✓ Reserva dentro de la capacidad nominal de ${r.capacityKWh} kWh.`:`⚠ Reserva superior a la batería nominal de ${r.capacityKWh} kWh.`,r.withinCapacity?`✓ Reserve within the nominal ${r.capacityKWh} kWh capacity.`:`⚠ Reserve exceeds the nominal ${r.capacityKWh} kWh battery.`);state(emergencyStatus,r.withinCapacity);
   renderEndurance(emergencyInput);return r;
  }
- const hoursText=h=>Number.isFinite(h)?`${h.toFixed(1)} h (${(h/calc.SOL_HOURS).toFixed(2)} ${ui('soles','sols')})`:ui('Sin límite de energía','No energy limit');
- const LIMITS={'energy':['La batería','The battery'],'life-support':['El soporte vital','Life support'],'energy-return':['La batería no alcanza ni para regresar','The battery cannot even cover the return']};
+ const hoursText=(h,language)=>{const text=(es,en)=>language?language==='en'?en:es:ui(es,en);return Number.isFinite(h)?`${h.toFixed(1)} h (${(h/calc.SOL_HOURS).toFixed(2)} ${text('soles','sols')})`:text('Sin límite de energía','No energy limit');};
+ const LIMITS={'energy':['La batería','The battery'],'life-support':['El soporte vital','Life support'],'energy-return':['La batería no alcanza ni para regresar','The battery cannot even cover the return'],'life-return':['El regreso supera el soporte vital restante','Return exceeds remaining life support']};
  const VERDICT={ok:['✓ Se puede esperar','✓ Can be waited out'],energy:['⚠ Supera la batería','⚠ Exceeds the battery'],'life-support':['⚠ Supera el soporte vital','⚠ Exceeds life support'],both:['⚠ Supera batería y soporte vital','⚠ Exceeds battery and life support']};
  function renderEndurance(input){
   const e=calc.endurance(input,options()),sc=calc.scenarios(input,options());
@@ -112,7 +112,8 @@
   articles.limit.querySelector('strong').textContent=ui(...LIMITS[e.limitingFactor]);
   articles.returnReserve.querySelector('strong').textContent=fmt(e.returnReserveKWh,'kWh');
   articles.maxWait.dataset.deficit=String(e.maxStormHours<=0);
-  label(enduranceNote,e.canReturn?`Con esta configuración el Chariot puede esperar hasta ${hoursText(e.maxStormHours)} y aún regresar con el margen indicado. Si el polvo sube, decide la salida antes de que se cumpla ese plazo. Supone batería al 100 % al empezar la tormenta y un techo de soporte vital de ${e.lifeSupportSols.toFixed(0)} soles.`:'La reserva para el regreso supera la batería: no hay espera posible con estos parámetros.',e.canReturn?`With this setup the Chariot can wait up to ${hoursText(e.maxStormHours)} and still return with the stated margin. If dust is rising, decide on departure before that deadline. Assumes a full battery when the storm starts and a ${e.lifeSupportSols.toFixed(0)}-sol life-support ceiling.`:'The return reserve exceeds the battery: no waiting is possible with these parameters.');
+  const reason=e.energyReturnOk?['El tiempo de regreso supera el soporte vital restante: no hay espera ni regreso viables con estos parámetros.','Return time exceeds remaining life support: neither waiting nor returning is feasible with these inputs.']:['La reserva para el regreso supera la batería: no hay espera posible con estos parámetros.','The return reserve exceeds the battery: no waiting is possible with these inputs.'];
+  label(enduranceNote,e.canReturn?`Espera máxima: ${hoursText(e.maxStormHours,'es')}, dejando tiempo para regresar. Soporte vital restante: ${e.remainingLifeSupportSols.toFixed(2)} soles; transcurridos: ${e.elapsedSols.toFixed(2)} de ${e.lifeSupportSols.toFixed(0)} soles. Sin tiempo transcurrido declarado se asume salida (0 soles). Supone batería al 100 % al empezar la tormenta.`:reason[0],e.canReturn?`Maximum wait: ${hoursText(e.maxStormHours,'en')}, allowing time to return. Remaining life support: ${e.remainingLifeSupportSols.toFixed(2)} sols; elapsed: ${e.elapsedSols.toFixed(2)} of ${e.lifeSupportSols.toFixed(0)} sols. Missing elapsed time assumes departure (0 sols). Assumes a full battery when the storm starts.`:reason[1]);
   state(enduranceNote,e.canReturn&&e.maxStormHours>0);
   scenarioList.replaceChildren(...sc.scenarios.map(row=>{
    const a=document.createElement('article'),b=make('b',null,`${row.es} · ${row.sols} soles`,`${row.en} · ${row.sols} sols`),strong=make('strong',null,...VERDICT[row.verdict]),small=make('small',null,`Reserva requerida ${row.requiredKWh.toFixed(1)} kWh. ${row.basisEs}`,`Required reserve ${row.requiredKWh.toFixed(1)} kWh. ${row.basisEn}`),use=make('button','secondary','Usar esta duración','Use this duration');
@@ -121,6 +122,8 @@
   }));
  }
  function update(){updateMission();updateEmergency();}
+ window.addEventListener?.('jezero:languagechange',update);
+ window.addEventListener?.('jezero:supportchange',update);
  // Al abrir la emergencia se copian los datos de la misión como punto de partida (el usuario puede cambiarlos).
  emergency.addEventListener('toggle',()=>{if(!emergency.open)return;inputs.returnDistance.value=inputs.distance.value;inputs.returnSpeed.value=inputs.speed.value;inputs.returnTraction.value=inputs.traction.value;updateEmergency();});
  for(const input of Object.values(inputs))input.addEventListener('input',update);

@@ -171,3 +171,6 @@ The yellow Chariot circle shows estimated one-way reach from its declared positi
 
 
 The environmental model fits independent harmonic regressions for temperature, dust optical depth (tau) and dose rate (microSv/h). Each variable needs 12 samples from the last 3 sols covering at least six 3-hour bins. WEATHER shows hourly dust and radiation curves for the selected sol and integrated ambient exposure over the whole horizon, converting local Martian hours to Earth hours. Each sol repeats the learned pattern; storms, solar events and day-to-day changes are not predicted. No causal dust/radiation effect on temperature is assumed, and resource-consumption scenarios are not changed automatically. Exposure is unshielded and is not personal dose. Insufficient observations leave a channel without a projection; new observations refit available channels.
+
+
+The storm-wait calculator subtracts the elapsed sols saved in Chariot from the total 14-sol limit. Return must fit both the energy budget and remaining life support; otherwise it is reported as impossible even without waiting. Missing elapsed sols assume departure (0 sols), as stated in the result. The energy simulation still assumes a full battery when the storm starts.

@@ -36,17 +36,20 @@
  // ── Cuánto puede esperar el Chariot (no se predice la tormenta: se calcula el límite de espera) ─────────────────
  // La espera máxima es el menor entre el límite de energía (batería inicial al 100 %, mismo modelo y margen que emergency())
  // y el techo de soporte vital (14 soles en la propuesta) menos el viaje de regreso.
- function lifeSupportHours(options){const sols=num(options.lifeSupportSols)??DEFAULTS.lifeSupportSols;return sols>0?sols*SOL_HOURS:null;}
+ function lifeSupportHours(options){
+  const sols=num(options.lifeSupportSols)??DEFAULTS.lifeSupportSols,elapsed=options.elapsedSols==null?0:num(options.elapsedSols);
+  return sols>0&&elapsed!==null&&elapsed>=0?Math.max(0,sols-elapsed)*SOL_HOURS:null;
+ }
  function endurance(raw={},options={}){
   const base=emergency({...raw,stormHours:0},options);if(!base.ok)return base;
   const ctx=context(options),lifeHours=lifeSupportHours(options);if(lifeHours===null)return fail('Revisa el límite de soporte vital.','Check the life-support limit.');
   const m=num(raw.marginPct)/100,standbyKW=Math.max(0,num(raw.essentialKW)-base.generationKW);
-  const returnReserveKWh=base.returnKWh*(1+m),canReturn=returnReserveKWh<=ctx.capacityKWh;
+  const returnReserveKWh=base.returnKWh*(1+m),energyReturnOk=returnReserveKWh<=ctx.capacityKWh,lifeReturnOk=base.travelHours<=lifeHours,canReturn=energyReturnOk&&lifeReturnOk;
   // required = (standbyKW·H + returnKWh)·(1+m) ≤ capacidad → H ≤ (capacidad/(1+m) − returnKWh)/standbyKW
-  const energyHours=!canReturn?0:standbyKW===0?Infinity:Math.max(0,(ctx.capacityKWh/(1+m)-base.returnKWh)/standbyKW);
+  const energyHours=!energyReturnOk?0:standbyKW===0?Infinity:Math.max(0,(ctx.capacityKWh/(1+m)-base.returnKWh)/standbyKW);
   const lifeCeilingHours=Math.max(0,lifeHours-base.travelHours);
-  const maxStormHours=Math.min(energyHours,lifeCeilingHours),limitingFactor=!canReturn?'energy-return':energyHours<=lifeCeilingHours?'energy':'life-support';
-  return {ok:true,maxStormHours,maxStormSols:maxStormHours/SOL_HOURS,energyHours,lifeCeilingHours,limitingFactor,canReturn,returnReserveKWh,standbyKW,travelHours:base.travelHours,capacityKWh:ctx.capacityKWh,lifeSupportSols:lifeHours/SOL_HOURS};
+  const maxStormHours=Math.min(energyHours,lifeCeilingHours),limitingFactor=!energyReturnOk?'energy-return':!lifeReturnOk?'life-return':energyHours<=lifeCeilingHours?'energy':'life-support';
+  return {ok:true,maxStormHours,maxStormSols:maxStormHours/SOL_HOURS,energyHours,lifeCeilingHours,limitingFactor,canReturn,energyReturnOk,lifeReturnOk,returnReserveKWh,standbyKW,travelHours:base.travelHours,capacityKWh:ctx.capacityKWh,remainingLifeSupportSols:lifeHours/SOL_HOURS,lifeSupportSols:num(options.lifeSupportSols)??DEFAULTS.lifeSupportSols,elapsedSols:options.elapsedSols==null?0:num(options.elapsedSols)};
  }
  // Escenarios de duración: valores redondos de PLANIFICACIÓN para comparar, no pronósticos ni estadísticas medidas.
  // Base cualitativa: las tormentas de gran escala duran de semanas a meses (Wang et al., 2015, Icarus; NASA 2018: al menos un par de meses para la global de 2018).
