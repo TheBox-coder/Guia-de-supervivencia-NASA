@@ -167,9 +167,7 @@
   }
 
   setupMirrors();
-  const initialRaw = localStorage.getItem(MODULE_KEY) || localStorage.getItem('jezero-active-module-v35') || localStorage.getItem('jezero-active-module-v34') || localStorage.getItem('jezero-active-module-v33') || localStorage.getItem('jezero-active-module-v32') || localStorage.getItem('jezero-active-module-v31') || localStorage.getItem('jezero-active-module-v30') || localStorage.getItem('jezero-active-module-v29') || localStorage.getItem('jezero-active-module-v28');
-  const migrated = initialRaw === 'science' ? 'planner' : initialRaw === 'reports' ? 'analysis' : initialRaw === 'terrain' ? 'explorer' : initialRaw === 'control' ? 'eva' : initialRaw;
-  const initial = ['/control','/dashboard','/jezero_mission_control.html'].includes(location.pathname)?'dashboard':localStorage.getItem(MODULE_KEY) || migrated || 'home';
+  const initial = ['/control','/dashboard','/jezero_mission_control.html'].includes(location.pathname)?'dashboard':'home';
   activateModule(validModule(initial) ? initial : 'home', {save:false, openMobile:false});
 
   window.addEventListener('jezero:languagechange',()=>activateModule(document.body.dataset.module||'planner',{save:false,openMobile:false,open:document.body.dataset.interfaceOpen!=='false'}));

@@ -6,7 +6,7 @@ Primer incremento de Dust Rider 4: auditoría, Mission Control, trazabilidad y p
 
 Node.js >=20. Sin dependencias npm de producción. Desde esta carpeta: `npm start` o `node server.mjs`; abre http://localhost:8000. `PORT` permite otro puerto. `npm test` o `node --test 'tests/*.test.mjs'` ejecuta las pruebas. Render sigue usando el servidor Node canónico; este trabajo no publica ni modifica infraestructura.
 
-En una instalación nueva abre Inicio. Una preferencia anterior conserva su módulo. Mission Control consolida el estado usando los motores originales y permite consultar ecuaciones/exportar evidencia. No exige cuenta. Manual y tutorial en Ayuda; español e inglés. Datos locales anteriores no se migran ni eliminan.
+Al abrir la aplicación se muestra Inicio, aunque la sesión anterior terminara en otro apartado. Los enlaces directos a Control abren ese apartado. Mission Control consolida el estado usando los motores originales y permite consultar ecuaciones/exportar evidencia. No exige cuenta. Manual y tutorial en Ayuda; español e inglés. Datos locales anteriores no se migran ni eliminan.
 
 ## Documentación del incremento
 
