@@ -97,6 +97,6 @@
   $('demoWelcomeSkip').addEventListener('click',()=>welcome.close());
   $('demoWelcomeStart').addEventListener('click',()=>{welcome.close();startDemo();});
   const offerDemo=()=>{welcomeLanguage();welcomeFocus=document.activeElement;welcome.showModal();};
-  if(document.readyState==='complete')offerDemo();else window.addEventListener('load',offerDemo,{once:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',offerDemo,{once:true});else offerDemo();
   window.JEZERO_HELP=Object.freeze({open:showHelp,tutorial:showTutorial});
 })();
