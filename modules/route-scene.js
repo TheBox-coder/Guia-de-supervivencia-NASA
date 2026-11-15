@@ -56,7 +56,7 @@
     for(let I=0;I<m;I++){const fi=I/k,i=Math.min(n-2,Math.floor(fi)),ti=fi-i;
       for(let J=0;J<m;J++){const fj=J/k,j=Math.min(n-2,Math.floor(fj)),tj=fj-j,rows=[];
         for(let r=-1;r<=2;r++)rows.push(cr(at(i+r,j-1),at(i+r,j),at(i+r,j+1),at(i+r,j+2),tj));
-        out[I*m+J]=cr(rows[0],rows[1],rows[2],rows[3],ti);}}
+        out[I*m+J]=clamp(cr(rows[0],rows[1],rows[2],rows[3],ti),Math.min(at(i,j),at(i,j+1),at(i+1,j),at(i+1,j+1)),Math.max(at(i,j),at(i,j+1),at(i+1,j),at(i+1,j+1)));}}
     return {z:out,n:m};
   }
   function contourInterval(rangeM){return [1,2,5,10,20,50,100,200,500,1000].find(v=>rangeM/v<=12)||2000;}
@@ -246,14 +246,17 @@
   function mul4(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o;}
   function cameraMatrices(sc,w,h){
     const fly=sc.t>0||sc.playing,m=trackAt(sc.track,sc.t),zk=v=>(v-sc.minM)/1000*sc.ve,side=sc.frame.sideKm;
-    const dist=(fly?clamp(side*.24,.9,5):side*1.22)/sc.cam.zoom,tilt=sc.cam.tilt,az=sc.cam.az;
+    // Fit the overview to the narrower field of view, including the elevated terrain.
+    const aspect=w/h,fov=36*Math.PI/180,halfFov=Math.atan(Math.tan(fov/2)*Math.min(1,aspect));
+    const radius=Math.hypot(side/Math.sqrt(2),(sc.maxM-sc.minM)/2000*sc.ve);
+    const dist=(fly?clamp(side*.24,.9,5):radius/Math.sin(halfFov)*1.08)/sc.cam.zoom,tilt=sc.cam.tilt,az=sc.cam.az;
     const target=fly?[m.x,m.y,zk(heightAt(sc,m.x,m.y))]:[0,0,zk((sc.minM+sc.maxM)/2)];
     const eye=[target[0]-Math.sin(az)*Math.cos(tilt)*dist,target[1]-Math.cos(az)*Math.cos(tilt)*dist,target[2]+Math.sin(tilt)*dist];
     const f=[target[0]-eye[0],target[1]-eye[1],target[2]-eye[2]],fl=Math.hypot(...f);f[0]/=fl;f[1]/=fl;f[2]/=fl;
     let s=[f[1],-f[0],0];const sl=Math.hypot(...s)||1;s=[s[0]/sl,s[1]/sl,0];
     const u=[s[1]*f[2]-s[2]*f[1],s[2]*f[0]-s[0]*f[2],s[0]*f[1]-s[1]*f[0]];
     const view=new Float32Array([s[0],u[0],-f[0],0,s[1],u[1],-f[1],0,s[2],u[2],-f[2],0,-(s[0]*eye[0]+s[1]*eye[1]+s[2]*eye[2]),-(u[0]*eye[0]+u[1]*eye[1]+u[2]*eye[2]),f[0]*eye[0]+f[1]*eye[1]+f[2]*eye[2],1]);
-    const fov=36*Math.PI/180,near=Math.max(.01,dist*.03),far=dist*8+side*3,t=1/Math.tan(fov/2);
+    const near=Math.max(.01,dist*.03),far=dist*8+side*3,t=1/Math.tan(fov/2);
     // En el recorrido el marcador queda en el tercio inferior, para ver el terreno que viene.
     const proj=new Float32Array([t/(w/h),0,0,0,0,t,0,0,0,fly?.45:0,(far+near)/(near-far),-1,0,0,2*far*near/(near-far),0]);
     return {mvp:mul4(proj,view),eye,dist,zk,marker:m,fly,w,h,far};
@@ -289,9 +292,12 @@
     base=mix(base,slopeColor(slope),uSlopes*.72);
     vec3 n=normalize(vec3(-vGrad*uVe,1.));
     float diff=max(dot(n,uSun),0.);
-    float light=(uUseTex>.5?.66:.52)+(uUseTex>.5?.58:.82)*diff;
+    // Soft sky fill keeps slopes readable without clipping sunlit ridges.
+    float sky=.5+.5*n.z;
+    float light=(uUseTex>.5?.48:.32)+.22*sky+(uUseTex>.5?.38:.62)*diff;
     light*=1.+clamp(vCurv*.035,-.2,.12);
     vec3 col=base*light;
+    col=col/(vec3(1.)+col*.22)*1.12;
     float f=vH/uInterval,w=fwidth(f);
     float line=1.-smoothstep(0.,1.4,abs(fract(f-.5)-.5)/max(w,1e-6));
     float f5=f/5.,w5=fwidth(f5);
@@ -370,11 +376,12 @@
       gl.uniform3f(U(terrain,'uSun'),Math.sin(sunAz)*Math.cos(sunEl),Math.cos(sunAz)*Math.cos(sunEl),Math.sin(sunEl));
       gl.uniform3fv(U(terrain,'uEye'),cam.eye);gl.uniform3fv(U(terrain,'uFog'),FOG);gl.uniform1f(U(terrain,'uFogK'),1/(cam.dist*3.2+side*1.2));
       if(tex){gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tex);gl.uniform1i(U(terrain,'uTex'),0);}
-      gl.drawElements(gl.TRIANGLES,index.length,gl.UNSIGNED_INT,0);
+      gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(1,1);
+      gl.drawElements(gl.TRIANGLES,index.length,gl.UNSIGNED_INT,0);gl.disable(gl.POLYGON_OFFSET_FILL);
       // Ruta: primero la parte oculta por el relieve (tenue), después la visible con borde oscuro.
       gl.useProgram(route);gl.bindVertexArray(rvao);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
       gl.uniformMatrix4fv(U(route,'uMVP'),false,cam.mvp);gl.uniform1f(U(route,'uVe'),scn.ve);
-      const width=3.2*dpr,lift=cam.dist*.004,count=rv.length/10;gl.uniform2f(U(route,'uViewport'),w,h);gl.uniform1f(U(route,'uShift'),width*2.6);
+      const width=3.2*dpr,lift=Math.max(.0005,side*.00008),count=rv.length/10;gl.uniform2f(U(route,'uViewport'),w,h);gl.uniform1f(U(route,'uShift'),width*2.6);
       const pass=(w,l,alpha,dark)=>{gl.uniform1f(U(route,'uWidth'),w);gl.uniform1f(U(route,'uLift'),l);gl.uniform1f(U(route,'uAlpha'),alpha);gl.uniform1f(U(route,'uDark'),dark);gl.drawArrays(gl.TRIANGLES,0,count);};
       gl.depthMask(false);gl.depthFunc(gl.GREATER);pass(width*.8,lift,.3,0);
       gl.depthFunc(gl.LEQUAL);pass(width+2.2*dpr,lift,.9,1);pass(width,lift*1.5,1,0);
@@ -425,11 +432,12 @@
     const label=(x,y,text,color,strong)=>{
       const g=toScreen(cam,x,y,cam.zk(heightAt(sc,x,y)));if(!g||g.sx<0||g.sx>w||g.sy<0||g.sy>h)return;
       ctx.font=`${strong?700:600} ${strong?12:11}px Inter,Segoe UI,sans-serif`;
-      const tw=ctx.measureText(text).width+14,pole=strong?46:34,bx=clamp(g.sx-tw/2,4,w-tw-4),by=g.sy-pole-22;
-      if(by<4||boxes.some(o=>bx<o[0]+o[2]+4&&bx+tw+4>o[0]&&by<o[1]+o[3]+3&&by+22+3>o[1]))return;
-      boxes.push([bx,by,tw,22]);
-      ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(g.sx,g.sy);ctx.lineTo(g.sx,by+22);ctx.stroke();
+      const tw=ctx.measureText(text).width+14,pole=strong?46:34,bx=clamp(g.sx-tw/2,4,w-tw-4);
+      const by=[g.sy-pole-22,g.sy-pole-50,g.sy+22].find(y=>y>=4&&y+22<=h-4&&!boxes.some(o=>bx<o[0]+o[2]+4&&bx+tw+4>o[0]&&y<o[1]+o[3]+3&&y+25>o[1]));
       ctx.fillStyle=color;ctx.strokeStyle='#0b0f18';ctx.lineWidth=2;ctx.beginPath();ctx.arc(g.sx,g.sy,strong?5.5:3.5,0,Math.PI*2);ctx.fill();ctx.stroke();
+      if(by===undefined)return;
+      boxes.push([bx,by,tw,22]);
+      ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(g.sx,g.sy);ctx.lineTo(clamp(g.sx,bx,bx+tw),by>g.sy?by:by+22);ctx.stroke();
       ctx.fillStyle='rgba(9,12,20,.88)';ctx.beginPath();ctx.roundRect?ctx.roundRect(bx,by,tw,22,5):ctx.rect(bx,by,tw,22);ctx.fill();
       ctx.fillStyle=color;ctx.fillRect(bx,by+3,3,16);
       ctx.fillStyle='#fff';ctx.fillText(text,bx+9,by+11.5);

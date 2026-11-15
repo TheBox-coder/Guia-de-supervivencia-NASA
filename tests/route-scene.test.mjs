@@ -90,3 +90,19 @@ test('perspective camera centres its target and keeps north up when looking nort
  assert.ok(north.sy<centre.sy&&Math.abs(north.sx-400)<1e-3);assert.ok(east.sx>centre.sx);
  assert.equal(t.toScreen(cam,cam.eye[0],cam.eye[1]-50,cam.eye[2]),null); // detrás de la cámara
 });
+
+test('smoothed terrain never invents peaks or pits between DEM samples',()=>{
+ const z=[0,0,100, 0,0,100, 0,0,100],up=t.upsample(z,3,8);
+ assert.ok(up.z.every(v=>v>=0&&v<=100));
+ for(let i=0;i<up.n;i++)for(let j=0;j<=8;j++)assert.equal(up.z[i*up.n+j],0);
+});
+
+test('overview fits terrain corners at portrait and landscape aspect ratios',()=>{
+ const f=t.sceneFrame(nodes),track=t.routeTrack(nodes,f),sc={frame:f,n:3,z:new Array(9).fill(-2500),minM:-2500,maxM:-2200,ve:4,track,t:0,playing:false,cam:{az:-.6,tilt:.52,zoom:1}};
+ for(const [w,h] of [[360,500],[1100,500]])for(const az of [0,-.6,1.5]){
+  const cam=t.cameraMatrices({...sc,cam:{...sc.cam,az}},w,h),half=f.sideKm/2;
+  for(const x of [-half,half])for(const y of [-half,half])for(const z of [sc.minM,sc.maxM]){
+   const p=t.toScreen(cam,x,y,cam.zk(z));assert.ok(p&&p.sx>=0&&p.sx<=w&&p.sy>=0&&p.sy<=h);
+  }
+ }
+});
