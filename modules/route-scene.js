@@ -470,6 +470,14 @@
   function drawChrome(){
     if(!scene||!dialog)return;const sc=scene,m=trackAt(sc.track,sc.t);
     els.title.textContent=ui('Vista 3D de la ruta','3D route view');
+    els.eyebrow.textContent=ui('DUST RIDER / EXPLORACIÓN','DUST RIDER / EXPLORATION');
+    els.subtitle.textContent=ui('Explora el relieve y sigue tu recorrido.','Explore the terrain and follow your traverse.');
+    els.optionsTitle.textContent=ui('Ajustar vista','View settings');
+    els.layersTitle.textContent=ui('Capas del terreno','Terrain layers');
+    els.cameraTitle.textContent=ui('Relieve e iluminación','Relief and lighting');
+    els.hint.textContent=ui('Arrastra para girar · Rueda para acercar','Drag to rotate · Scroll to zoom');
+    els.sourceTitle.textContent=ui('Fuentes y límites del modelo','Sources and model limits');
+    els.modelNote.textContent=ui('Relieve interpolado del DEM. La exageración vertical cambia la apariencia, no las pendientes calculadas.','Interpolated DEM terrain. Vertical exaggeration changes the appearance, not the calculated slopes.');
     els.play.textContent=sc.playing?ui('Pausar','Pause'):sc.t>=1?ui('Repetir recorrido','Replay flyover'):ui('Recorrer la ruta','Fly the route');
     els.reset.textContent=ui('Vista general','Overview');
     els.close.setAttribute('aria-label',ui('Cerrar vista 3D','Close 3D view'));
@@ -520,8 +528,13 @@
     if(dialog)return;
     const mk=(tag,cls)=>{const e=document.createElement(tag);if(cls)e.className=cls;return e;};
     dialog=mk('div','routeScene');dialog.hidden=true;dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','routeSceneTitle');
-    const panel=mk('div','routeScenePanel'),head=mk('header'),bar=mk('div','routeSceneBar'),opts=mk('div','routeSceneOptions');
-    els.title=mk('h2');els.title.id='routeSceneTitle';els.close=mk('button','routeSceneClose');els.close.type='button';els.close.textContent='×';head.append(els.title,els.close);
+    const panel=mk('div','routeScenePanel'),head=mk('header'),bar=mk('div','routeSceneBar'),opts=mk('aside','routeSceneOptions');
+    const titles=mk('div','routeSceneHeading');els.eyebrow=mk('small');els.subtitle=mk('p');
+    els.optionsTitle=mk('h3');els.layersTitle=mk('legend');els.cameraTitle=mk('legend');
+    const layers=mk('fieldset','routeSceneLayers'),camera=mk('fieldset','routeSceneLighting');
+    els.modelNote=mk('p','routeSceneModelNote');els.hint=mk('p','routeSceneHint');
+    els.sourceTitle=mk('summary');const sources=mk('details','routeSceneSources');sources.append(els.sourceTitle);
+    els.title=mk('h2');els.title.id='routeSceneTitle';els.close=mk('button','routeSceneClose');els.close.type='button';els.close.textContent='×';titles.append(els.eyebrow,els.title,els.subtitle);head.append(titles,els.close);
     els.stage=mk('div','routeSceneStage');
     els.status=mk('p','routeSceneStatus');els.slopeKey=mk('p','routeSceneKey');els.slopeKey.hidden=true;
     els.play=mk('button','routeScenePlay');els.play.type='button';els.reset=mk('button');els.reset.type='button';
@@ -529,9 +542,11 @@
     els.readout=mk('output');bar.append(els.play,els.scrub,els.readout,els.reset);
     const check=(key)=>{const l=mk('label'),i=mk('input'),s=mk('span');i.type='checkbox';l.append(i,s);els[key]=i;els[key+'Label']=s;return l;};
     const slider=(key,min,max,step)=>{const l=mk('label','routeSceneVe'),s=mk('span'),i=mk('input');i.type='range';i.min=min;i.max=max;i.step=step;l.append(s,i);els[key]=i;els[key+'Label']=s;return l;};
-    opts.append(check('imagery'),check('slopes'),check('contours'),check('names'),slider('ve','1','15','.5'),slider('sun','0','359','1'));
+    layers.append(els.layersTitle,check('imagery'),check('slopes'),check('contours'),check('names'));
+    camera.append(els.cameraTitle,slider('ve','1','15','.5'),slider('sun','0','359','1'));
+    opts.append(els.optionsTitle,layers,camera,els.modelNote);
     els.caption=mk('p','routeSceneCaption');
-    panel.append(head,els.stage,bar,opts,els.caption);dialog.append(panel);document.body.append(dialog);
+    sources.append(els.caption);panel.append(head,els.stage,bar,opts,sources);dialog.append(panel);document.body.append(dialog);
     els.close.addEventListener('click',close);dialog.addEventListener('click',e=>{if(e.target===dialog)close();});
     dialog.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
     els.play.addEventListener('click',play);
@@ -548,7 +563,7 @@
     els.stage.replaceChildren();
     canvas=document.createElement('canvas');canvas.className='routeSceneCanvas';
     overlay=document.createElement('canvas');overlay.className='routeSceneCanvas routeSceneOverlay';overlay.tabIndex=0;
-    els.stage.append(canvas,overlay,els.status,els.slopeKey);
+    els.stage.append(canvas,overlay,els.status,els.slopeKey,els.hint);
     let drag=null;
     overlay.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};overlay.setPointerCapture?.(e.pointerId);});
     overlay.addEventListener('pointermove',e=>{if(!drag||!scene)return;scene.cam.az+=(e.clientX-drag.x)*.008;scene.cam.tilt=clamp(scene.cam.tilt+(e.clientY-drag.y)*.006,.1,1.5);drag={x:e.clientX,y:e.clientY};redraw();});
