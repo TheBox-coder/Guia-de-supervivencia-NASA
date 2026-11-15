@@ -54,14 +54,16 @@ test('emergency validates its inputs and treats an omitted generator flag as ope
 test('calculator card mounts in the Chariot section, recalculates and follows declared Chariot data',async()=>{
  const fs=await import('node:fs'),vm=await import('node:vm');
  class El{constructor(tag){this.tag=tag;this.children=[];this.dataset={};this.attrs={};this.listeners={};this.className='';this.id='';this.value='';this.textContent='';this.checked=false;this.open=false;this.type='';}
+  prepend(...c){this.children.unshift(...c);}scrollIntoView(){this.scrolled=true;}focus(){this.focused=true;}
   append(...c){this.children.push(...c);for(const x of c)if(x&&typeof x==='object')x.parentNode=this;}setAttribute(k,v){this.attrs[k]=v;}addEventListener(n,f){this.listeners[n]=f;}querySelector(t){const walk=e=>{for(const c of e.children||[]){if(c.tag===t)return c;const r=walk(c);if(r)return r;}return null;};return walk(this);}}
  const host=new El('section');let declared={batteryCapacityKWh:null,generationKW:null};const byId=new Map();
  const document={getElementById:id=>id==='opsPanel-base'?host:byId.get(id)||null,createElement:t=>{const e=new El(t);return new Proxy(e,{set(o,k,v){o[k]=v;if(k==='id')byId.set(v,e);return true;},get:(o,k)=>k==='__raw'?o:o[k]});}};
  const ctx=vm.createContext({document,window:{JEZERO_CHARIOT_CALC:calc,JEZERO_I18N:{ui:(es)=>es},JEZERO_OPERATIONS:{getState:()=>({base:declared})},JEZERO_OPERATIONS_ENGINE:{CHARIOT_PROPOSAL:{batteryCapacityKWh:42,generationKW:1.2}}},Number,Object});
  vm.runInContext(fs.readFileSync(new URL('../modules/chariot-calculator.js',import.meta.url),'utf8'),ctx);
- assert.equal(host.children.length,1);const el=id=>document.getElementById(id);
+ assert.equal(host.children.length,2);const el=id=>document.getElementById(id);
+ el('openChariotCalculator').listeners.click();assert.equal(el('chariotCalculator').scrolled,true);assert.equal(el('chariotCalcTitle').focused,true);
  assert.equal(el('chariotCalc-capacity').value,'42');assert.equal(el('chariotCalc-generation').value,'1.2');
- const text=()=>host.children[0].querySelector('strong');assert.ok(text());
+ const text=()=>host.children[1].querySelector('strong');assert.ok(text());
  // distancia 12 km → demanda neta 10,20 kWh
  const strongs=[];(function walk(n){for(const c of n.children||[]){if(c.tag==='strong')strongs.push(c.textContent);walk(c);}})(host);
  assert.ok(strongs.includes('24.00 km'));assert.ok(strongs.includes('10.20 kWh'));assert.ok(strongs.includes('33.60 kWh'));

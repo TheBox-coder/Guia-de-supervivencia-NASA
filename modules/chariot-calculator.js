@@ -81,6 +81,8 @@
  emergency.addEventListener('toggle',()=>{if(!emergency.open)return;inputs.returnDistance.value=inputs.distance.value;inputs.returnSpeed.value=inputs.speed.value;inputs.returnTraction.value=inputs.traction.value;updateEmergency();});
  for(const input of Object.values(inputs))input.addEventListener('input',update);
  generatorInput.addEventListener('change',updateEmergency);useChariot.addEventListener('click',loadChariot);
- host.append(card);loadChariot();
+ const openCalculator=make('button','opsPrimary','Abrir calculadora de misión y emergencia','Open mission and emergency calculator');openCalculator.type='button';openCalculator.id='openChariotCalculator';openCalculator.setAttribute('aria-controls','chariotCalculator');title.tabIndex=-1;
+ openCalculator.addEventListener('click',()=>{card.scrollIntoView({behavior:'smooth',block:'start'});title.focus({preventScroll:true});});
+ host.prepend(openCalculator);host.append(card);loadChariot();
  window.JEZERO_CHARIOT_CALCULATOR=Object.freeze({update,reload:loadChariot});
 })();

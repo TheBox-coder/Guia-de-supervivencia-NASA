@@ -13,7 +13,7 @@ const NOMENCLATURE_ENDPOINT = 'https://planetarynames.wr.usgs.gov/nomenclature/S
 const nomenclatureCache = new Map();
 const PUBLIC_FILES = new Set([
   '/control.css','/components.css','/modules/assurance.cjs','/modules/mission-control-engine.cjs','/modules/mission-control.js','/modules/dashboard.js','/modules/command-palette.js',
-  '/operations.css','/modules/operations-engine.cjs','/modules/operations-map.js','/modules/operations.js',
+  '/modules/chariot-calculator-engine.cjs','/modules/chariot-calculator.js','/operations.css','/modules/operations-engine.cjs','/modules/operations-map.js','/modules/operations.js',
   '/modules/forecast.js',
   '/polish.css','/modules/map-detail.js','/modules/regional-mosaics.js','/modules/workspace.js','/modules/locale.js','/modules/help-english.js','/MANUAL-HELP-EN.md',
   '/professional.css','/modules/help.js','/MANUAL-DE-AYUDA.md',
